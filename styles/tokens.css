@@ -94,7 +94,8 @@
   box-shadow: var(--z1-shadow);
   backdrop-filter: blur(var(--glass-blur-1));
   -webkit-backdrop-filter: blur(var(--glass-blur-1));
-  transition: background-color var(--dur-1) var(--ease-out),
+  transition:
+    background-color var(--dur-1) var(--ease-out),
     border-color var(--dur-1) var(--ease-out),
     transform var(--dur-1) var(--ease-out),
     box-shadow var(--dur-1) var(--ease-out);
@@ -153,8 +154,8 @@
   background:
     repeating-radial-gradient(
       circle at 12% 18%,
-      rgba(255, 255, 255, 0.10) 0 0.6px,
-      rgba(0, 0, 0, 0.10) 0.6px 1.2px
+      rgba(255, 255, 255, 0.1) 0 0.6px,
+      rgba(0, 0, 0, 0.1) 0.6px 1.2px
     ),
     repeating-radial-gradient(
       circle at 78% 62%,
@@ -180,22 +181,18 @@
       120% 90% at 12% 8%,
       rgba(255, 255, 255, 0.18),
       rgba(255, 255, 255, 0.06) 42%,
-      rgba(255, 255, 255, 0.00) 70%
+      rgba(255, 255, 255, 0) 70%
     ),
     /* bottom-right counter-sheen */
-    radial-gradient(
-      120% 100% at 92% 92%,
-      rgba(255, 255, 255, 0.10),
-      rgba(255, 255, 255, 0.00) 62%
-    ),
+    radial-gradient(120% 100% at 92% 92%, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0) 62%),
     /* thin inner rim highlight */
     linear-gradient(
-      to bottom,
-      rgba(255, 255, 255, 0.10),
-      rgba(255, 255, 255, 0.00) 24%,
-      rgba(0, 0, 0, 0.06) 78%,
-      rgba(0, 0, 0, 0.10)
-    );
+        to bottom,
+        rgba(255, 255, 255, 0.1),
+        rgba(255, 255, 255, 0) 24%,
+        rgba(0, 0, 0, 0.06) 78%,
+        rgba(0, 0, 0, 0.1)
+      );
 
   /* keep it subtle + "in the material" */
   mix-blend-mode: soft-light;
@@ -204,6 +201,56 @@
 /* Strong glass gets slightly more pronounced refraction */
 .tf-glass--strong::after {
   opacity: 0.72;
+}
+
+/* ------------------------------------------------------------------
+   Phase 1A.2: Chromatic edge split (tokens unchanged, no animation)
+   - Adds subtle spectral separation along the rim
+------------------------------------------------------------------- */
+
+.tf-glass::after,
+.tf-glass--strong::after {
+  /* Add two ultra-subtle chroma rims on top of existing refraction */
+  background:
+    /* chroma rim: warm edge (top/left) */
+    linear-gradient(
+      135deg,
+      rgba(255, 120, 120, 0.10),
+      rgba(255, 120, 120, 0.00) 22%
+    ),
+    /* chroma rim: cool edge (bottom/right) */
+    linear-gradient(
+      315deg,
+      rgba(120, 210, 255, 0.10),
+      rgba(120, 210, 255, 0.00) 22%
+    ),
+    /* keep your existing refraction layers */
+    radial-gradient(
+      120% 90% at 12% 8%,
+      rgba(255, 255, 255, 0.18),
+      rgba(255, 255, 255, 0.06) 42%,
+      rgba(255, 255, 255, 0.00) 70%
+    ),
+    radial-gradient(
+      120% 100% at 92% 92%,
+      rgba(255, 255, 255, 0.10),
+      rgba(255, 255, 255, 0.00) 62%
+    ),
+    linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.10),
+      rgba(255, 255, 255, 0.00) 24%,
+      rgba(0, 0, 0, 0.06) 78%,
+      rgba(0, 0, 0, 0.10)
+    );
+
+  /* Keep it in-material */
+  mix-blend-mode: soft-light;
+}
+
+/* Slightly stronger for strong glass, still subtle */
+.tf-glass--strong::after {
+  opacity: 0.78; /* previously 0.72 */
 }
 
 /* Respect reduced motion (we're not animating, but keep transforms safe) */
