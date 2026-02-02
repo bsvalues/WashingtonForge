@@ -16,6 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
+import { DrawerShell } from "@/components/material";
 import { cn } from "@/lib/utils";
 import {
   getTraceFeed,
@@ -144,7 +145,10 @@ export function TraceFeedDrawer({ isOpen, onClose }: TraceFeedDrawerProps) {
   if (!isOpen) return null;
 
   return (
-    <div className="glass-panel border-border/30 fixed top-0 right-0 z-50 flex h-full w-[420px] flex-col border-l">
+    <DrawerShell
+      strength="strong"
+      className="border-border/30 fixed top-0 right-0 z-50 flex h-full w-[420px] flex-col border-l"
+    >
       {/* Header */}
       <div className="border-border/30 border-b p-4">
         <div className="mb-3 flex items-center justify-between">
@@ -303,6 +307,6 @@ export function TraceFeedDrawer({ isOpen, onClose }: TraceFeedDrawerProps) {
         onClose={() => setDetailCorrelationId(null)}
         correlationId={detailCorrelationId}
       />
-    </div>
+    </DrawerShell>
   );
 }

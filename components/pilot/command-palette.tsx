@@ -3,11 +3,10 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Command, Zap, Sparkles, Search, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { GlassCard, SignalBadge } from "@/components/material";
 import {
   TOOL_REGISTRY,
-  getRiskBadgeColor,
   getRiskLabel,
-  getSuiteLabel,
   defaultRiskPolicy,
   type ToolDescriptor,
 } from "@/lib/pilot/tools";
@@ -107,7 +106,10 @@ export function CommandPalette({
       <div className="bg-background/80 absolute inset-0 backdrop-blur-sm" onClick={onClose} />
 
       {/* Palette */}
-      <div className="glass-panel border-border/30 relative mx-4 w-full max-w-lg overflow-hidden rounded-xl border shadow-2xl">
+      <GlassCard
+        strength="strong"
+        className="relative mx-4 w-full max-w-lg overflow-hidden rounded-xl shadow-2xl"
+      >
         {/* Header */}
         <div className="border-border/30 flex items-center gap-3 border-b p-4">
           <div className="text-muted-foreground flex items-center gap-1">
@@ -182,14 +184,19 @@ export function CommandPalette({
                       <span className="text-foreground truncate text-sm font-medium">
                         {tool.title}
                       </span>
-                      <span
-                        className={cn(
-                          "shrink-0 rounded border px-1.5 py-0.5 text-[10px] font-medium",
-                          getRiskBadgeColor(tool.risk)
-                        )}
+                      <SignalBadge
+                        state={
+                          tool.risk === "read_only"
+                            ? "official"
+                            : tool.risk === "write_low"
+                              ? "overlay"
+                              : tool.risk === "write_high"
+                                ? "warning"
+                                : "blocked"
+                        }
                       >
                         {getRiskLabel(tool.risk)}
-                      </span>
+                      </SignalBadge>
                     </div>
                     <p className="text-muted-foreground truncate text-xs">{tool.description}</p>
                   </div>
@@ -220,7 +227,7 @@ export function CommandPalette({
             <kbd className="bg-muted/50 border-border/30 rounded border px-1 py-0.5">Esc</kbd> Close
           </span>
         </div>
-      </div>
+      </GlassCard>
     </div>
   );
 }

@@ -6,6 +6,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { Loader2, Lasso, Square } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { GlassCard } from "@/components/material";
 import { HoverTooltip } from "./hover-tooltip";
 import { MapControls } from "./map-controls";
 import { useSelection } from "@/lib/selection";
@@ -428,7 +429,7 @@ export function CockpitMap({ filters, parcels, onZoomToParcel }: CockpitMapProps
         />
 
         {/* Legend */}
-        <div className="glass-panel absolute bottom-4 left-4 z-10 rounded-lg p-3">
+        <GlassCard className="absolute bottom-4 left-4 z-10 rounded-lg p-3">
           <p className="text-foreground mb-2 text-xs font-semibold">Equity Status</p>
           <div className="space-y-1.5">
             <div className="flex items-center gap-2">
@@ -449,11 +450,11 @@ export function CockpitMap({ filters, parcels, onZoomToParcel }: CockpitMapProps
               {positionedParcels.length} parcels shown
             </p>
           </div>
-        </div>
+        </GlassCard>
 
         {/* Select Mode Indicator */}
         {selectMode !== "none" && (
-          <div className="glass-panel absolute top-4 left-1/2 z-20 flex -translate-x-1/2 items-center gap-3 rounded-lg px-4 py-2">
+          <GlassCard className="absolute top-4 left-1/2 z-20 flex -translate-x-1/2 items-center gap-3 rounded-lg px-4 py-2">
             {selectMode === "lasso" && (
               <>
                 <Lasso className="text-primary h-4 w-4" />
@@ -482,7 +483,7 @@ export function CockpitMap({ filters, parcels, onZoomToParcel }: CockpitMapProps
             >
               Cancel
             </Button>
-          </div>
+          </GlassCard>
         )}
       </div>
     </TooltipProvider>

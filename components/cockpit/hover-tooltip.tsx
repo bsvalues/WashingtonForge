@@ -5,6 +5,7 @@ import React from "react";
 import { memo, useEffect, useState, useRef } from "react";
 import type { Parcel } from "@/lib/api/types";
 import { cn } from "@/lib/utils";
+import { PremiumTooltip, SignalBadge } from "@/components/material";
 
 interface HoverTooltipProps {
   parcel: Parcel | null;
@@ -59,29 +60,16 @@ function HoverTooltipComponent({ parcel, position, containerRef }: HoverTooltipP
     return null;
   }
 
-  const getEquityColor = (status: Parcel["equityStatus"]) => {
+  const getEquityState = (status: Parcel["equityStatus"]) => {
     switch (status) {
       case "fair":
-        return "text-emerald-400";
+        return "success";
       case "progressive":
-        return "text-sky-400";
+        return "overlay";
       case "regressive":
-        return "text-amber-400";
+        return "warning";
       default:
-        return "text-muted-foreground";
-    }
-  };
-
-  const getEquityBg = (status: Parcel["equityStatus"]) => {
-    switch (status) {
-      case "fair":
-        return "bg-emerald-500/20 border-emerald-500/30";
-      case "progressive":
-        return "bg-sky-500/20 border-sky-500/30";
-      case "regressive":
-        return "bg-amber-500/20 border-amber-500/30";
-      default:
-        return "bg-muted/20 border-muted/30";
+        return "official";
     }
   };
 
@@ -97,22 +85,16 @@ function HoverTooltipComponent({ parcel, position, containerRef }: HoverTooltipP
         top: adjustedPosition?.y ?? position.y,
       }}
     >
-      <div className="glass-panel border-border/50 min-w-56 rounded-lg border p-3 shadow-xl">
+      <PremiumTooltip className="min-w-56 p-3">
         {/* Header */}
         <div className="mb-2 flex items-start justify-between gap-3">
           <div>
             <p className="text-foreground font-mono text-sm font-semibold">{parcel.parcelId}</p>
             <p className="text-muted-foreground max-w-40 truncate text-xs">{parcel.situs}</p>
           </div>
-          <span
-            className={cn(
-              "shrink-0 rounded-full border px-2 py-0.5 text-xs font-medium capitalize",
-              getEquityBg(parcel.equityStatus),
-              getEquityColor(parcel.equityStatus)
-            )}
-          >
+          <SignalBadge state={getEquityState(parcel.equityStatus)} className="capitalize">
             {parcel.equityStatus}
-          </span>
+          </SignalBadge>
         </div>
 
         {/* Data Grid */}
@@ -129,7 +111,7 @@ function HoverTooltipComponent({ parcel, position, containerRef }: HoverTooltipP
           </span>
 
           <span className="text-muted-foreground">Ratio</span>
-          <span className={cn("font-mono font-semibold", getEquityColor(parcel.equityStatus))}>
+          <span className="text-foreground font-mono font-semibold">
             {parcel.ratio?.toFixed(3) || "N/A"}
           </span>
         </div>
@@ -138,7 +120,7 @@ function HoverTooltipComponent({ parcel, position, containerRef }: HoverTooltipP
         <div className="border-border/30 text-muted-foreground mt-2 border-t pt-2 text-xs">
           Click to select | Shift+Click to multi-select
         </div>
-      </div>
+      </PremiumTooltip>
     </div>
   );
 }
