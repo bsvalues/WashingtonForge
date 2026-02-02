@@ -131,7 +131,7 @@ export default function CountyPage() {
 
         <div className="grid gap-6 md:grid-cols-2">
           {/* County Selection */}
-          <div className="glass-panel rounded-xl p-6">
+          <div className="tf-glass rounded-xl p-6">
             <div className="mb-4 flex items-center gap-3">
               <MapPin className="text-primary h-5 w-5" />
               <h2 className="text-foreground text-lg font-medium">Select County</h2>
@@ -164,7 +164,7 @@ export default function CountyPage() {
                     onClick={() => setSelectedCounty(county.id)}
                     className={cn(
                       "w-full rounded-lg p-4 text-left transition-all",
-                      "glass-btn border border-transparent",
+                      "tf-glass-btn border border-transparent",
                       selectedCounty === county.id
                         ? "border-primary/50 bg-primary/10"
                         : "hover:border-border/50"
@@ -188,7 +188,7 @@ export default function CountyPage() {
           </div>
 
           {/* Role Selection */}
-          <div className="glass-panel rounded-xl p-6">
+          <div className="tf-glass rounded-xl p-6">
             <div className="mb-4 flex items-center gap-3">
               <Users className="text-primary h-5 w-5" />
               <h2 className="text-foreground text-lg font-medium">Select Role</h2>
@@ -204,7 +204,7 @@ export default function CountyPage() {
                     onClick={() => setSelectedRole(role.value)}
                     className={cn(
                       "w-full rounded-lg p-4 text-left transition-all",
-                      "glass-btn border border-transparent",
+                      "tf-glass-btn border border-transparent",
                       selectedRole === role.value
                         ? "border-primary/50 bg-primary/10"
                         : "hover:border-border/50"
@@ -241,7 +241,7 @@ export default function CountyPage() {
           <Button
             onClick={handleContinue}
             disabled={!selectedCounty || !selectedRole || isSubmitting}
-            className="glass-btn-primary text-foreground h-12 px-8 font-medium"
+            className="tf-glass-btn tf-glass-btn--primary text-foreground h-12 px-8 font-medium"
           >
             {isSubmitting ? (
               <>

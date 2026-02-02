@@ -51,7 +51,7 @@ export default function RatioStudiesPage() {
           </div>
           <Button
             onClick={() => setIsRunModalOpen(true)}
-            className="glass-btn-primary text-foreground"
+            className="tf-glass-btn tf-glass-btn--primary text-foreground"
           >
             <Plus className="mr-2 h-4 w-4" />
             Run New Study
