@@ -23,6 +23,7 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { GlassButton } from "@/components/material";
 import { cn } from "@/lib/utils";
 import { evaluateCompliance, getComplianceLabel, getComplianceBgColor } from "@/lib/compliance";
 import { getAuditEvents, setAuditContext, audit } from "@/lib/audit";
@@ -219,19 +220,16 @@ export function DashboardContent({ datasetVersionId }: DashboardContentProps) {
           </div>
           <div className="flex gap-3">
             <Link href="/ingest">
-              <Button className="tf-glass-btn tf-glass-btn--primary border-primary/40 text-foreground border">
+              <GlassButton tone="primary" className="border-primary/40 text-foreground border">
                 <Upload className="mr-2 h-4 w-4" />
                 New Ingest
-              </Button>
+              </GlassButton>
             </Link>
             <Link href="/ratio-studies">
-              <Button
-                variant="outline"
-                className="tf-glass-btn border-border/50 text-foreground bg-transparent"
-              >
+              <GlassButton variant="outline" className="border-border/50 text-foreground bg-transparent">
                 <BarChart3 className="mr-2 h-4 w-4" />
                 Run Study
-              </Button>
+              </GlassButton>
             </Link>
           </div>
         </div>
