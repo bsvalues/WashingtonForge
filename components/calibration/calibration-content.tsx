@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { GlassButton } from "@/components/material";
 import { Slider } from "@/components/ui/slider";
 import {
   AlertTriangle,
@@ -437,10 +438,11 @@ export function CalibrationContent() {
             </div>
 
             {/* Simulate Button */}
-            <Button
+            <GlassButton
               onClick={handleSimulate}
+              tone="primary"
               disabled={isSimulating || !selectedVersion}
-              className="tf-glass-btn tf-glass-btn--primary mt-6 w-full"
+              className="mt-6 w-full"
             >
               {isSimulating ? (
                 <>
@@ -453,7 +455,7 @@ export function CalibrationContent() {
                   Simulate Changes
                 </>
               )}
-            </Button>
+            </GlassButton>
           </Card>
 
           {/* Right: Before/After Comparison */}
@@ -553,10 +555,11 @@ export function CalibrationContent() {
                     </span>
                   </div>
                 ) : (
-                  <Button
+                  <GlassButton
                     onClick={handleApply}
+                    tone="primary"
                     disabled={isApplying}
-                    className="tf-glass-btn tf-glass-btn--primary w-full"
+                    className="w-full"
                   >
                     {isApplying ? (
                       <>
@@ -569,7 +572,7 @@ export function CalibrationContent() {
                         Apply & Create New Version
                       </>
                     )}
-                  </Button>
+                  </GlassButton>
                 )}
               </div>
             )}
