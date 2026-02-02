@@ -13,7 +13,7 @@ export function IngestStepper({ steps, currentStep }: IngestStepperProps) {
   const currentIndex = steps.findIndex((s) => s.id === currentStep);
 
   return (
-    <div className="glass-panel rounded-xl p-4">
+    <div className="tf-glass rounded-xl p-4">
       <div className="flex items-center justify-between">
         {steps.map((step, index) => {
           const isCompleted = index < currentIndex;

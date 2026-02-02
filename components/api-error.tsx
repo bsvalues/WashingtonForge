@@ -17,7 +17,7 @@ export function ApiError({ error, onRetry }: ApiErrorProps) {
     errorMessage.includes("DOCTYPE");
 
   return (
-    <div className="glass-panel mx-auto max-w-md rounded-xl p-8 text-center">
+    <div className="tf-glass mx-auto max-w-md rounded-xl p-8 text-center">
       <div className="bg-destructive/10 mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full">
         {isBackendError ? (
           <WifiOff className="text-destructive h-8 w-8" />
@@ -51,7 +51,7 @@ export function ApiError({ error, onRetry }: ApiErrorProps) {
           <Button
             onClick={onRetry}
             variant="outline"
-            className="glass-btn text-foreground bg-transparent"
+            className="tf-glass-btn text-foreground bg-transparent"
           >
             <RefreshCw className="mr-2 h-4 w-4" />
             Retry

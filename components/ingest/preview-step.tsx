@@ -45,7 +45,7 @@ export function PreviewStep({ dataset, fieldMappings, onComplete, onBack }: Prev
 
   if (isLoading) {
     return (
-      <div className="glass-panel rounded-xl p-12 text-center">
+      <div className="tf-glass rounded-xl p-12 text-center">
         <Loader2 className="text-primary mx-auto mb-4 h-12 w-12 animate-spin" />
         <h3 className="text-foreground mb-2 text-lg font-medium">Loading Preview</h3>
         <p className="text-muted-foreground">Preparing data preview with mapped fields...</p>
@@ -55,14 +55,14 @@ export function PreviewStep({ dataset, fieldMappings, onComplete, onBack }: Prev
 
   if (error) {
     return (
-      <div className="glass-panel rounded-xl p-12 text-center">
+      <div className="tf-glass rounded-xl p-12 text-center">
         <Eye className="text-muted-foreground mx-auto mb-4 h-12 w-12" />
         <h3 className="text-foreground mb-2 text-lg font-medium">Preview Unavailable</h3>
         <p className="text-muted-foreground mb-6">{error}</p>
         <Button
           variant="outline"
           onClick={onBack}
-          className="glass-btn border-border/50 text-foreground bg-transparent"
+          className="tf-glass-btn border-border/50 text-foreground bg-transparent"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Go Back
@@ -74,7 +74,7 @@ export function PreviewStep({ dataset, fieldMappings, onComplete, onBack }: Prev
   return (
     <div className="space-y-6">
       {/* Info Banner */}
-      <div className="glass-panel flex items-start gap-4 rounded-xl p-4">
+      <div className="tf-glass flex items-start gap-4 rounded-xl p-4">
         <TableIcon className="text-primary mt-0.5 h-6 w-6 shrink-0" />
         <div>
           <p className="text-foreground font-medium">Data Preview</p>
@@ -87,28 +87,28 @@ export function PreviewStep({ dataset, fieldMappings, onComplete, onBack }: Prev
 
       {/* Summary */}
       <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-        <div className="glass-panel rounded-xl p-4 text-center">
+        <div className="tf-glass rounded-xl p-4 text-center">
           <p className="text-foreground text-2xl font-semibold">
             {dataset.rowCount?.toLocaleString() || "—"}
           </p>
           <p className="text-muted-foreground text-sm">Total Rows</p>
         </div>
-        <div className="glass-panel rounded-xl p-4 text-center">
+        <div className="tf-glass rounded-xl p-4 text-center">
           <p className="text-foreground text-2xl font-semibold">{mappedColumns.length}</p>
           <p className="text-muted-foreground text-sm">Mapped Fields</p>
         </div>
-        <div className="glass-panel rounded-xl p-4 text-center">
+        <div className="tf-glass rounded-xl p-4 text-center">
           <p className="text-foreground text-2xl font-semibold">{dataset.errorCount || 0}</p>
           <p className="text-muted-foreground text-sm">Errors</p>
         </div>
-        <div className="glass-panel rounded-xl p-4 text-center">
+        <div className="tf-glass rounded-xl p-4 text-center">
           <p className="text-primary text-2xl font-semibold capitalize">{dataset.type}</p>
           <p className="text-muted-foreground text-sm">Dataset Type</p>
         </div>
       </div>
 
       {/* Preview Table */}
-      <div className="glass-panel overflow-hidden rounded-xl">
+      <div className="tf-glass overflow-hidden rounded-xl">
         <div className="border-border/50 border-b p-4">
           <h3 className="text-foreground font-medium">Sample Data (First 10 Rows)</h3>
         </div>
@@ -157,12 +157,12 @@ export function PreviewStep({ dataset, fieldMappings, onComplete, onBack }: Prev
         <Button
           variant="outline"
           onClick={onBack}
-          className="glass-btn border-border/50 text-foreground bg-transparent"
+          className="tf-glass-btn border-border/50 text-foreground bg-transparent"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back
         </Button>
-        <Button onClick={onComplete} className="glass-btn-primary text-foreground font-medium">
+        <Button onClick={onComplete} className="tf-glass-btn tf-glass-btn--primary text-foreground font-medium">
           Continue to Publish
           <ArrowRight className="ml-2 h-4 w-4" />
         </Button>

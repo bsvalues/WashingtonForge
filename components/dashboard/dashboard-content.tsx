@@ -179,11 +179,11 @@ export function DashboardContent({ datasetVersionId }: DashboardContentProps) {
   if (error || !data) {
     return (
       <div className="space-bg flex min-h-screen items-center justify-center">
-        <div className="glass-panel max-w-md rounded-xl p-8 text-center">
+        <div className="tf-glass max-w-md rounded-xl p-8 text-center">
           <XCircle className="text-destructive mx-auto mb-4 h-12 w-12" />
           <h2 className="text-foreground mb-2 text-lg font-semibold">Failed to Load Dashboard</h2>
           <p className="text-muted-foreground mb-4 text-sm">{error || "Unknown error occurred"}</p>
-          <Button onClick={loadDashboardData} className="glass-btn-primary">
+          <Button onClick={loadDashboardData} className="tf-glass-btn tf-glass-btn--primary">
             <RefreshCw className="mr-2 h-4 w-4" />
             Retry
           </Button>
@@ -219,7 +219,7 @@ export function DashboardContent({ datasetVersionId }: DashboardContentProps) {
           </div>
           <div className="flex gap-3">
             <Link href="/ingest">
-              <Button className="glass-btn-primary border-primary/40 text-foreground border">
+              <Button className="tf-glass-btn tf-glass-btn--primary border-primary/40 text-foreground border">
                 <Upload className="mr-2 h-4 w-4" />
                 New Ingest
               </Button>
@@ -227,7 +227,7 @@ export function DashboardContent({ datasetVersionId }: DashboardContentProps) {
             <Link href="/ratio-studies">
               <Button
                 variant="outline"
-                className="glass-btn border-border/50 text-foreground bg-transparent"
+                className="tf-glass-btn border-border/50 text-foreground bg-transparent"
               >
                 <BarChart3 className="mr-2 h-4 w-4" />
                 Run Study
@@ -239,7 +239,7 @@ export function DashboardContent({ datasetVersionId }: DashboardContentProps) {
         {/* IAAO Compliance Banner (Computed, not hardcoded) */}
         <div
           className={cn(
-            "glass-panel flex items-center gap-4 rounded-xl border p-4",
+            "tf-glass flex items-center gap-4 rounded-xl border p-4",
             getComplianceBgColor(compliance.overall)
           )}
         >
@@ -305,7 +305,7 @@ export function DashboardContent({ datasetVersionId }: DashboardContentProps) {
         {/* Main Content Grid */}
         <div className="grid gap-6 md:grid-cols-3">
           {/* Equity Distribution + PRD/PRB */}
-          <div className="glass-panel rounded-xl p-5 md:col-span-2">
+          <div className="tf-glass rounded-xl p-5 md:col-span-2">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-foreground font-semibold">Equity Distribution</h2>
               <Link href="/cockpit">
@@ -369,7 +369,7 @@ export function DashboardContent({ datasetVersionId }: DashboardContentProps) {
           </div>
 
           {/* Pending Tasks (Executable workflows) */}
-          <div className="glass-panel rounded-xl p-5">
+          <div className="tf-glass rounded-xl p-5">
             <h2 className="text-foreground mb-4 font-semibold">Pending Tasks</h2>
             <div className="space-y-3">
               {data.pendingTasks.map((task) => (
@@ -389,7 +389,7 @@ export function DashboardContent({ datasetVersionId }: DashboardContentProps) {
         {/* Quick Actions & Recent Activity (Backed by Audit Events) */}
         <div className="grid gap-6 md:grid-cols-2">
           {/* Quick Actions */}
-          <div className="glass-panel rounded-xl p-5">
+          <div className="tf-glass rounded-xl p-5">
             <h2 className="text-foreground mb-4 font-semibold">Quick Actions</h2>
             <div className="grid grid-cols-2 gap-3">
               <QuickActionCard
@@ -420,7 +420,7 @@ export function DashboardContent({ datasetVersionId }: DashboardContentProps) {
           </div>
 
           {/* Recent Activity (From Audit Pipeline) */}
-          <div className="glass-panel rounded-xl p-5">
+          <div className="tf-glass rounded-xl p-5">
             <h2 className="text-foreground mb-4 font-semibold">Recent Activity</h2>
             <div className="space-y-3">
               {data.recentActivity.length === 0 ? (
@@ -473,7 +473,7 @@ interface KPICardProps {
 
 function KPICard({ label, value, icon: Icon, trend, status, target }: KPICardProps) {
   return (
-    <div className="glass-panel rounded-xl p-4">
+    <div className="tf-glass rounded-xl p-4">
       <div className="mb-3 flex items-center gap-2">
         <div
           className={cn(

@@ -116,7 +116,7 @@ export function MapFieldsStep({ dataset, onComplete, onBack }: MapFieldsStepProp
 
   if (isLoading) {
     return (
-      <div className="glass-panel rounded-xl p-12 text-center">
+      <div className="tf-glass rounded-xl p-12 text-center">
         <Loader2 className="text-primary mx-auto mb-4 h-12 w-12 animate-spin" />
         <h3 className="text-foreground mb-2 text-lg font-medium">Loading Source Fields</h3>
         <p className="text-muted-foreground">Analyzing your dataset structure...</p>
@@ -127,7 +127,7 @@ export function MapFieldsStep({ dataset, onComplete, onBack }: MapFieldsStepProp
   return (
     <div className="space-y-6">
       {/* Instructions */}
-      <div className="glass-panel flex items-start gap-4 rounded-xl p-4">
+      <div className="tf-glass flex items-start gap-4 rounded-xl p-4">
         <Link2 className="text-primary mt-0.5 h-6 w-6 shrink-0" />
         <div>
           <p className="text-foreground font-medium">Map Your Fields</p>
@@ -139,7 +139,7 @@ export function MapFieldsStep({ dataset, onComplete, onBack }: MapFieldsStepProp
       </div>
 
       {/* Field Mapping Grid */}
-      <div className="glass-panel overflow-hidden rounded-xl">
+      <div className="tf-glass overflow-hidden rounded-xl">
         <div className="border-border/50 border-b p-4">
           <h3 className="text-foreground font-medium">Field Mappings</h3>
         </div>
@@ -209,7 +209,7 @@ export function MapFieldsStep({ dataset, onComplete, onBack }: MapFieldsStepProp
         <Button
           variant="outline"
           onClick={onBack}
-          className="glass-btn border-border/50 text-foreground bg-transparent"
+          className="tf-glass-btn border-border/50 text-foreground bg-transparent"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back
@@ -217,7 +217,7 @@ export function MapFieldsStep({ dataset, onComplete, onBack }: MapFieldsStepProp
         <Button
           onClick={handleSave}
           disabled={isSaving}
-          className="glass-btn-primary text-foreground font-medium"
+          className="tf-glass-btn tf-glass-btn--primary text-foreground font-medium"
         >
           {isSaving ? (
             <>

@@ -236,7 +236,7 @@ export function CalibrationContent() {
                 setSimulation(null);
                 setApplied(false);
               }}
-              className="glass-panel border-border/50 focus:ring-primary/50 rounded-lg bg-transparent px-3 py-2 text-sm focus:ring-2 focus:outline-none"
+              className="tf-glass border-border/50 focus:ring-primary/50 rounded-lg bg-transparent px-3 py-2 text-sm focus:ring-2 focus:outline-none"
             >
               {versions.map((v) => (
                 <option key={v.id} value={v.id}>
@@ -248,7 +248,7 @@ export function CalibrationContent() {
         </div>
 
         {/* Summary Bar */}
-        <Card className="glass-panel p-4">
+        <Card className="tf-glass p-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-6">
               <div className="flex items-center gap-2">
@@ -312,7 +312,7 @@ export function CalibrationContent() {
         {/* Three-Column Layout */}
         <div className="grid gap-6 lg:grid-cols-3">
           {/* Left: VEI Findings */}
-          <Card className="glass-panel p-4">
+          <Card className="tf-glass p-4">
             <h2 className="mb-4 text-lg font-medium">VEI Findings</h2>
             <div className="space-y-3">
               {findings.map((finding) => {
@@ -359,7 +359,7 @@ export function CalibrationContent() {
           </Card>
 
           {/* Middle: Calibration Levers */}
-          <Card className="glass-panel p-4">
+          <Card className="tf-glass p-4">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-lg font-medium">Calibration Levers</h2>
               <Button
@@ -440,7 +440,7 @@ export function CalibrationContent() {
             <Button
               onClick={handleSimulate}
               disabled={isSimulating || !selectedVersion}
-              className="glass-btn-primary mt-6 w-full"
+              className="tf-glass-btn tf-glass-btn--primary mt-6 w-full"
             >
               {isSimulating ? (
                 <>
@@ -457,7 +457,7 @@ export function CalibrationContent() {
           </Card>
 
           {/* Right: Before/After Comparison */}
-          <Card className="glass-panel p-4">
+          <Card className="tf-glass p-4">
             <h2 className="mb-4 text-lg font-medium">Before / After</h2>
 
             {!simulation ? (
@@ -556,7 +556,7 @@ export function CalibrationContent() {
                   <Button
                     onClick={handleApply}
                     disabled={isApplying}
-                    className="glass-btn-primary w-full"
+                    className="tf-glass-btn tf-glass-btn--primary w-full"
                   >
                     {isApplying ? (
                       <>

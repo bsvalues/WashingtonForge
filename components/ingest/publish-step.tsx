@@ -33,7 +33,7 @@ export function PublishStep({ dataset, onComplete, onBack }: PublishStepProps) {
 
   if (isPublished) {
     return (
-      <div className="glass-panel rounded-xl p-12 text-center">
+      <div className="tf-glass rounded-xl p-12 text-center">
         <div className="bg-chart-1/20 mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-full">
           <CheckCircle2 className="text-chart-1 h-10 w-10" />
         </div>
@@ -44,23 +44,23 @@ export function PublishStep({ dataset, onComplete, onBack }: PublishStepProps) {
         </p>
 
         <div className="mx-auto mb-8 grid max-w-2xl grid-cols-1 gap-4 md:grid-cols-3">
-          <div className="glass-panel rounded-lg p-4">
+          <div className="tf-glass rounded-lg p-4">
             <p className="text-foreground text-lg font-semibold">
               {dataset.rowCount?.toLocaleString() || "—"}
             </p>
             <p className="text-muted-foreground text-sm">Records Ingested</p>
           </div>
-          <div className="glass-panel rounded-lg p-4">
+          <div className="tf-glass rounded-lg p-4">
             <p className="text-foreground text-lg font-semibold capitalize">{dataset.type}</p>
             <p className="text-muted-foreground text-sm">Dataset Type</p>
           </div>
-          <div className="glass-panel rounded-lg p-4">
+          <div className="tf-glass rounded-lg p-4">
             <p className="text-chart-1 text-lg font-semibold">Active</p>
             <p className="text-muted-foreground text-sm">Status</p>
           </div>
         </div>
 
-        <Button onClick={onComplete} className="glass-btn-primary text-foreground px-8 font-medium">
+        <Button onClick={onComplete} className="tf-glass-btn tf-glass-btn--primary text-foreground px-8 font-medium">
           Upload Another Dataset
         </Button>
       </div>
@@ -70,7 +70,7 @@ export function PublishStep({ dataset, onComplete, onBack }: PublishStepProps) {
   return (
     <div className="space-y-6">
       {/* Pre-publish Summary */}
-      <div className="glass-panel rounded-xl p-8 text-center">
+      <div className="tf-glass rounded-xl p-8 text-center">
         <div className="bg-primary/20 mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-xl">
           <Rocket className="text-primary h-8 w-8" />
         </div>
@@ -83,7 +83,7 @@ export function PublishStep({ dataset, onComplete, onBack }: PublishStepProps) {
 
       {/* Checklist */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        <div className="glass-panel rounded-xl p-6">
+        <div className="tf-glass rounded-xl p-6">
           <div className="mb-3 flex items-center gap-3">
             <CheckCircle2 className="text-chart-1 h-5 w-5" />
             <span className="text-foreground font-medium">Validation</span>
@@ -94,7 +94,7 @@ export function PublishStep({ dataset, onComplete, onBack }: PublishStepProps) {
           </p>
         </div>
 
-        <div className="glass-panel rounded-xl p-6">
+        <div className="tf-glass rounded-xl p-6">
           <div className="mb-3 flex items-center gap-3">
             <CheckCircle2 className="text-chart-1 h-5 w-5" />
             <span className="text-foreground font-medium">Field Mapping</span>
@@ -104,7 +104,7 @@ export function PublishStep({ dataset, onComplete, onBack }: PublishStepProps) {
           </p>
         </div>
 
-        <div className="glass-panel rounded-xl p-6">
+        <div className="tf-glass rounded-xl p-6">
           <div className="mb-3 flex items-center gap-3">
             <Shield className="text-primary h-5 w-5" />
             <span className="text-foreground font-medium">Audit Trail</span>
@@ -116,7 +116,7 @@ export function PublishStep({ dataset, onComplete, onBack }: PublishStepProps) {
       </div>
 
       {/* Warning Notice */}
-      <div className="glass-panel flex items-start gap-4 rounded-xl border border-amber-500/30 bg-amber-500/5 p-4">
+      <div className="tf-glass flex items-start gap-4 rounded-xl border border-amber-500/30 bg-amber-500/5 p-4">
         <Clock className="mt-0.5 h-6 w-6 shrink-0 text-amber-500" />
         <div>
           <p className="text-foreground font-medium">Before You Publish</p>
@@ -140,7 +140,7 @@ export function PublishStep({ dataset, onComplete, onBack }: PublishStepProps) {
           variant="outline"
           onClick={onBack}
           disabled={isPublishing}
-          className="glass-btn border-border/50 text-foreground bg-transparent"
+          className="tf-glass-btn border-border/50 text-foreground bg-transparent"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back
@@ -148,7 +148,7 @@ export function PublishStep({ dataset, onComplete, onBack }: PublishStepProps) {
         <Button
           onClick={handlePublish}
           disabled={isPublishing}
-          className="glass-btn-primary text-foreground px-8 font-medium"
+          className="tf-glass-btn tf-glass-btn--primary text-foreground px-8 font-medium"
         >
           {isPublishing ? (
             <>

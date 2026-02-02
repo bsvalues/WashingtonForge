@@ -61,7 +61,7 @@ export function RunStudyModal({ isOpen, onClose, onStudyCreated }: RunStudyModal
       <div className="bg-background/80 absolute inset-0 backdrop-blur-sm" onClick={onClose} />
 
       {/* Modal */}
-      <div className="glass-panel relative mx-4 w-full max-w-md rounded-xl p-6">
+      <div className="tf-glass relative mx-4 w-full max-w-md rounded-xl p-6">
         {/* Header */}
         <div className="mb-6 flex items-center justify-between">
           <h2 className="text-foreground text-lg font-semibold">Run New Ratio Study</h2>
@@ -133,14 +133,14 @@ export function RunStudyModal({ isOpen, onClose, onStudyCreated }: RunStudyModal
               variant="outline"
               onClick={onClose}
               disabled={isRunning}
-              className="glass-btn border-border/50 text-foreground bg-transparent"
+              className="tf-glass-btn border-border/50 text-foreground bg-transparent"
             >
               Cancel
             </Button>
             <Button
               type="submit"
               disabled={isRunning}
-              className="glass-btn-primary text-foreground"
+              className="tf-glass-btn tf-glass-btn--primary text-foreground"
             >
               {isRunning ? (
                 <>

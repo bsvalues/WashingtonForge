@@ -86,6 +86,35 @@
   background: var(--surface-scrim);
 }
 
+/* Glass buttons (Touchpoints) */
+.tf-glass-btn {
+  background: var(--glass-tint);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--r-md);
+  box-shadow: var(--z1-shadow);
+  backdrop-filter: blur(var(--glass-blur-1));
+  -webkit-backdrop-filter: blur(var(--glass-blur-1));
+  transition: background-color var(--dur-1) var(--ease-out),
+    border-color var(--dur-1) var(--ease-out),
+    transform var(--dur-1) var(--ease-out),
+    box-shadow var(--dur-1) var(--ease-out);
+}
+
+.tf-glass-btn:hover {
+  background: var(--glass-tint-strong);
+  border-color: var(--glass-border-strong);
+}
+
+.tf-glass-btn--primary {
+  background: rgba(160, 220, 255, 0.18);
+  border-color: rgba(160, 220, 255, 0.36);
+}
+
+.tf-glass-btn--primary:hover {
+  background: rgba(160, 220, 255, 0.24);
+  border-color: rgba(160, 220, 255, 0.5);
+}
+
 @media (prefers-reduced-motion: reduce) {
   :root {
     --dur-1: 1ms;

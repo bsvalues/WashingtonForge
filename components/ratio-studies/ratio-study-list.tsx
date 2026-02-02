@@ -42,7 +42,7 @@ export function RatioStudyList({
 }: RatioStudyListProps) {
   if (isLoading) {
     return (
-      <div className="glass-panel rounded-xl p-8 text-center">
+      <div className="tf-glass rounded-xl p-8 text-center">
         <Loader2 className="text-primary mx-auto mb-3 h-8 w-8 animate-spin" />
         <p className="text-muted-foreground text-sm">Loading studies...</p>
       </div>
@@ -51,7 +51,7 @@ export function RatioStudyList({
 
   if (studies.length === 0) {
     return (
-      <div className="glass-panel rounded-xl p-8 text-center">
+      <div className="tf-glass rounded-xl p-8 text-center">
         <div className="bg-muted/30 mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl">
           <FileBarChart className="text-muted-foreground h-6 w-6" />
         </div>
@@ -64,7 +64,7 @@ export function RatioStudyList({
   }
 
   return (
-    <div className="glass-panel overflow-hidden rounded-xl">
+    <div className="tf-glass overflow-hidden rounded-xl">
       <div className="border-border/50 border-b p-4">
         <h2 className="text-foreground font-medium">Recent Studies</h2>
       </div>

@@ -135,7 +135,7 @@ export function ValidateStep({ dataset, onComplete, onBack }: ValidateStepProps)
 
   if (isValidating) {
     return (
-      <div className="glass-panel rounded-xl p-12">
+      <div className="tf-glass rounded-xl p-12">
         <div className="mx-auto max-w-md text-center">
           <div className="relative mx-auto mb-6 h-20 w-20">
             <div className="border-primary/20 absolute inset-0 rounded-full border-4" />
@@ -201,14 +201,14 @@ export function ValidateStep({ dataset, onComplete, onBack }: ValidateStepProps)
 
   if (error) {
     return (
-      <div className="glass-panel rounded-xl p-12 text-center">
+      <div className="tf-glass rounded-xl p-12 text-center">
         <XCircle className="text-destructive mx-auto mb-4 h-12 w-12" />
         <h3 className="text-foreground mb-2 text-lg font-medium">Validation Failed</h3>
         <p className="text-muted-foreground mb-6">{error}</p>
         <Button
           variant="outline"
           onClick={onBack}
-          className="glass-btn border-border/50 text-foreground bg-transparent"
+          className="tf-glass-btn border-border/50 text-foreground bg-transparent"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Go Back
@@ -239,7 +239,7 @@ export function ValidateStep({ dataset, onComplete, onBack }: ValidateStepProps)
     <div className="space-y-6">
       {/* Summary Cards */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
-        <div className="glass-panel rounded-xl p-5">
+        <div className="tf-glass rounded-xl p-5">
           <div className="mb-2 flex items-center gap-3">
             <div className="bg-primary/20 flex h-9 w-9 items-center justify-center rounded-lg">
               <Hash className="text-primary h-4 w-4" />
@@ -251,7 +251,7 @@ export function ValidateStep({ dataset, onComplete, onBack }: ValidateStepProps)
           </p>
         </div>
 
-        <div className="glass-panel rounded-xl p-5">
+        <div className="tf-glass rounded-xl p-5">
           <div className="mb-2 flex items-center gap-3">
             <div className="bg-chart-1/20 flex h-9 w-9 items-center justify-center rounded-lg">
               <CheckCircle2 className="text-chart-1 h-4 w-4" />
@@ -264,7 +264,7 @@ export function ValidateStep({ dataset, onComplete, onBack }: ValidateStepProps)
           <p className="text-muted-foreground text-xs">{acceptRate}% pass rate</p>
         </div>
 
-        <div className="glass-panel rounded-xl p-5">
+        <div className="tf-glass rounded-xl p-5">
           <div className="mb-2 flex items-center gap-3">
             <div
               className={cn(
@@ -290,7 +290,7 @@ export function ValidateStep({ dataset, onComplete, onBack }: ValidateStepProps)
           </p>
         </div>
 
-        <div className="glass-panel rounded-xl p-5">
+        <div className="tf-glass rounded-xl p-5">
           <div className="mb-2 flex items-center gap-3">
             <div
               className={cn(
@@ -318,7 +318,7 @@ export function ValidateStep({ dataset, onComplete, onBack }: ValidateStepProps)
       {/* Status Message */}
       <div
         className={cn(
-          "glass-panel flex items-center gap-4 rounded-xl p-4",
+          "tf-glass flex items-center gap-4 rounded-xl p-4",
           hasErrors
             ? "border border-amber-500/30 bg-amber-500/5"
             : "border-chart-1/30 bg-chart-1/5 border"
@@ -344,7 +344,7 @@ export function ValidateStep({ dataset, onComplete, onBack }: ValidateStepProps)
             variant="outline"
             size="sm"
             onClick={handleDownloadErrors}
-            className="glass-btn border-border/50 text-foreground shrink-0 bg-transparent"
+            className="tf-glass-btn border-border/50 text-foreground shrink-0 bg-transparent"
           >
             <Download className="mr-2 h-4 w-4" />
             Export Errors
@@ -361,7 +361,7 @@ export function ValidateStep({ dataset, onComplete, onBack }: ValidateStepProps)
               type="button"
               onClick={() => setActiveErrorTab(key)}
               className={cn(
-                "glass-panel rounded-lg p-3 text-left transition-all",
+                "tf-glass rounded-lg p-3 text-left transition-all",
                 activeErrorTab === key
                   ? "border-primary/50 bg-primary/10 border"
                   : "hover:bg-muted/20"
@@ -379,7 +379,7 @@ export function ValidateStep({ dataset, onComplete, onBack }: ValidateStepProps)
 
       {/* Error Table with Tabs */}
       {hasErrors && result.errors.length > 0 && (
-        <div className="glass-panel overflow-hidden rounded-xl">
+        <div className="tf-glass overflow-hidden rounded-xl">
           <Tabs value={activeErrorTab} onValueChange={setActiveErrorTab}>
             <div className="border-border/50 flex items-center justify-between border-b p-4">
               <TabsList className="bg-muted/30">
@@ -442,12 +442,12 @@ export function ValidateStep({ dataset, onComplete, onBack }: ValidateStepProps)
         <Button
           variant="outline"
           onClick={onBack}
-          className="glass-btn border-border/50 text-foreground bg-transparent"
+          className="tf-glass-btn border-border/50 text-foreground bg-transparent"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back
         </Button>
-        <Button onClick={handleContinue} className="glass-btn-primary text-foreground font-medium">
+        <Button onClick={handleContinue} className="tf-glass-btn tf-glass-btn--primary text-foreground font-medium">
           Continue to Field Mapping
           <ArrowRight className="ml-2 h-4 w-4" />
         </Button>
