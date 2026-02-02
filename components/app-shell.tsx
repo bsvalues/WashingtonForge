@@ -29,6 +29,7 @@ import { TerraPilotPanel } from "@/components/pilot/terra-pilot-panel";
 import { CommandPalette } from "@/components/pilot/command-palette";
 import { TraceFeedDrawer } from "@/components/trace/trace-feed-drawer";
 import { PolicyDebugDrawer } from "@/components/pilot/policy-debug-drawer";
+import { TactileButton } from "@/components/material";
 import {
   type ToolDescriptor,
   defaultRiskPolicy,
@@ -95,7 +96,7 @@ export function AppShell({ children, user }: AppShellProps) {
   return (
     <div className="space-bg flex min-h-screen flex-col">
       {/* Top Navigation Bar */}
-      <header className="glass-panel border-border/50 sticky top-0 z-50 border-b">
+      <header className="tf-glass tf-glass--strong border-border/50 sticky top-0 z-50 border-b">
         <div className="flex h-16 items-center justify-between px-4">
           {/* Logo & Brand */}
           <div className="flex items-center gap-4">
@@ -137,60 +138,60 @@ export function AppShell({ children, user }: AppShellProps) {
           {/* Right Actions */}
           <div className="flex items-center gap-2">
             {/* TerraPilot Button */}
-            <Button
+            <TactileButton
               variant="outline"
               size="sm"
               onClick={() => setPilotPanelOpen(true)}
-              className="glass-btn border-primary/50 text-primary hover:bg-primary/10 hidden gap-2 bg-transparent sm:flex"
+              className="border-primary/50 text-primary hover:bg-primary/10 hidden gap-2 bg-transparent sm:flex"
             >
               <Zap className="h-4 w-4" />
               TerraPilot
-            </Button>
+            </TactileButton>
 
             {/* Trace Feed Button */}
-            <Button
+            <TactileButton
               variant="outline"
               size="sm"
               onClick={() => setTraceFeedOpen(true)}
-              className="glass-btn hidden gap-2 border-violet-500/50 bg-transparent text-violet-400 hover:bg-violet-500/10 sm:flex"
+              className="hidden gap-2 border-violet-500/50 bg-transparent text-violet-400 hover:bg-violet-500/10 sm:flex"
             >
               <Shield className="h-4 w-4" />
               Trace
-            </Button>
+            </TactileButton>
 
             {/* Policy Debug Button */}
-            <Button
+            <TactileButton
               variant="outline"
               size="sm"
               onClick={() => setPolicyDebugOpen(true)}
-              className="glass-btn hidden gap-2 border-amber-500/50 bg-transparent text-amber-400 hover:bg-amber-500/10 lg:flex"
+              className="hidden gap-2 border-amber-500/50 bg-transparent text-amber-400 hover:bg-amber-500/10 lg:flex"
               title="Debug policy gates"
             >
               <Settings2 className="h-4 w-4" />
               Policy
-            </Button>
+            </TactileButton>
 
             {/* Audit Log Button */}
-            <Button
+            <TactileButton
               variant="outline"
               size="sm"
               onClick={() => setAuditLogOpen(true)}
-              className="glass-btn border-border/50 text-foreground hidden gap-2 bg-transparent lg:flex"
+              className="border-border/50 text-foreground hidden gap-2 bg-transparent lg:flex"
             >
               <FileText className="h-4 w-4" />
               Audit Log
-            </Button>
+            </TactileButton>
 
             {/* Roll Year Snapshot Button */}
-            <Button
+            <TactileButton
               variant="outline"
               size="sm"
               onClick={() => setSnapshotOpen(true)}
-              className="glass-btn border-border/50 text-foreground hidden gap-2 bg-transparent lg:flex"
+              className="border-border/50 text-foreground hidden gap-2 bg-transparent lg:flex"
             >
               <Camera className="h-4 w-4" />
               Snapshot
-            </Button>
+            </TactileButton>
 
             {/* User Info */}
             {user && (
@@ -248,50 +249,50 @@ export function AppShell({ children, user }: AppShellProps) {
               );
             })}
             <div className="border-border/50 space-y-2 border-t pt-2">
-              <Button
+              <TactileButton
                 variant="outline"
                 onClick={() => {
                   setMobileMenuOpen(false);
                   setPilotPanelOpen(true);
                 }}
-                className="glass-btn border-primary/50 text-primary w-full justify-start gap-3 bg-transparent"
+                className="border-primary/50 text-primary w-full justify-start gap-3 bg-transparent"
               >
                 <Zap className="h-4 w-4" />
                 TerraPilot
-              </Button>
-              <Button
+              </TactileButton>
+              <TactileButton
                 variant="outline"
                 onClick={() => {
                   setMobileMenuOpen(false);
                   setTraceFeedOpen(true);
                 }}
-                className="glass-btn w-full justify-start gap-3 border-violet-500/50 bg-transparent text-violet-400"
+                className="w-full justify-start gap-3 border-violet-500/50 bg-transparent text-violet-400"
               >
                 <Shield className="h-4 w-4" />
                 Trace Feed
-              </Button>
-              <Button
+              </TactileButton>
+              <TactileButton
                 variant="outline"
                 onClick={() => {
                   setMobileMenuOpen(false);
                   setAuditLogOpen(true);
                 }}
-                className="glass-btn border-border/50 text-foreground w-full justify-start gap-3 bg-transparent"
+                className="border-border/50 text-foreground w-full justify-start gap-3 bg-transparent"
               >
                 <FileText className="h-4 w-4" />
                 Audit Log
-              </Button>
-              <Button
+              </TactileButton>
+              <TactileButton
                 variant="outline"
                 onClick={() => {
                   setMobileMenuOpen(false);
                   setSnapshotOpen(true);
                 }}
-                className="glass-btn border-border/50 text-foreground w-full justify-start gap-3 bg-transparent"
+                className="border-border/50 text-foreground w-full justify-start gap-3 bg-transparent"
               >
                 <Camera className="h-4 w-4" />
                 Roll Year Snapshot
-              </Button>
+              </TactileButton>
             </div>
           </nav>
         )}
