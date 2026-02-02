@@ -5,6 +5,7 @@ import React from "react";
 import { useState } from "react";
 import { X, Loader2, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { GlassButton } from "@/components/material";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -128,20 +129,16 @@ export function RunStudyModal({ isOpen, onClose, onStudyCreated }: RunStudyModal
 
           {/* Actions */}
           <div className="flex justify-end gap-3">
-            <Button
+            <GlassButton
               type="button"
               variant="outline"
               onClick={onClose}
               disabled={isRunning}
-              className="tf-glass-btn border-border/50 text-foreground bg-transparent"
+              className="border-border/50 text-foreground bg-transparent"
             >
               Cancel
-            </Button>
-            <Button
-              type="submit"
-              disabled={isRunning}
-              className="tf-glass-btn tf-glass-btn--primary text-foreground"
-            >
+            </GlassButton>
+            <GlassButton type="submit" tone="primary" disabled={isRunning} className="text-foreground">
               {isRunning ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -153,7 +150,7 @@ export function RunStudyModal({ isOpen, onClose, onStudyCreated }: RunStudyModal
                   Run Study
                 </>
               )}
-            </Button>
+            </GlassButton>
           </div>
         </form>
       </div>
