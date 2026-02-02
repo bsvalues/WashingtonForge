@@ -3,13 +3,7 @@
 // TerraFusion Tenant Boundary Enforcement
 // Every API call and UI action must be scoped to the current county tenant
 
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useCallback,
-  type ReactNode,
-} from "react";
+import React, { createContext, useContext, useState, useCallback, type ReactNode } from "react";
 import { setAuditContext, clearAuditContext } from "@/lib/audit";
 import type { User, DatasetVersion } from "@/lib/api/types";
 
@@ -74,9 +68,7 @@ export function TenantProvider({
       datasetVersionId,
     });
 
-    console.info(
-      `[TerraFusion Tenant] Set tenant: county=${user.countyId}, user=${user.id}`
-    );
+    console.info(`[TerraFusion Tenant] Set tenant: county=${user.countyId}, user=${user.id}`);
   }, []);
 
   const clearTenant = useCallback(() => {
@@ -108,9 +100,7 @@ export function TenantProvider({
         });
       }
 
-      console.info(
-        `[TerraFusion Tenant] Set dataset version: ${datasetVersionId}`
-      );
+      console.info(`[TerraFusion Tenant] Set dataset version: ${datasetVersionId}`);
     },
     [state.user]
   );
@@ -132,9 +122,7 @@ export function TenantProvider({
     assertTenant,
   };
 
-  return (
-    <TenantContext.Provider value={value}>{children}</TenantContext.Provider>
-  );
+  return <TenantContext.Provider value={value}>{children}</TenantContext.Provider>;
 }
 
 // ============================================
@@ -164,10 +152,7 @@ export class TenantBoundaryError extends Error {
 // Tenant-Scoped API Request Helper
 // ============================================
 
-export function createTenantScopedRequest(
-  countyId: string,
-  datasetVersionId?: string
-) {
+export function createTenantScopedRequest(countyId: string, datasetVersionId?: string) {
   return function scopedRequest<T extends Record<string, unknown>>(
     params: T
   ): T & { countyId: string; datasetVersionId?: string } {
@@ -183,10 +168,7 @@ export function createTenantScopedRequest(
 // Validate County Boundary
 // ============================================
 
-export function validateCountyBoundary(
-  requestedCountyId: string,
-  currentCountyId: string
-): void {
+export function validateCountyBoundary(requestedCountyId: string, currentCountyId: string): void {
   if (requestedCountyId !== currentCountyId) {
     throw new TenantBoundaryError(
       `Access denied: Cannot access data for county '${requestedCountyId}' while authenticated as '${currentCountyId}'`
@@ -218,9 +200,7 @@ export function validateSelectionInCounty(
   selectedParcelCountyIds: string[],
   currentCountyId: string
 ): void {
-  const foreignParcels = selectedParcelCountyIds.filter(
-    (id) => id !== currentCountyId
-  );
+  const foreignParcels = selectedParcelCountyIds.filter((id) => id !== currentCountyId);
   if (foreignParcels.length > 0) {
     throw new TenantBoundaryError(
       `Selection includes ${foreignParcels.length} parcel(s) from other counties. Cross-county selection is not allowed.`

@@ -17,16 +17,9 @@ import {
   Area,
   ComposedChart,
 } from "recharts";
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-} from "@/components/ui/chart";
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import type { RatioStudy, RatioStudyResults } from "@/lib/api/types";
-import {
-  IAAO_RESIDENTIAL_THRESHOLDS,
-  type IAAOComplianceThresholds,
-} from "@/lib/api/types";
+import { IAAO_RESIDENTIAL_THRESHOLDS, type IAAOComplianceThresholds } from "@/lib/api/types";
 
 // ============================================
 // Chart Props Interface
@@ -42,10 +35,7 @@ interface RatioChartsProps {
 // Color Utilities (Computed from IAAO Thresholds)
 // ============================================
 
-function getRatioBarColor(
-  ratio: number,
-  thresholds: IAAOComplianceThresholds
-): string {
+function getRatioBarColor(ratio: number, thresholds: IAAOComplianceThresholds): string {
   const fairMin = (thresholds.ratioMin + thresholds.ratioMax) / 2 - 0.05;
   const fairMax = (thresholds.ratioMin + thresholds.ratioMax) / 2 + 0.05;
 
@@ -58,10 +48,7 @@ function getRatioBarColor(
   return "oklch(0.6 0.22 25)"; // regressive red
 }
 
-function getScatterPointColor(
-  ratio: number,
-  thresholds: IAAOComplianceThresholds
-): string {
+function getScatterPointColor(ratio: number, thresholds: IAAOComplianceThresholds): string {
   if (ratio >= 0.95 && ratio <= 1.05) {
     return "oklch(0.65 0.2 150 / 0.7)"; // fair
   }
@@ -121,11 +108,9 @@ export function RatioCharts({
       {/* Ratio by Neighborhood */}
       {neighborhoodData.length > 0 && (
         <div className="glass-panel rounded-xl p-5">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-foreground">
-              Median Ratio by Neighborhood
-            </h3>
-            <span className="text-xs text-muted-foreground">
+          <div className="mb-4 flex items-center justify-between">
+            <h3 className="text-foreground font-semibold">Median Ratio by Neighborhood</h3>
+            <span className="text-muted-foreground text-xs">
               n={results.byNeighborhood.reduce((sum, n) => sum + n.sampleSize, 0)}
             </span>
           </div>
@@ -141,10 +126,7 @@ export function RatioCharts({
                 layout="vertical"
                 margin={{ top: 5, right: 30, left: 80, bottom: 5 }}
               >
-                <CartesianGrid
-                  strokeDasharray="3 3"
-                  stroke="oklch(0.3 0.02 260 / 0.3)"
-                />
+                <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.3 0.02 260 / 0.3)" />
                 <XAxis
                   type="number"
                   domain={[thresholds.ratioMin - 0.05, thresholds.ratioMax + 0.05]}
@@ -163,8 +145,8 @@ export function RatioCharts({
                     if (!payload?.[0]) return null;
                     const data = payload[0].payload;
                     return (
-                      <div className="glass-panel rounded-lg p-2 text-xs border border-border/50">
-                        <p className="font-medium text-foreground">{data.name}</p>
+                      <div className="glass-panel border-border/50 rounded-lg border p-2 text-xs">
+                        <p className="text-foreground font-medium">{data.name}</p>
                         <p className="text-muted-foreground">
                           Median Ratio: {data.ratio.toFixed(3)}
                         </p>
@@ -199,10 +181,7 @@ export function RatioCharts({
                 />
                 <Bar dataKey="ratio" radius={[0, 4, 4, 0]}>
                   {neighborhoodData.map((entry, index) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={getRatioBarColor(entry.ratio, thresholds)}
-                    />
+                    <Cell key={`cell-${index}`} fill={getRatioBarColor(entry.ratio, thresholds)} />
                   ))}
                 </Bar>
               </BarChart>
@@ -214,11 +193,9 @@ export function RatioCharts({
       {/* Ratio by Property Class */}
       {propertyClassData.length > 0 && (
         <div className="glass-panel rounded-xl p-5">
-          <div className="flex items-center justify-between mb-4">
-            <h3 className="font-semibold text-foreground">
-              Median Ratio by Property Class
-            </h3>
-            <span className="text-xs text-muted-foreground">
+          <div className="mb-4 flex items-center justify-between">
+            <h3 className="text-foreground font-semibold">Median Ratio by Property Class</h3>
+            <span className="text-muted-foreground text-xs">
               n={results.byPropertyClass.reduce((sum, c) => sum + c.sampleSize, 0)}
             </span>
           </div>
@@ -233,10 +210,7 @@ export function RatioCharts({
                 data={propertyClassData}
                 margin={{ top: 5, right: 30, left: 20, bottom: 40 }}
               >
-                <CartesianGrid
-                  strokeDasharray="3 3"
-                  stroke="oklch(0.3 0.02 260 / 0.3)"
-                />
+                <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.3 0.02 260 / 0.3)" />
                 <XAxis
                   dataKey="name"
                   tick={{ fill: "oklch(0.65 0.02 260)", fontSize: 11 }}
@@ -255,8 +229,8 @@ export function RatioCharts({
                     if (!payload?.[0]) return null;
                     const data = payload[0].payload;
                     return (
-                      <div className="glass-panel rounded-lg p-2 text-xs border border-border/50">
-                        <p className="font-medium text-foreground">{data.name}</p>
+                      <div className="glass-panel border-border/50 rounded-lg border p-2 text-xs">
+                        <p className="text-foreground font-medium">{data.name}</p>
                         <p className="text-muted-foreground">
                           Median Ratio: {data.ratio.toFixed(3)}
                         </p>
@@ -284,10 +258,7 @@ export function RatioCharts({
                 />
                 <Bar dataKey="ratio" radius={[4, 4, 0, 0]}>
                   {propertyClassData.map((entry, index) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={getRatioBarColor(entry.ratio, thresholds)}
-                    />
+                    <Cell key={`cell-${index}`} fill={getRatioBarColor(entry.ratio, thresholds)} />
                   ))}
                 </Bar>
               </BarChart>
@@ -298,9 +269,9 @@ export function RatioCharts({
 
       {/* Historical Trend with Compliance Band */}
       <div className="glass-panel rounded-xl p-5">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="font-semibold text-foreground">Historical Ratio Trend</h3>
-          <span className="text-xs text-muted-foreground">5-Year Comparison</span>
+        <div className="mb-4 flex items-center justify-between">
+          <h3 className="text-foreground font-semibold">Historical Ratio Trend</h3>
+          <span className="text-muted-foreground text-xs">5-Year Comparison</span>
         </div>
         <ChartContainer
           config={{
@@ -310,14 +281,8 @@ export function RatioCharts({
           className="h-64"
         >
           <ResponsiveContainer width="100%" height="100%">
-            <ComposedChart
-              data={trendData}
-              margin={{ top: 5, right: 50, left: 20, bottom: 5 }}
-            >
-              <CartesianGrid
-                strokeDasharray="3 3"
-                stroke="oklch(0.3 0.02 260 / 0.3)"
-              />
+            <ComposedChart data={trendData} margin={{ top: 5, right: 50, left: 20, bottom: 5 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.3 0.02 260 / 0.3)" />
               <XAxis
                 dataKey="year"
                 tick={{ fill: "oklch(0.65 0.02 260)" }}
@@ -347,8 +312,8 @@ export function RatioCharts({
                 content={({ payload, label }) => {
                   if (!payload?.length) return null;
                   return (
-                    <div className="glass-panel rounded-lg p-2 text-xs border border-border/50">
-                      <p className="font-medium text-foreground mb-1">{label}</p>
+                    <div className="glass-panel border-border/50 rounded-lg border p-2 text-xs">
+                      <p className="text-foreground mb-1 font-medium">{label}</p>
                       {payload.map((p, i) => (
                         <p key={i} className="text-muted-foreground">
                           {p.name}: {typeof p.value === "number" ? p.value.toFixed(3) : p.value}
@@ -406,17 +371,20 @@ export function RatioCharts({
             </ComposedChart>
           </ResponsiveContainer>
         </ChartContainer>
-        <div className="flex justify-center gap-6 mt-3 text-xs">
+        <div className="mt-3 flex justify-center gap-6 text-xs">
           <div className="flex items-center gap-2">
-            <div className="w-3 h-0.5 rounded" style={{ background: "oklch(0.65 0.2 150)" }} />
+            <div className="h-0.5 w-3 rounded" style={{ background: "oklch(0.65 0.2 150)" }} />
             <span className="text-muted-foreground">Median Ratio (left)</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-3 h-0.5 rounded" style={{ background: "oklch(0.7 0.15 200)" }} />
+            <div className="h-0.5 w-3 rounded" style={{ background: "oklch(0.7 0.15 200)" }} />
             <span className="text-muted-foreground">COD % (right)</span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded opacity-30" style={{ background: "oklch(0.65 0.2 150)" }} />
+            <div
+              className="h-3 w-3 rounded opacity-30"
+              style={{ background: "oklch(0.65 0.2 150)" }}
+            />
             <span className="text-muted-foreground">Compliance Band</span>
           </div>
         </div>
@@ -424,11 +392,9 @@ export function RatioCharts({
 
       {/* Ratio Distribution Scatter */}
       <div className="glass-panel rounded-xl p-5">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="font-semibold text-foreground">
-            Ratio vs Sale Price Distribution
-          </h3>
-          <span className="text-xs text-muted-foreground">
+        <div className="mb-4 flex items-center justify-between">
+          <h3 className="text-foreground font-semibold">Ratio vs Sale Price Distribution</h3>
+          <span className="text-muted-foreground text-xs">
             n={results.sampleSize} ({results.outlierCount} outliers excluded)
           </span>
         </div>
@@ -440,10 +406,7 @@ export function RatioCharts({
         >
           <ResponsiveContainer width="100%" height="100%">
             <ScatterChart margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-              <CartesianGrid
-                strokeDasharray="3 3"
-                stroke="oklch(0.3 0.02 260 / 0.3)"
-              />
+              <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.3 0.02 260 / 0.3)" />
               <XAxis
                 type="number"
                 dataKey="salePrice"
@@ -466,13 +429,9 @@ export function RatioCharts({
                   if (!payload?.[0]) return null;
                   const data = payload[0].payload;
                   return (
-                    <div className="glass-panel rounded-lg p-2 text-xs border border-border/50">
-                      <p className="text-foreground">
-                        Sale: ${data.salePrice.toLocaleString()}
-                      </p>
-                      <p className="text-foreground">
-                        Ratio: {data.ratio.toFixed(3)}
-                      </p>
+                    <div className="glass-panel border-border/50 rounded-lg border p-2 text-xs">
+                      <p className="text-foreground">Sale: ${data.salePrice.toLocaleString()}</p>
+                      <p className="text-foreground">Ratio: {data.ratio.toFixed(3)}</p>
                       <p className="text-muted-foreground">
                         Status:{" "}
                         {data.ratio >= 0.95 && data.ratio <= 1.05
@@ -486,11 +445,7 @@ export function RatioCharts({
                 }}
               />
               {/* IAAO Reference Lines */}
-              <ReferenceLine
-                y={ratioTarget}
-                stroke="oklch(0.65 0.02 260)"
-                strokeDasharray="3 3"
-              />
+              <ReferenceLine y={ratioTarget} stroke="oklch(0.65 0.02 260)" strokeDasharray="3 3" />
               <ReferenceLine
                 y={fairBandMin}
                 stroke="oklch(0.65 0.2 150 / 0.5)"
@@ -522,26 +477,17 @@ export function RatioCharts({
             </ScatterChart>
           </ResponsiveContainer>
         </ChartContainer>
-        <div className="flex justify-center gap-4 mt-3 text-xs">
+        <div className="mt-3 flex justify-center gap-4 text-xs">
           <div className="flex items-center gap-1">
-            <div
-              className="w-2 h-2 rounded-full"
-              style={{ background: "oklch(0.65 0.2 150)" }}
-            />
+            <div className="h-2 w-2 rounded-full" style={{ background: "oklch(0.65 0.2 150)" }} />
             <span className="text-muted-foreground">Fair (0.95-1.05)</span>
           </div>
           <div className="flex items-center gap-1">
-            <div
-              className="w-2 h-2 rounded-full"
-              style={{ background: "oklch(0.6 0.18 250)" }}
-            />
+            <div className="h-2 w-2 rounded-full" style={{ background: "oklch(0.6 0.18 250)" }} />
             <span className="text-muted-foreground">Progressive (&lt;0.95)</span>
           </div>
           <div className="flex items-center gap-1">
-            <div
-              className="w-2 h-2 rounded-full"
-              style={{ background: "oklch(0.6 0.22 25)" }}
-            />
+            <div className="h-2 w-2 rounded-full" style={{ background: "oklch(0.6 0.22 25)" }} />
             <span className="text-muted-foreground">Regressive (&gt;1.05)</span>
           </div>
         </div>

@@ -103,10 +103,10 @@ export function emitAuditEvent(payload: AuditEventPayload): AuditLogEntry {
   }
 
   // Log for debugging/monitoring
-  console.info(
-    `[TerraFusion Audit] ${entry.action} on ${entry.resourceType}/${entry.resourceId}`,
-    { countyId: entry.countyId, datasetVersionId: entry.datasetVersionId }
-  );
+  console.info(`[TerraFusion Audit] ${entry.action} on ${entry.resourceType}/${entry.resourceId}`, {
+    countyId: entry.countyId,
+    datasetVersionId: entry.datasetVersionId,
+  });
 
   return entry;
 }
@@ -144,12 +144,7 @@ export const audit = {
       details: { fileName, rowCount },
     }),
 
-  ingestValidate: (
-    datasetId: string,
-    countyId: string,
-    accepted: number,
-    rejected: number
-  ) =>
+  ingestValidate: (datasetId: string, countyId: string, accepted: number, rejected: number) =>
     emitAuditEvent({
       action: "INGEST_VALIDATE",
       resourceType: "dataset",

@@ -31,9 +31,7 @@ function SelectionSummaryComponent({ parcels, hiddenCount }: SelectionSummaryPro
 
     // Calculate mean ratio
     const meanRatio =
-      ratios.length > 0
-        ? ratios.reduce((sum, r) => sum + r, 0) / ratios.length
-        : null;
+      ratios.length > 0 ? ratios.reduce((sum, r) => sum + r, 0) / ratios.length : null;
 
     // Calculate COD (approximate)
     const cod =
@@ -76,7 +74,7 @@ function SelectionSummaryComponent({ parcels, hiddenCount }: SelectionSummaryPro
 
   if (!stats) {
     return (
-      <div className="h-full flex items-center justify-center text-muted-foreground">
+      <div className="text-muted-foreground flex h-full items-center justify-center">
         No parcels selected
       </div>
     );
@@ -88,24 +86,20 @@ function SelectionSummaryComponent({ parcels, hiddenCount }: SelectionSummaryPro
   const regressivePct = total > 0 ? (stats.equityDist.regressive / total) * 100 : 0;
 
   return (
-    <div className="p-4 space-y-6">
+    <div className="space-y-6 p-4">
       {/* Key Metrics */}
       <div className="grid grid-cols-4 gap-4">
         <div className="glass-panel rounded-lg p-3">
-          <p className="text-xs text-muted-foreground mb-1">Count</p>
-          <p className="text-xl font-semibold text-foreground">{stats.count}</p>
-          {hiddenCount > 0 && (
-            <p className="text-xs text-amber-400 mt-1">
-              +{hiddenCount} hidden
-            </p>
-          )}
+          <p className="text-muted-foreground mb-1 text-xs">Count</p>
+          <p className="text-foreground text-xl font-semibold">{stats.count}</p>
+          {hiddenCount > 0 && <p className="mt-1 text-xs text-amber-400">+{hiddenCount} hidden</p>}
         </div>
 
         <div className="glass-panel rounded-lg p-3">
-          <p className="text-xs text-muted-foreground mb-1">Median Ratio</p>
+          <p className="text-muted-foreground mb-1 text-xs">Median Ratio</p>
           <p
             className={cn(
-              "text-xl font-semibold font-mono",
+              "font-mono text-xl font-semibold",
               stats.medianRatio && stats.medianRatio >= 0.9 && stats.medianRatio <= 1.1
                 ? "text-emerald-400"
                 : "text-amber-400"
@@ -116,10 +110,10 @@ function SelectionSummaryComponent({ parcels, hiddenCount }: SelectionSummaryPro
         </div>
 
         <div className="glass-panel rounded-lg p-3">
-          <p className="text-xs text-muted-foreground mb-1">COD</p>
+          <p className="text-muted-foreground mb-1 text-xs">COD</p>
           <p
             className={cn(
-              "text-xl font-semibold font-mono",
+              "font-mono text-xl font-semibold",
               stats.cod && stats.cod <= 15 ? "text-emerald-400" : "text-amber-400"
             )}
           >
@@ -128,8 +122,8 @@ function SelectionSummaryComponent({ parcels, hiddenCount }: SelectionSummaryPro
         </div>
 
         <div className="glass-panel rounded-lg p-3">
-          <p className="text-xs text-muted-foreground mb-1">Total Assessed</p>
-          <p className="text-xl font-semibold text-foreground">
+          <p className="text-muted-foreground mb-1 text-xs">Total Assessed</p>
+          <p className="text-foreground text-xl font-semibold">
             ${(stats.totalAssessed / 1000000).toFixed(1)}M
           </p>
         </div>
@@ -137,10 +131,10 @@ function SelectionSummaryComponent({ parcels, hiddenCount }: SelectionSummaryPro
 
       {/* Equity Distribution */}
       <div>
-        <p className="text-sm font-medium text-foreground mb-3">Equity Distribution</p>
-        
+        <p className="text-foreground mb-3 text-sm font-medium">Equity Distribution</p>
+
         {/* Stacked Bar */}
-        <div className="h-6 rounded-full overflow-hidden flex bg-muted/30">
+        <div className="bg-muted/30 flex h-6 overflow-hidden rounded-full">
           {fairPct > 0 && (
             <div
               className="bg-emerald-500 transition-all duration-300"
@@ -162,22 +156,22 @@ function SelectionSummaryComponent({ parcels, hiddenCount }: SelectionSummaryPro
         </div>
 
         {/* Legend */}
-        <div className="flex gap-6 mt-3">
+        <div className="mt-3 flex gap-6">
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-sm bg-emerald-500" />
-            <span className="text-xs text-muted-foreground">
+            <div className="h-3 w-3 rounded-sm bg-emerald-500" />
+            <span className="text-muted-foreground text-xs">
               Fair: {stats.equityDist.fair} ({fairPct.toFixed(0)}%)
             </span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-sm bg-sky-500" />
-            <span className="text-xs text-muted-foreground">
+            <div className="h-3 w-3 rounded-sm bg-sky-500" />
+            <span className="text-muted-foreground text-xs">
               Progressive: {stats.equityDist.progressive} ({progressivePct.toFixed(0)}%)
             </span>
           </div>
           <div className="flex items-center gap-2">
-            <div className="w-3 h-3 rounded-sm bg-amber-500" />
-            <span className="text-xs text-muted-foreground">
+            <div className="h-3 w-3 rounded-sm bg-amber-500" />
+            <span className="text-muted-foreground text-xs">
               Regressive: {stats.equityDist.regressive} ({regressivePct.toFixed(0)}%)
             </span>
           </div>
@@ -186,11 +180,11 @@ function SelectionSummaryComponent({ parcels, hiddenCount }: SelectionSummaryPro
 
       {/* Sales Coverage Warning */}
       {stats.salesCoverage < 80 && (
-        <div className="flex items-start gap-3 p-3 rounded-lg bg-amber-500/10 border border-amber-500/20">
-          <AlertTriangle className="w-4 h-4 text-amber-400 mt-0.5 shrink-0" />
+        <div className="flex items-start gap-3 rounded-lg border border-amber-500/20 bg-amber-500/10 p-3">
+          <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-400" />
           <div>
             <p className="text-sm font-medium text-amber-400">Limited Sales Data</p>
-            <p className="text-xs text-muted-foreground mt-0.5">
+            <p className="text-muted-foreground mt-0.5 text-xs">
               Only {stats.withSales} of {stats.count} parcels ({stats.salesCoverage.toFixed(0)}%)
               have recent sales data. Ratio metrics may be less reliable.
             </p>

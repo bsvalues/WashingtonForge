@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react"
+import React from "react";
 
 import { memo, useEffect, useState, useRef } from "react";
 import type { Parcel } from "@/lib/api/types";
@@ -89,7 +89,7 @@ function HoverTooltipComponent({ parcel, position, containerRef }: HoverTooltipP
     <div
       ref={tooltipRef}
       className={cn(
-        "absolute z-50 pointer-events-none transition-opacity duration-100",
+        "pointer-events-none absolute z-50 transition-opacity duration-100",
         adjustedPosition ? "opacity-100" : "opacity-0"
       )}
       style={{
@@ -97,20 +97,16 @@ function HoverTooltipComponent({ parcel, position, containerRef }: HoverTooltipP
         top: adjustedPosition?.y ?? position.y,
       }}
     >
-      <div className="glass-panel rounded-lg p-3 min-w-56 shadow-xl border border-border/50">
+      <div className="glass-panel border-border/50 min-w-56 rounded-lg border p-3 shadow-xl">
         {/* Header */}
-        <div className="flex items-start justify-between gap-3 mb-2">
+        <div className="mb-2 flex items-start justify-between gap-3">
           <div>
-            <p className="font-mono font-semibold text-foreground text-sm">
-              {parcel.parcelId}
-            </p>
-            <p className="text-xs text-muted-foreground truncate max-w-40">
-              {parcel.situs}
-            </p>
+            <p className="text-foreground font-mono text-sm font-semibold">{parcel.parcelId}</p>
+            <p className="text-muted-foreground max-w-40 truncate text-xs">{parcel.situs}</p>
           </div>
           <span
             className={cn(
-              "px-2 py-0.5 rounded-full text-xs font-medium border capitalize shrink-0",
+              "shrink-0 rounded-full border px-2 py-0.5 text-xs font-medium capitalize",
               getEquityBg(parcel.equityStatus),
               getEquityColor(parcel.equityStatus)
             )}
@@ -120,14 +116,12 @@ function HoverTooltipComponent({ parcel, position, containerRef }: HoverTooltipP
         </div>
 
         {/* Data Grid */}
-        <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-xs border-t border-border/30 pt-2">
+        <div className="border-border/30 grid grid-cols-2 gap-x-4 gap-y-1.5 border-t pt-2 text-xs">
           <span className="text-muted-foreground">Class</span>
           <span className="text-foreground font-medium">{parcel.propertyClass}</span>
 
           <span className="text-muted-foreground">Assessed Value</span>
-          <span className="text-foreground font-medium">
-            ${parcel.totalValue.toLocaleString()}
-          </span>
+          <span className="text-foreground font-medium">${parcel.totalValue.toLocaleString()}</span>
 
           <span className="text-muted-foreground">Sale Price</span>
           <span className="text-foreground font-medium">
@@ -141,7 +135,7 @@ function HoverTooltipComponent({ parcel, position, containerRef }: HoverTooltipP
         </div>
 
         {/* Footer hint */}
-        <div className="mt-2 pt-2 border-t border-border/30 text-xs text-muted-foreground">
+        <div className="border-border/30 text-muted-foreground mt-2 border-t pt-2 text-xs">
           Click to select | Shift+Click to multi-select
         </div>
       </div>

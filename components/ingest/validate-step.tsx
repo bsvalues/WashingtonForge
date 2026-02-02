@@ -69,11 +69,7 @@ function categorizeErrors(errors: ValidationError[]) {
   return categories;
 }
 
-export function ValidateStep({
-  dataset,
-  onComplete,
-  onBack,
-}: ValidateStepProps) {
+export function ValidateStep({ dataset, onComplete, onBack }: ValidateStepProps) {
   const [isValidating, setIsValidating] = useState(true);
   const [validationProgress, setValidationProgress] = useState(0);
   const [validationStage, setValidationStage] = useState("Initializing...");
@@ -140,9 +136,9 @@ export function ValidateStep({
   if (isValidating) {
     return (
       <div className="glass-panel rounded-xl p-12">
-        <div className="max-w-md mx-auto text-center">
-          <div className="relative w-20 h-20 mx-auto mb-6">
-            <div className="absolute inset-0 rounded-full border-4 border-primary/20" />
+        <div className="mx-auto max-w-md text-center">
+          <div className="relative mx-auto mb-6 h-20 w-20">
+            <div className="border-primary/20 absolute inset-0 rounded-full border-4" />
             <svg className="absolute inset-0 -rotate-90" viewBox="0 0 100 100">
               <circle
                 cx="50"
@@ -157,36 +153,44 @@ export function ValidateStep({
               />
             </svg>
             <div className="absolute inset-0 flex items-center justify-center">
-              <span className="text-lg font-semibold text-foreground">
-                {validationProgress}%
-              </span>
+              <span className="text-foreground text-lg font-semibold">{validationProgress}%</span>
             </div>
           </div>
-          <h3 className="text-lg font-medium text-foreground mb-2">
-            Validating Dataset
-          </h3>
+          <h3 className="text-foreground mb-2 text-lg font-medium">Validating Dataset</h3>
           <p className="text-muted-foreground mb-6">{validationStage}</p>
           <Progress value={validationProgress} className="h-2" />
           <div className="mt-6 grid grid-cols-3 gap-4 text-xs">
-            <div className={cn(
-              "p-2 rounded-lg",
-              validationProgress >= 30 ? "bg-chart-1/20 text-chart-1" : "bg-muted/20 text-muted-foreground"
-            )}>
-              <CheckCircle2 className="w-4 h-4 mx-auto mb-1" />
+            <div
+              className={cn(
+                "rounded-lg p-2",
+                validationProgress >= 30
+                  ? "bg-chart-1/20 text-chart-1"
+                  : "bg-muted/20 text-muted-foreground"
+              )}
+            >
+              <CheckCircle2 className="mx-auto mb-1 h-4 w-4" />
               Structure
             </div>
-            <div className={cn(
-              "p-2 rounded-lg",
-              validationProgress >= 70 ? "bg-chart-1/20 text-chart-1" : "bg-muted/20 text-muted-foreground"
-            )}>
-              <CheckCircle2 className="w-4 h-4 mx-auto mb-1" />
+            <div
+              className={cn(
+                "rounded-lg p-2",
+                validationProgress >= 70
+                  ? "bg-chart-1/20 text-chart-1"
+                  : "bg-muted/20 text-muted-foreground"
+              )}
+            >
+              <CheckCircle2 className="mx-auto mb-1 h-4 w-4" />
               Data Quality
             </div>
-            <div className={cn(
-              "p-2 rounded-lg",
-              validationProgress >= 95 ? "bg-chart-1/20 text-chart-1" : "bg-muted/20 text-muted-foreground"
-            )}>
-              <CheckCircle2 className="w-4 h-4 mx-auto mb-1" />
+            <div
+              className={cn(
+                "rounded-lg p-2",
+                validationProgress >= 95
+                  ? "bg-chart-1/20 text-chart-1"
+                  : "bg-muted/20 text-muted-foreground"
+              )}
+            >
+              <CheckCircle2 className="mx-auto mb-1 h-4 w-4" />
               Geometry
             </div>
           </div>
@@ -198,17 +202,15 @@ export function ValidateStep({
   if (error) {
     return (
       <div className="glass-panel rounded-xl p-12 text-center">
-        <XCircle className="w-12 h-12 mx-auto mb-4 text-destructive" />
-        <h3 className="text-lg font-medium text-foreground mb-2">
-          Validation Failed
-        </h3>
+        <XCircle className="text-destructive mx-auto mb-4 h-12 w-12" />
+        <h3 className="text-foreground mb-2 text-lg font-medium">Validation Failed</h3>
         <p className="text-muted-foreground mb-6">{error}</p>
         <Button
           variant="outline"
           onClick={onBack}
           className="glass-btn border-border/50 text-foreground bg-transparent"
         >
-          <ArrowLeft className="w-4 h-4 mr-2" />
+          <ArrowLeft className="mr-2 h-4 w-4" />
           Go Back
         </Button>
       </div>
@@ -222,104 +224,116 @@ export function ValidateStep({
   const errorCategories = categorizeErrors(result.errors);
 
   const categoryInfo = [
-    { key: "missing", label: "Missing Required", icon: FileWarning, count: errorCategories.missing.length },
+    {
+      key: "missing",
+      label: "Missing Required",
+      icon: FileWarning,
+      count: errorCategories.missing.length,
+    },
     { key: "format", label: "Invalid Format", icon: Hash, count: errorCategories.format.length },
     { key: "range", label: "Value Range", icon: DollarSign, count: errorCategories.range.length },
     { key: "geometry", label: "Geometry", icon: MapPin, count: errorCategories.geometry.length },
-  ].filter(c => c.count > 0);
+  ].filter((c) => c.count > 0);
 
   return (
     <div className="space-y-6">
       {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
         <div className="glass-panel rounded-xl p-5">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-9 h-9 rounded-lg bg-primary/20 flex items-center justify-center">
-              <Hash className="w-4 h-4 text-primary" />
+          <div className="mb-2 flex items-center gap-3">
+            <div className="bg-primary/20 flex h-9 w-9 items-center justify-center rounded-lg">
+              <Hash className="text-primary h-4 w-4" />
             </div>
-            <span className="text-sm text-muted-foreground">Total Rows</span>
+            <span className="text-muted-foreground text-sm">Total Rows</span>
           </div>
-          <p className="text-2xl font-semibold text-foreground">
+          <p className="text-foreground text-2xl font-semibold">
             {result.totalRows.toLocaleString()}
           </p>
         </div>
 
         <div className="glass-panel rounded-xl p-5">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-9 h-9 rounded-lg bg-chart-1/20 flex items-center justify-center">
-              <CheckCircle2 className="w-4 h-4 text-chart-1" />
+          <div className="mb-2 flex items-center gap-3">
+            <div className="bg-chart-1/20 flex h-9 w-9 items-center justify-center rounded-lg">
+              <CheckCircle2 className="text-chart-1 h-4 w-4" />
             </div>
-            <span className="text-sm text-muted-foreground">Accepted</span>
+            <span className="text-muted-foreground text-sm">Accepted</span>
           </div>
-          <p className="text-2xl font-semibold text-chart-1">
+          <p className="text-chart-1 text-2xl font-semibold">
             {result.acceptedRows.toLocaleString()}
           </p>
-          <p className="text-xs text-muted-foreground">{acceptRate}% pass rate</p>
+          <p className="text-muted-foreground text-xs">{acceptRate}% pass rate</p>
         </div>
 
         <div className="glass-panel rounded-xl p-5">
-          <div className="flex items-center gap-3 mb-2">
-            <div className={cn(
-              "w-9 h-9 rounded-lg flex items-center justify-center",
-              hasErrors ? "bg-destructive/20" : "bg-chart-1/20"
-            )}>
+          <div className="mb-2 flex items-center gap-3">
+            <div
+              className={cn(
+                "flex h-9 w-9 items-center justify-center rounded-lg",
+                hasErrors ? "bg-destructive/20" : "bg-chart-1/20"
+              )}
+            >
               {hasErrors ? (
-                <XCircle className="w-4 h-4 text-destructive" />
+                <XCircle className="text-destructive h-4 w-4" />
               ) : (
-                <CheckCircle2 className="w-4 h-4 text-chart-1" />
+                <CheckCircle2 className="text-chart-1 h-4 w-4" />
               )}
             </div>
-            <span className="text-sm text-muted-foreground">Rejected</span>
+            <span className="text-muted-foreground text-sm">Rejected</span>
           </div>
-          <p className={cn(
-            "text-2xl font-semibold",
-            hasErrors ? "text-destructive" : "text-foreground"
-          )}>
+          <p
+            className={cn(
+              "text-2xl font-semibold",
+              hasErrors ? "text-destructive" : "text-foreground"
+            )}
+          >
             {result.rejectedRows.toLocaleString()}
           </p>
         </div>
 
         <div className="glass-panel rounded-xl p-5">
-          <div className="flex items-center gap-3 mb-2">
-            <div className={cn(
-              "w-9 h-9 rounded-lg flex items-center justify-center",
-              hasErrors ? "bg-amber-500/20" : "bg-chart-1/20"
-            )}>
-              <AlertTriangle className={cn(
-                "w-4 h-4",
-                hasErrors ? "text-amber-500" : "text-chart-1"
-              )} />
+          <div className="mb-2 flex items-center gap-3">
+            <div
+              className={cn(
+                "flex h-9 w-9 items-center justify-center rounded-lg",
+                hasErrors ? "bg-amber-500/20" : "bg-chart-1/20"
+              )}
+            >
+              <AlertTriangle
+                className={cn("h-4 w-4", hasErrors ? "text-amber-500" : "text-chart-1")}
+              />
             </div>
-            <span className="text-sm text-muted-foreground">Errors</span>
+            <span className="text-muted-foreground text-sm">Errors</span>
           </div>
-          <p className={cn(
-            "text-2xl font-semibold",
-            hasErrors ? "text-amber-500" : "text-foreground"
-          )}>
+          <p
+            className={cn(
+              "text-2xl font-semibold",
+              hasErrors ? "text-amber-500" : "text-foreground"
+            )}
+          >
             {result.errors.length}
           </p>
         </div>
       </div>
 
       {/* Status Message */}
-      <div className={cn(
-        "glass-panel rounded-xl p-4 flex items-center gap-4",
-        hasErrors
-          ? "border border-amber-500/30 bg-amber-500/5"
-          : "border border-chart-1/30 bg-chart-1/5"
-      )}>
+      <div
+        className={cn(
+          "glass-panel flex items-center gap-4 rounded-xl p-4",
+          hasErrors
+            ? "border border-amber-500/30 bg-amber-500/5"
+            : "border-chart-1/30 bg-chart-1/5 border"
+        )}
+      >
         {hasErrors ? (
-          <AlertTriangle className="w-6 h-6 text-amber-500 shrink-0" />
+          <AlertTriangle className="h-6 w-6 shrink-0 text-amber-500" />
         ) : (
-          <CheckCircle2 className="w-6 h-6 text-chart-1 shrink-0" />
+          <CheckCircle2 className="text-chart-1 h-6 w-6 shrink-0" />
         )}
         <div className="flex-1">
-          <p className="font-medium text-foreground">
-            {hasErrors
-              ? "Validation completed with warnings"
-              : "All rows validated successfully"}
+          <p className="text-foreground font-medium">
+            {hasErrors ? "Validation completed with warnings" : "All rows validated successfully"}
           </p>
-          <p className="text-sm text-muted-foreground">
+          <p className="text-muted-foreground text-sm">
             {hasErrors
               ? `${result.acceptedRows.toLocaleString()} rows will be imported. ${result.rejectedRows} rows with errors will be skipped.`
               : "Your data is ready for field mapping"}
@@ -330,9 +344,9 @@ export function ValidateStep({
             variant="outline"
             size="sm"
             onClick={handleDownloadErrors}
-            className="glass-btn border-border/50 text-foreground bg-transparent shrink-0"
+            className="glass-btn border-border/50 text-foreground shrink-0 bg-transparent"
           >
-            <Download className="w-4 h-4 mr-2" />
+            <Download className="mr-2 h-4 w-4" />
             Export Errors
           </Button>
         )}
@@ -340,7 +354,7 @@ export function ValidateStep({
 
       {/* Error Categories */}
       {hasErrors && categoryInfo.length > 0 && (
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
           {categoryInfo.map(({ key, label, icon: Icon, count }) => (
             <button
               key={key}
@@ -349,15 +363,15 @@ export function ValidateStep({
               className={cn(
                 "glass-panel rounded-lg p-3 text-left transition-all",
                 activeErrorTab === key
-                  ? "border border-primary/50 bg-primary/10"
+                  ? "border-primary/50 bg-primary/10 border"
                   : "hover:bg-muted/20"
               )}
             >
-              <div className="flex items-center gap-2 mb-1">
-                <Icon className="w-4 h-4 text-muted-foreground" />
-                <span className="text-xs text-muted-foreground">{label}</span>
+              <div className="mb-1 flex items-center gap-2">
+                <Icon className="text-muted-foreground h-4 w-4" />
+                <span className="text-muted-foreground text-xs">{label}</span>
               </div>
-              <p className="text-lg font-semibold text-foreground">{count}</p>
+              <p className="text-foreground text-lg font-semibold">{count}</p>
             </button>
           ))}
         </div>
@@ -365,16 +379,19 @@ export function ValidateStep({
 
       {/* Error Table with Tabs */}
       {hasErrors && result.errors.length > 0 && (
-        <div className="glass-panel rounded-xl overflow-hidden">
+        <div className="glass-panel overflow-hidden rounded-xl">
           <Tabs value={activeErrorTab} onValueChange={setActiveErrorTab}>
-            <div className="p-4 border-b border-border/50 flex items-center justify-between">
+            <div className="border-border/50 flex items-center justify-between border-b p-4">
               <TabsList className="bg-muted/30">
-                <TabsTrigger value="all" className="text-foreground data-[state=active]:bg-primary/20">
+                <TabsTrigger
+                  value="all"
+                  className="text-foreground data-[state=active]:bg-primary/20"
+                >
                   All ({result.errors.length})
                 </TabsTrigger>
                 {categoryInfo.map(({ key, label, count }) => (
-                  <TabsTrigger 
-                    key={key} 
+                  <TabsTrigger
+                    key={key}
                     value={key}
                     className="text-foreground data-[state=active]:bg-primary/20"
                   >
@@ -412,7 +429,7 @@ export function ValidateStep({
             </div>
 
             {result.errors.length > 50 && (
-              <div className="p-3 border-t border-border/50 text-center text-sm text-muted-foreground">
+              <div className="border-border/50 text-muted-foreground border-t p-3 text-center text-sm">
                 Showing first 50 errors. Download CSV for complete report.
               </div>
             )}
@@ -427,15 +444,12 @@ export function ValidateStep({
           onClick={onBack}
           className="glass-btn border-border/50 text-foreground bg-transparent"
         >
-          <ArrowLeft className="w-4 h-4 mr-2" />
+          <ArrowLeft className="mr-2 h-4 w-4" />
           Back
         </Button>
-        <Button
-          onClick={handleContinue}
-          className="glass-btn-primary text-foreground font-medium"
-        >
+        <Button onClick={handleContinue} className="glass-btn-primary text-foreground font-medium">
           Continue to Field Mapping
-          <ArrowRight className="w-4 h-4 ml-2" />
+          <ArrowRight className="ml-2 h-4 w-4" />
         </Button>
       </div>
     </div>
@@ -445,16 +459,12 @@ export function ValidateStep({
 function ErrorRow({ error }: { error: ValidationError }) {
   return (
     <TableRow className="border-border/50">
-      <TableCell className="text-foreground font-mono text-sm">
-        {error.row}
-      </TableCell>
+      <TableCell className="text-foreground font-mono text-sm">{error.row}</TableCell>
       <TableCell className="text-foreground">{error.field}</TableCell>
-      <TableCell className="text-muted-foreground font-mono text-xs max-w-32 truncate">
+      <TableCell className="text-muted-foreground max-w-32 truncate font-mono text-xs">
         {error.value || <span className="italic">empty</span>}
       </TableCell>
-      <TableCell className="text-destructive text-sm">
-        {error.message}
-      </TableCell>
+      <TableCell className="text-destructive text-sm">{error.message}</TableCell>
     </TableRow>
   );
 }

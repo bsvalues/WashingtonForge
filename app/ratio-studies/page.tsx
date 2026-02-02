@@ -41,30 +41,24 @@ export default function RatioStudiesPage() {
   };
 
   return (
-    <AppShell
-      user={{ name: "Jane Doe", role: "Assessor", county: "Benton County" }}
-    >
-      <div className="p-4 md:p-6 max-w-7xl mx-auto">
+    <AppShell user={{ name: "Jane Doe", role: "Assessor", county: "Benton County" }}>
+      <div className="mx-auto max-w-7xl p-4 md:p-6">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className="mb-8 flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-semibold text-foreground mb-2">
-              Ratio Studies
-            </h1>
-            <p className="text-muted-foreground">
-              Run and view assessment ratio analysis reports
-            </p>
+            <h1 className="text-foreground mb-2 text-2xl font-semibold">Ratio Studies</h1>
+            <p className="text-muted-foreground">Run and view assessment ratio analysis reports</p>
           </div>
           <Button
             onClick={() => setIsRunModalOpen(true)}
             className="glass-btn-primary text-foreground"
           >
-            <Plus className="w-4 h-4 mr-2" />
+            <Plus className="mr-2 h-4 w-4" />
             Run New Study
           </Button>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-6">
+        <div className="grid gap-6 lg:grid-cols-3">
           {/* Studies List */}
           <div className="lg:col-span-1">
             <RatioStudyList

@@ -14,7 +14,7 @@ export * from "./types";
 
 /**
  * DEMO_MODE: Set to true for UI demo, false when real backend is ready.
- * 
+ *
  * When you connect a real backend, change this to false or use:
  * export const DEMO_MODE = process.env.NEXT_PUBLIC_DEMO_MODE !== "false";
  */
@@ -26,10 +26,10 @@ export const DEMO_MODE = true;
 
 /**
  * Unified API client that automatically routes to demo or real backend.
- * 
+ *
  * In demo mode: Returns mock data from fixtures (no network calls)
  * In production: Makes real HTTP requests to backend services
- * 
+ *
  * Switching from demo to production is a single env flag change.
  */
 export const client = DEMO_MODE ? demoClient : apiClient;

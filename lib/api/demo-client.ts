@@ -105,10 +105,7 @@ export async function selectCounty(countyId: string, role: UserRole): Promise<Us
 // Data Ingestion
 // ============================================
 
-export async function uploadDataset(
-  file: File,
-  datasetType: DatasetType
-): Promise<Dataset> {
+export async function uploadDataset(file: File, datasetType: DatasetType): Promise<Dataset> {
   await delay(500);
   return {
     id: `ds-${Date.now()}`,
@@ -133,10 +130,11 @@ export async function getDatasetErrors(datasetId: string): Promise<ValidationErr
 
 export async function downloadErrorCsv(datasetId: string): Promise<Blob> {
   await delay();
-  const csv = "row,field,value,message\n" + 
-    MOCK_VALIDATION_RESULT.errors.map(e => 
-      `${e.row},"${e.field}","${e.value}","${e.message}"`
-    ).join("\n");
+  const csv =
+    "row,field,value,message\n" +
+    MOCK_VALIDATION_RESULT.errors
+      .map((e) => `${e.row},"${e.field}","${e.value}","${e.message}"`)
+      .join("\n");
   return new Blob([csv], { type: "text/csv" });
 }
 
@@ -145,10 +143,7 @@ export async function getSourceFields(datasetId: string): Promise<string[]> {
   return MOCK_SOURCE_FIELDS;
 }
 
-export async function saveFieldMapping(
-  datasetId: string,
-  mappings: FieldMapping[]
-): Promise<void> {
+export async function saveFieldMapping(datasetId: string, mappings: FieldMapping[]): Promise<void> {
   await delay();
 }
 
@@ -191,7 +186,7 @@ export async function publishDataset(datasetId: string): Promise<Dataset> {
 export async function getParcels(filter?: ParcelFilter): Promise<Parcel[]> {
   await delay();
   let parcels = [...MOCK_PARCELS];
-  
+
   if (filter?.neighborhood?.length) {
     parcels = parcels.filter((p) => filter.neighborhood!.includes(p.neighborhood));
   }
@@ -201,7 +196,7 @@ export async function getParcels(filter?: ParcelFilter): Promise<Parcel[]> {
   if (filter?.equityStatus?.length) {
     parcels = parcels.filter((p) => filter.equityStatus!.includes(p.equityStatus));
   }
-  
+
   return parcels;
 }
 
@@ -232,9 +227,7 @@ export async function getParcelGeoJson(filter?: ParcelFilter): Promise<GeoJSON.F
   };
 }
 
-export async function selectParcelsInPolygon(
-  polygon: GeoJSON.Polygon
-): Promise<SelectionResult> {
+export async function selectParcelsInPolygon(polygon: GeoJSON.Polygon): Promise<SelectionResult> {
   await delay();
   return {
     parcelIds: MOCK_PARCELS.map((p) => p.id),
@@ -315,7 +308,7 @@ export async function getAuditLog(params?: {
 }): Promise<AuditLogEntry[]> {
   await delay();
   let logs = [...MOCK_AUDIT_LOG];
-  
+
   if (params?.action) {
     logs = logs.filter((l) => l.action === params.action);
   }
@@ -328,7 +321,7 @@ export async function getAuditLog(params?: {
   if (params?.limit) {
     logs = logs.slice(0, params.limit);
   }
-  
+
   return logs;
 }
 
@@ -399,7 +392,9 @@ export async function getCalibrationLevers(): Promise<CalibrationLever[]> {
   return MOCK_CALIBRATION_LEVERS;
 }
 
-export async function getCalibrationHistory(datasetVersionId?: string): Promise<CalibrationPatch[]> {
+export async function getCalibrationHistory(
+  datasetVersionId?: string
+): Promise<CalibrationPatch[]> {
   await delay();
   return MOCK_CALIBRATION_PATCHES;
 }
@@ -411,11 +406,12 @@ export async function simulateCalibration(params: {
   levers: CalibrationLeverApply[];
 }): Promise<CalibrationSimulation> {
   await delay(800);
-  
+
   // Simulate improvement based on lever adjustments
-  const currentVersion = MOCK_DATASET_VERSIONS.find((v) => v.id === params.datasetVersionId) || MOCK_DATASET_VERSIONS[0];
+  const currentVersion =
+    MOCK_DATASET_VERSIONS.find((v) => v.id === params.datasetVersionId) || MOCK_DATASET_VERSIONS[0];
   const beforeMetrics = currentVersion.metrics!;
-  
+
   // Calculate simulated after metrics (fake improvement)
   const afterMetrics: DatasetMetrics = {
     ...beforeMetrics,
@@ -424,7 +420,7 @@ export async function simulateCalibration(params: {
     prd: Math.max(0.98, beforeMetrics.prd - 0.01),
     prb: beforeMetrics.prb + 0.004,
   };
-  
+
   return {
     levers: params.levers,
     scope: params.scope,
@@ -442,10 +438,11 @@ export async function applyCalibration(params: {
   levers: CalibrationLeverApply[];
 }): Promise<{ patch: CalibrationPatch; newVersion: DatasetVersion }> {
   await delay(1200);
-  
-  const currentVersion = MOCK_DATASET_VERSIONS.find((v) => v.id === params.datasetVersionId) || MOCK_DATASET_VERSIONS[0];
+
+  const currentVersion =
+    MOCK_DATASET_VERSIONS.find((v) => v.id === params.datasetVersionId) || MOCK_DATASET_VERSIONS[0];
   const beforeMetrics = currentVersion.metrics!;
-  
+
   const afterMetrics: DatasetMetrics = {
     ...beforeMetrics,
     medianRatio: Math.min(1.0, beforeMetrics.medianRatio + 0.015),
@@ -454,9 +451,9 @@ export async function applyCalibration(params: {
     prb: beforeMetrics.prb + 0.004,
     totalAssessedValue: Math.round(beforeMetrics.totalAssessedValue * 1.01),
   };
-  
+
   const newVersionId = `dsv-${Date.now()}`;
-  
+
   const patch: CalibrationPatch = {
     id: `cal-${Date.now()}`,
     fromVersionId: params.datasetVersionId,
@@ -469,7 +466,7 @@ export async function applyCalibration(params: {
     beforeMetrics,
     afterMetrics,
   };
-  
+
   const newVersion: DatasetVersion = {
     id: newVersionId,
     datasetId: currentVersion.datasetId,
@@ -481,7 +478,7 @@ export async function applyCalibration(params: {
     createdAt: new Date().toISOString(),
     metrics: afterMetrics,
   };
-  
+
   return { patch, newVersion };
 }
 

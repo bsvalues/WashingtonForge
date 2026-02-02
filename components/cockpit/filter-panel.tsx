@@ -48,10 +48,7 @@ export function FilterPanel({ filters, onFilterChange }: FilterPanelProps) {
   useEffect(() => {
     async function loadOptions() {
       try {
-        const [hoods, classes] = await Promise.all([
-          getNeighborhoods(),
-          getPropertyClasses(),
-        ]);
+        const [hoods, classes] = await Promise.all([getNeighborhoods(), getPropertyClasses()]);
         setNeighborhoods(hoods);
         setPropertyClasses(classes);
       } catch (err) {
@@ -91,9 +88,7 @@ export function FilterPanel({ filters, onFilterChange }: FilterPanelProps) {
 
   const handleEquityStatusChange = (status: EquityStatus, checked: boolean) => {
     const current = filters.equityStatus || [];
-    const updated = checked
-      ? [...current, status]
-      : current.filter((s) => s !== status);
+    const updated = checked ? [...current, status] : current.filter((s) => s !== status);
     onFilterChange({ ...filters, equityStatus: updated.length > 0 ? updated : undefined });
   };
 
@@ -104,14 +99,14 @@ export function FilterPanel({ filters, onFilterChange }: FilterPanelProps) {
 
   if (isCollapsed) {
     return (
-      <div className="absolute left-0 top-4 z-10">
+      <div className="absolute top-4 left-0 z-10">
         <Button
           variant="outline"
           size="icon"
           onClick={() => setIsCollapsed(false)}
           className="glass-btn border-border/50 text-foreground rounded-l-none"
         >
-          <ChevronRight className="w-4 h-4" />
+          <ChevronRight className="h-4 w-4" />
           <span className="sr-only">Expand filters</span>
         </Button>
       </div>
@@ -119,19 +114,19 @@ export function FilterPanel({ filters, onFilterChange }: FilterPanelProps) {
   }
 
   return (
-    <div className="w-72 shrink-0 glass-panel border-r border-border/50 flex flex-col">
+    <div className="glass-panel border-border/50 flex w-72 shrink-0 flex-col border-r">
       {/* Header */}
-      <div className="p-4 border-b border-border/50 flex items-center justify-between">
+      <div className="border-border/50 flex items-center justify-between border-b p-4">
         <div className="flex items-center gap-2">
-          <Filter className="w-4 h-4 text-primary" />
-          <h2 className="font-medium text-foreground">Filters</h2>
+          <Filter className="text-primary h-4 w-4" />
+          <h2 className="text-foreground font-medium">Filters</h2>
         </div>
         <div className="flex items-center gap-1">
           <Button
             variant="ghost"
             size="sm"
             onClick={clearFilters}
-            className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
+            className="text-muted-foreground hover:text-foreground h-7 px-2 text-xs"
           >
             Clear
           </Button>
@@ -139,22 +134,22 @@ export function FilterPanel({ filters, onFilterChange }: FilterPanelProps) {
             variant="ghost"
             size="icon"
             onClick={() => setIsCollapsed(true)}
-            className="h-7 w-7 text-muted-foreground hover:text-foreground"
+            className="text-muted-foreground hover:text-foreground h-7 w-7"
           >
-            <ChevronLeft className="w-4 h-4" />
+            <ChevronLeft className="h-4 w-4" />
             <span className="sr-only">Collapse filters</span>
           </Button>
         </div>
       </div>
 
       {/* Filter Content */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-6">
+      <div className="flex-1 space-y-6 overflow-y-auto p-4">
         {/* Property Class */}
         <div>
           <Label className="text-foreground mb-3 block">Property Class</Label>
           <div className="space-y-2">
             {propertyClasses.length === 0 ? (
-              <p className="text-sm text-muted-foreground">Loading...</p>
+              <p className="text-muted-foreground text-sm">Loading...</p>
             ) : (
               propertyClasses.map((cls) => (
                 <div key={cls} className="flex items-center gap-2">
@@ -166,7 +161,7 @@ export function FilterPanel({ filters, onFilterChange }: FilterPanelProps) {
                   />
                   <label
                     htmlFor={`class-${cls}`}
-                    className="text-sm text-foreground cursor-pointer"
+                    className="text-foreground cursor-pointer text-sm"
                   >
                     {cls}
                   </label>
@@ -183,7 +178,7 @@ export function FilterPanel({ filters, onFilterChange }: FilterPanelProps) {
             value={filters.neighborhood?.[0] || "all"}
             onValueChange={handleNeighborhoodChange}
           >
-            <SelectTrigger className="w-full bg-input border-border/50 text-foreground">
+            <SelectTrigger className="bg-input border-border/50 text-foreground w-full">
               <SelectValue placeholder="All neighborhoods" />
             </SelectTrigger>
             <SelectContent className="bg-popover border-border/50">
@@ -217,11 +212,8 @@ export function FilterPanel({ filters, onFilterChange }: FilterPanelProps) {
         {/* Value Tier */}
         <div>
           <Label className="text-foreground mb-3 block">Value Tier</Label>
-          <Select
-            value={filters.valueTier || "all"}
-            onValueChange={handleValueTierChange}
-          >
-            <SelectTrigger className="w-full bg-input border-border/50 text-foreground">
+          <Select value={filters.valueTier || "all"} onValueChange={handleValueTierChange}>
+            <SelectTrigger className="bg-input border-border/50 text-foreground w-full">
               <SelectValue placeholder="All tiers" />
             </SelectTrigger>
             <SelectContent className="bg-popover border-border/50">
@@ -229,11 +221,7 @@ export function FilterPanel({ filters, onFilterChange }: FilterPanelProps) {
                 All Tiers
               </SelectItem>
               {valueTiers.map((tier) => (
-                <SelectItem
-                  key={tier.value}
-                  value={tier.value}
-                  className="text-foreground"
-                >
+                <SelectItem key={tier.value} value={tier.value} className="text-foreground">
                   {tier.label}
                 </SelectItem>
               ))}
@@ -255,10 +243,10 @@ export function FilterPanel({ filters, onFilterChange }: FilterPanelProps) {
                   }
                   className="border-border/50 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
                 />
-                <div className={cn("w-3 h-3 rounded-sm", status.color)} />
+                <div className={cn("h-3 w-3 rounded-sm", status.color)} />
                 <label
                   htmlFor={`equity-${status.value}`}
-                  className="text-sm text-foreground cursor-pointer"
+                  className="text-foreground cursor-pointer text-sm"
                 >
                   {status.label}
                 </label>

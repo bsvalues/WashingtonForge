@@ -1,17 +1,9 @@
 "use client";
 
-import React from "react"
+import React from "react";
 
 import { useState, useCallback } from "react";
-import {
-  Upload,
-  FileText,
-  MapIcon,
-  Archive,
-  X,
-  Loader2,
-  AlertCircle,
-} from "lucide-react";
+import { Upload, FileText, MapIcon, Archive, X, Loader2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import {
@@ -67,15 +59,12 @@ export function UploadStep({ onComplete }: UploadStepProps) {
     }
   }, []);
 
-  const handleFileSelect = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
-      const selectedFile = e.target.files?.[0];
-      if (selectedFile) {
-        validateAndSetFile(selectedFile);
-      }
-    },
-    []
-  );
+  const handleFileSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0];
+    if (selectedFile) {
+      validateAndSetFile(selectedFile);
+    }
+  }, []);
 
   const validateAndSetFile = (f: File) => {
     const validExtensions = [".csv", ".geojson", ".json", ".zip"];
@@ -115,20 +104,13 @@ export function UploadStep({ onComplete }: UploadStepProps) {
       {/* Dataset Type Selection */}
       <div className="glass-panel rounded-xl p-6">
         <Label className="text-foreground mb-3 block">Dataset Type</Label>
-        <Select
-          value={datasetType}
-          onValueChange={(v) => setDatasetType(v as DatasetType)}
-        >
-          <SelectTrigger className="w-full max-w-md bg-input border-border/50 text-foreground">
+        <Select value={datasetType} onValueChange={(v) => setDatasetType(v as DatasetType)}>
+          <SelectTrigger className="bg-input border-border/50 text-foreground w-full max-w-md">
             <SelectValue />
           </SelectTrigger>
           <SelectContent className="bg-popover border-border/50">
             {datasetTypes.map((type) => (
-              <SelectItem
-                key={type.value}
-                value={type.value}
-                className="text-foreground"
-              >
+              <SelectItem key={type.value} value={type.value} className="text-foreground">
                 {type.label}
               </SelectItem>
             ))}
@@ -139,11 +121,9 @@ export function UploadStep({ onComplete }: UploadStepProps) {
       {/* Drop Zone */}
       <div
         className={cn(
-          "glass-panel rounded-xl p-8 border-2 border-dashed transition-all",
-          isDragging
-            ? "border-primary bg-primary/5"
-            : "border-border/50 hover:border-border",
-          file && "border-solid border-primary/30"
+          "glass-panel rounded-xl border-2 border-dashed p-8 transition-all",
+          isDragging ? "border-primary bg-primary/5" : "border-border/50 hover:border-border",
+          file && "border-primary/30 border-solid"
         )}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
@@ -152,12 +132,12 @@ export function UploadStep({ onComplete }: UploadStepProps) {
         {file ? (
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-lg bg-primary/20 flex items-center justify-center">
-                <FileText className="w-6 h-6 text-primary" />
+              <div className="bg-primary/20 flex h-12 w-12 items-center justify-center rounded-lg">
+                <FileText className="text-primary h-6 w-6" />
               </div>
               <div>
-                <p className="font-medium text-foreground">{file.name}</p>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-foreground font-medium">{file.name}</p>
+                <p className="text-muted-foreground text-sm">
                   {(file.size / 1024 / 1024).toFixed(2)} MB
                 </p>
               </div>
@@ -168,21 +148,17 @@ export function UploadStep({ onComplete }: UploadStepProps) {
               onClick={clearFile}
               className="text-muted-foreground hover:text-foreground"
             >
-              <X className="w-5 h-5" />
+              <X className="h-5 w-5" />
               <span className="sr-only">Remove file</span>
             </Button>
           </div>
         ) : (
           <div className="text-center">
-            <div className="w-16 h-16 mx-auto mb-4 rounded-xl bg-muted/30 flex items-center justify-center">
-              <Upload className="w-8 h-8 text-muted-foreground" />
+            <div className="bg-muted/30 mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-xl">
+              <Upload className="text-muted-foreground h-8 w-8" />
             </div>
-            <p className="text-lg font-medium text-foreground mb-2">
-              Drop your file here
-            </p>
-            <p className="text-muted-foreground mb-6">
-              or click to browse from your computer
-            </p>
+            <p className="text-foreground mb-2 text-lg font-medium">Drop your file here</p>
+            <p className="text-muted-foreground mb-6">or click to browse from your computer</p>
 
             <input
               type="file"
@@ -208,9 +184,9 @@ export function UploadStep({ onComplete }: UploadStepProps) {
                 return (
                   <div
                     key={type.ext}
-                    className="flex items-center gap-2 text-sm text-muted-foreground"
+                    className="text-muted-foreground flex items-center gap-2 text-sm"
                   >
-                    <Icon className="w-4 h-4" />
+                    <Icon className="h-4 w-4" />
                     <span>{type.label}</span>
                   </div>
                 );
@@ -222,8 +198,8 @@ export function UploadStep({ onComplete }: UploadStepProps) {
 
       {/* Error Message */}
       {error && (
-        <div className="flex items-center gap-3 p-4 rounded-lg bg-destructive/10 border border-destructive/30 text-destructive">
-          <AlertCircle className="w-5 h-5 shrink-0" />
+        <div className="bg-destructive/10 border-destructive/30 text-destructive flex items-center gap-3 rounded-lg border p-4">
+          <AlertCircle className="h-5 w-5 shrink-0" />
           <p className="text-sm">{error}</p>
         </div>
       )}
@@ -233,16 +209,16 @@ export function UploadStep({ onComplete }: UploadStepProps) {
         <Button
           onClick={handleUpload}
           disabled={!file || isUploading}
-          className="glass-btn-primary text-foreground font-medium px-8"
+          className="glass-btn-primary text-foreground px-8 font-medium"
         >
           {isUploading ? (
             <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               Uploading...
             </>
           ) : (
             <>
-              <Upload className="w-4 h-4 mr-2" />
+              <Upload className="mr-2 h-4 w-4" />
               Upload & Continue
             </>
           )}

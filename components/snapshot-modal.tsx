@@ -1,12 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import {
   getRollYearSnapshots,
@@ -64,9 +59,7 @@ export function SnapshotModal({ isOpen, onClose }: SnapshotModalProps) {
     setIsPublishing(snapshotId);
     try {
       const updated = await publishSnapshot(snapshotId);
-      setSnapshots((prev) =>
-        prev.map((s) => (s.id === snapshotId ? updated : s))
-      );
+      setSnapshots((prev) => prev.map((s) => (s.id === snapshotId ? updated : s)));
     } catch (err) {
       console.error("[v0] Failed to publish snapshot:", err);
     } finally {
@@ -95,20 +88,18 @@ export function SnapshotModal({ isOpen, onClose }: SnapshotModalProps) {
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="glass-panel border-border/50 max-w-xl">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-foreground">
-            <Camera className="w-5 h-5 text-primary" />
+          <DialogTitle className="text-foreground flex items-center gap-2">
+            <Camera className="text-primary h-5 w-5" />
             Roll Year Snapshots
           </DialogTitle>
         </DialogHeader>
 
         {/* Create New Snapshot */}
-        <div className="p-4 rounded-lg bg-primary/10 border border-primary/30 mb-4">
+        <div className="bg-primary/10 border-primary/30 mb-4 rounded-lg border p-4">
           <div className="flex items-center justify-between">
             <div>
-              <h3 className="text-sm font-medium text-foreground">
-                Create New Snapshot
-              </h3>
-              <p className="text-xs text-muted-foreground mt-0.5">
+              <h3 className="text-foreground text-sm font-medium">Create New Snapshot</h3>
+              <p className="text-muted-foreground mt-0.5 text-xs">
                 Capture current assessment roll for {new Date().getFullYear()}
               </p>
             </div>
@@ -119,9 +110,9 @@ export function SnapshotModal({ isOpen, onClose }: SnapshotModalProps) {
               size="sm"
             >
               {isCreating ? (
-                <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />
+                <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
               ) : (
-                <Camera className="w-4 h-4 mr-2" />
+                <Camera className="mr-2 h-4 w-4" />
               )}
               {isCreating ? "Creating..." : "Create Snapshot"}
             </Button>
@@ -129,14 +120,14 @@ export function SnapshotModal({ isOpen, onClose }: SnapshotModalProps) {
         </div>
 
         {/* Snapshots List */}
-        <div className="space-y-3 max-h-96 overflow-y-auto">
+        <div className="max-h-96 space-y-3 overflow-y-auto">
           {isLoading ? (
             <div className="flex items-center justify-center py-12">
-              <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+              <div className="border-primary h-6 w-6 animate-spin rounded-full border-2 border-t-transparent" />
             </div>
           ) : snapshots.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">
-              <AlertCircle className="w-8 h-8 mx-auto mb-2 opacity-50" />
+            <div className="text-muted-foreground py-12 text-center">
+              <AlertCircle className="mx-auto mb-2 h-8 w-8 opacity-50" />
               No snapshots created yet
             </div>
           ) : (
@@ -144,21 +135,19 @@ export function SnapshotModal({ isOpen, onClose }: SnapshotModalProps) {
               <div
                 key={snapshot.id}
                 className={cn(
-                  "p-4 rounded-lg border transition-colors",
+                  "rounded-lg border p-4 transition-colors",
                   snapshot.status === "published"
                     ? "bg-chart-1/10 border-chart-1/30"
                     : "bg-secondary/30 border-border/30"
                 )}
               >
-                <div className="flex items-start justify-between mb-3">
+                <div className="mb-3 flex items-start justify-between">
                   <div>
                     <div className="flex items-center gap-2">
-                      <h3 className="font-medium text-foreground">
-                        Roll Year {snapshot.rollYear}
-                      </h3>
+                      <h3 className="text-foreground font-medium">Roll Year {snapshot.rollYear}</h3>
                       <span
                         className={cn(
-                          "px-2 py-0.5 rounded-full text-xs font-medium",
+                          "rounded-full px-2 py-0.5 text-xs font-medium",
                           snapshot.status === "published"
                             ? "bg-chart-1/20 text-chart-1"
                             : "bg-chart-5/20 text-chart-5"
@@ -166,19 +155,19 @@ export function SnapshotModal({ isOpen, onClose }: SnapshotModalProps) {
                       >
                         {snapshot.status === "published" ? (
                           <span className="flex items-center gap-1">
-                            <Check className="w-3 h-3" />
+                            <Check className="h-3 w-3" />
                             Published
                           </span>
                         ) : (
                           <span className="flex items-center gap-1">
-                            <Clock className="w-3 h-3" />
+                            <Clock className="h-3 w-3" />
                             Draft
                           </span>
                         )}
                       </span>
                     </div>
-                    <div className="flex items-center gap-1 text-xs text-muted-foreground mt-1">
-                      <Calendar className="w-3 h-3" />
+                    <div className="text-muted-foreground mt-1 flex items-center gap-1 text-xs">
+                      <Calendar className="h-3 w-3" />
                       Created {formatDate(snapshot.createdAt)}
                     </div>
                   </div>
@@ -192,9 +181,9 @@ export function SnapshotModal({ isOpen, onClose }: SnapshotModalProps) {
                       className="glass-btn border-chart-1/40 text-chart-1 hover:bg-chart-1/20 bg-transparent"
                     >
                       {isPublishing === snapshot.id ? (
-                        <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin mr-2" />
+                        <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
                       ) : (
-                        <Upload className="w-4 h-4 mr-2" />
+                        <Upload className="mr-2 h-4 w-4" />
                       )}
                       Publish
                     </Button>
@@ -203,21 +192,19 @@ export function SnapshotModal({ isOpen, onClose }: SnapshotModalProps) {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="flex items-center gap-2">
-                    <Package className="w-4 h-4 text-muted-foreground" />
+                    <Package className="text-muted-foreground h-4 w-4" />
                     <div>
-                      <p className="text-xs text-muted-foreground">Parcels</p>
-                      <p className="text-sm font-medium text-foreground">
+                      <p className="text-muted-foreground text-xs">Parcels</p>
+                      <p className="text-foreground text-sm font-medium">
                         {snapshot.parcelCount.toLocaleString()}
                       </p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <DollarSign className="w-4 h-4 text-muted-foreground" />
+                    <DollarSign className="text-muted-foreground h-4 w-4" />
                     <div>
-                      <p className="text-xs text-muted-foreground">
-                        Total Assessed
-                      </p>
-                      <p className="text-sm font-medium text-foreground">
+                      <p className="text-muted-foreground text-xs">Total Assessed</p>
+                      <p className="text-foreground text-sm font-medium">
                         {formatCurrency(snapshot.totalAssessedValue)}
                       </p>
                     </div>

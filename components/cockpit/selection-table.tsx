@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react"
+import React from "react";
 
 import { memo, useState, useMemo } from "react";
 import { Search, ArrowUpDown, MapPin } from "lucide-react";
@@ -46,9 +46,7 @@ function SelectionTableComponent({ parcels, onParcelClick }: SelectionTableProps
     if (searchQuery.trim()) {
       const query = searchQuery.toLowerCase();
       result = result.filter(
-        (p) =>
-          p.parcelId.toLowerCase().includes(query) ||
-          p.situs?.toLowerCase().includes(query)
+        (p) => p.parcelId.toLowerCase().includes(query) || p.situs?.toLowerCase().includes(query)
       );
     }
 
@@ -79,9 +77,7 @@ function SelectionTableComponent({ parcels, onParcelClick }: SelectionTableProps
       }
 
       if (typeof aVal === "string" && typeof bVal === "string") {
-        return sortDirection === "asc"
-          ? aVal.localeCompare(bVal)
-          : bVal.localeCompare(aVal);
+        return sortDirection === "asc" ? aVal.localeCompare(bVal) : bVal.localeCompare(aVal);
       }
 
       return sortDirection === "asc"
@@ -102,7 +98,7 @@ function SelectionTableComponent({ parcels, onParcelClick }: SelectionTableProps
     return (
       <span
         className={cn(
-          "px-2 py-0.5 rounded-full text-xs font-medium border capitalize",
+          "rounded-full border px-2 py-0.5 text-xs font-medium capitalize",
           styles[status]
         )}
       >
@@ -117,7 +113,7 @@ function SelectionTableComponent({ parcels, onParcelClick }: SelectionTableProps
       size="sm"
       onClick={() => handleSort(field)}
       className={cn(
-        "h-7 px-2 -ml-2 text-xs font-medium",
+        "-ml-2 h-7 px-2 text-xs font-medium",
         sortField === field ? "text-primary" : "text-muted-foreground"
       )}
     >
@@ -127,19 +123,19 @@ function SelectionTableComponent({ parcels, onParcelClick }: SelectionTableProps
   );
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="flex h-full flex-col">
       {/* Search */}
-      <div className="p-3 border-b border-border/30">
+      <div className="border-border/30 border-b p-3">
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
           <Input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search by parcel ID..."
-            className="pl-9 h-8 text-sm bg-input border-border/50 text-foreground placeholder:text-muted-foreground"
+            className="bg-input border-border/50 text-foreground placeholder:text-muted-foreground h-8 pl-9 text-sm"
           />
         </div>
-        <p className="text-xs text-muted-foreground mt-2">
+        <p className="text-muted-foreground mt-2 text-xs">
           Showing {filteredAndSortedParcels.length} of {parcels.length} parcels
         </p>
       </div>
@@ -147,7 +143,7 @@ function SelectionTableComponent({ parcels, onParcelClick }: SelectionTableProps
       {/* Table */}
       <div className="flex-1 overflow-auto">
         <Table>
-          <TableHeader className="sticky top-0 bg-background/80 backdrop-blur-sm">
+          <TableHeader className="bg-background/80 sticky top-0 backdrop-blur-sm">
             <TableRow className="border-border/30 hover:bg-transparent">
               <TableHead className="w-36">
                 <SortButton field="parcelId">Parcel ID</SortButton>
@@ -170,7 +166,7 @@ function SelectionTableComponent({ parcels, onParcelClick }: SelectionTableProps
           <TableBody>
             {filteredAndSortedParcels.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
+                <TableCell colSpan={8} className="text-muted-foreground py-8 text-center">
                   {searchQuery ? "No parcels match your search" : "No parcels selected"}
                 </TableCell>
               </TableRow>
@@ -178,22 +174,18 @@ function SelectionTableComponent({ parcels, onParcelClick }: SelectionTableProps
               filteredAndSortedParcels.map((parcel) => (
                 <TableRow
                   key={parcel.id}
-                  className="border-border/30 cursor-pointer hover:bg-muted/10"
+                  className="border-border/30 hover:bg-muted/10 cursor-pointer"
                   onClick={() => onParcelClick(parcel)}
                 >
-                  <TableCell className="font-mono text-sm text-foreground">
+                  <TableCell className="text-foreground font-mono text-sm">
                     {parcel.parcelId}
                   </TableCell>
-                  <TableCell className="text-foreground text-sm">
-                    {parcel.propertyClass}
-                  </TableCell>
-                  <TableCell className="text-foreground text-sm">
-                    {parcel.neighborhood}
-                  </TableCell>
-                  <TableCell className="text-right text-foreground text-sm">
+                  <TableCell className="text-foreground text-sm">{parcel.propertyClass}</TableCell>
+                  <TableCell className="text-foreground text-sm">{parcel.neighborhood}</TableCell>
+                  <TableCell className="text-foreground text-right text-sm">
                     ${parcel.totalValue.toLocaleString()}
                   </TableCell>
-                  <TableCell className="text-right text-foreground text-sm">
+                  <TableCell className="text-foreground text-right text-sm">
                     {parcel.salePrice ? `$${parcel.salePrice.toLocaleString()}` : "—"}
                   </TableCell>
                   <TableCell className="text-right font-mono text-sm">
@@ -212,13 +204,13 @@ function SelectionTableComponent({ parcels, onParcelClick }: SelectionTableProps
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="h-6 w-6 text-muted-foreground hover:text-primary"
+                      className="text-muted-foreground hover:text-primary h-6 w-6"
                       onClick={(e) => {
                         e.stopPropagation();
                         onParcelClick(parcel);
                       }}
                     >
-                      <MapPin className="w-3.5 h-3.5" />
+                      <MapPin className="h-3.5 w-3.5" />
                       <span className="sr-only">Zoom to parcel</span>
                     </Button>
                   </TableCell>

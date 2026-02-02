@@ -1,12 +1,28 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, Search, Copy, Check, AlertTriangle, CheckCircle, XCircle, Zap, Shield, Filter } from "lucide-react";
+import {
+  X,
+  Search,
+  Copy,
+  Check,
+  AlertTriangle,
+  CheckCircle,
+  XCircle,
+  Zap,
+  Shield,
+  Filter,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { getTraceFeed, subscribeToTrace, type TraceEvent, type TraceEventType } from "@/lib/pilot/executor";
+import {
+  getTraceFeed,
+  subscribeToTrace,
+  type TraceEvent,
+  type TraceEventType,
+} from "@/lib/pilot/executor";
 import { TraceDetailPanel } from "./trace-detail-panel";
 
 interface TraceFeedDrawerProps {
@@ -18,13 +34,40 @@ interface TraceFeedDrawerInternalProps extends TraceFeedDrawerProps {
   onOpenDetail?: (correlationId: string) => void;
 }
 
-const EVENT_TYPE_CONFIG: Record<TraceEventType, { icon: typeof Zap; color: string; label: string }> = {
-  tool_invoked: { icon: Zap, color: "text-sky-400 bg-sky-500/10 border-sky-500/30", label: "Invoked" },
-  tool_succeeded: { icon: CheckCircle, color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/30", label: "Succeeded" },
-  tool_failed: { icon: XCircle, color: "text-red-400 bg-red-500/10 border-red-500/30", label: "Failed" },
-  mode_switched: { icon: Zap, color: "text-violet-400 bg-violet-500/10 border-violet-500/30", label: "Mode Switch" },
-  permission_denied: { icon: Shield, color: "text-amber-400 bg-amber-500/10 border-amber-500/30", label: "Denied" },
-  policy_blocked: { icon: AlertTriangle, color: "text-red-400 bg-red-500/10 border-red-500/30", label: "Blocked" },
+const EVENT_TYPE_CONFIG: Record<
+  TraceEventType,
+  { icon: typeof Zap; color: string; label: string }
+> = {
+  tool_invoked: {
+    icon: Zap,
+    color: "text-sky-400 bg-sky-500/10 border-sky-500/30",
+    label: "Invoked",
+  },
+  tool_succeeded: {
+    icon: CheckCircle,
+    color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/30",
+    label: "Succeeded",
+  },
+  tool_failed: {
+    icon: XCircle,
+    color: "text-red-400 bg-red-500/10 border-red-500/30",
+    label: "Failed",
+  },
+  mode_switched: {
+    icon: Zap,
+    color: "text-violet-400 bg-violet-500/10 border-violet-500/30",
+    label: "Mode Switch",
+  },
+  permission_denied: {
+    icon: Shield,
+    color: "text-amber-400 bg-amber-500/10 border-amber-500/30",
+    label: "Denied",
+  },
+  policy_blocked: {
+    icon: AlertTriangle,
+    color: "text-red-400 bg-red-500/10 border-red-500/30",
+    label: "Blocked",
+  },
 };
 
 const ALL_EVENT_TYPES: TraceEventType[] = [
@@ -89,7 +132,11 @@ export function TraceFeedDrawer({ isOpen, onClose }: TraceFeedDrawerProps) {
 
   const formatTime = (ts: string) => {
     const date = new Date(ts);
-    return date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+    return date.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    });
   };
 
   const shortenId = (id: string) => id.slice(0, 12) + "...";
@@ -97,38 +144,38 @@ export function TraceFeedDrawer({ isOpen, onClose }: TraceFeedDrawerProps) {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed right-0 top-0 h-full w-[420px] z-50 glass-panel border-l border-border/30 flex flex-col">
+    <div className="glass-panel border-border/30 fixed top-0 right-0 z-50 flex h-full w-[420px] flex-col border-l">
       {/* Header */}
-      <div className="p-4 border-b border-border/30">
-        <div className="flex items-center justify-between mb-3">
+      <div className="border-border/30 border-b p-4">
+        <div className="mb-3 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-violet-500/20 flex items-center justify-center">
-              <Shield className="w-4 h-4 text-violet-400" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/20">
+              <Shield className="h-4 w-4 text-violet-400" />
             </div>
             <div>
-              <h2 className="text-sm font-semibold text-foreground">TerraTrace</h2>
-              <p className="text-xs text-muted-foreground">Audit Feed</p>
+              <h2 className="text-foreground text-sm font-semibold">TerraTrace</h2>
+              <p className="text-muted-foreground text-xs">Audit Feed</p>
             </div>
           </div>
           <Button variant="ghost" size="icon" onClick={onClose} className="text-muted-foreground">
-            <X className="w-4 h-4" />
+            <X className="h-4 w-4" />
           </Button>
         </div>
 
         {/* Search */}
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
           <Input
             placeholder="Search events..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-9 bg-input/50 border-border/30"
+            className="bg-input/50 border-border/30 pl-9"
           />
         </div>
 
         {/* Filter Chips */}
-        <div className="flex items-center gap-2 mt-3 flex-wrap">
-          <Filter className="w-3 h-3 text-muted-foreground" />
+        <div className="mt-3 flex flex-wrap items-center gap-2">
+          <Filter className="text-muted-foreground h-3 w-3" />
           {ALL_EVENT_TYPES.map((type) => {
             const config = EVENT_TYPE_CONFIG[type];
             const isActive = activeFilters.has(type);
@@ -137,8 +184,10 @@ export function TraceFeedDrawer({ isOpen, onClose }: TraceFeedDrawerProps) {
                 key={type}
                 onClick={() => toggleFilter(type)}
                 className={cn(
-                  "text-[10px] px-2 py-1 rounded-full border transition-all",
-                  isActive ? config.color : "text-muted-foreground bg-muted/20 border-border/30 opacity-50"
+                  "rounded-full border px-2 py-1 text-[10px] transition-all",
+                  isActive
+                    ? config.color
+                    : "text-muted-foreground bg-muted/20 border-border/30 opacity-50"
                 )}
               >
                 {config.label}
@@ -148,7 +197,7 @@ export function TraceFeedDrawer({ isOpen, onClose }: TraceFeedDrawerProps) {
           {(searchQuery || activeFilters.size < ALL_EVENT_TYPES.length) && (
             <button
               onClick={clearFilters}
-              className="text-[10px] text-muted-foreground hover:text-foreground underline ml-1"
+              className="text-muted-foreground hover:text-foreground ml-1 text-[10px] underline"
             >
               Clear
             </button>
@@ -158,12 +207,14 @@ export function TraceFeedDrawer({ isOpen, onClose }: TraceFeedDrawerProps) {
 
       {/* Events List */}
       <ScrollArea className="flex-1">
-        <div className="p-4 space-y-2">
+        <div className="space-y-2 p-4">
           {filteredEvents.length === 0 ? (
-            <div className="text-center py-12">
-              <Shield className="w-10 h-10 mx-auto mb-3 text-muted-foreground/30" />
-              <p className="text-sm text-muted-foreground">No trace events yet.</p>
-              <p className="text-xs text-muted-foreground/70 mt-1">Execute a TerraPilot tool to see events.</p>
+            <div className="py-12 text-center">
+              <Shield className="text-muted-foreground/30 mx-auto mb-3 h-10 w-10" />
+              <p className="text-muted-foreground text-sm">No trace events yet.</p>
+              <p className="text-muted-foreground/70 mt-1 text-xs">
+                Execute a TerraPilot tool to see events.
+              </p>
             </div>
           ) : (
             filteredEvents.map((event) => {
@@ -173,50 +224,59 @@ export function TraceFeedDrawer({ isOpen, onClose }: TraceFeedDrawerProps) {
                 <div
                   key={event.id}
                   className={cn(
-                    "p-3 rounded-lg border transition-all",
+                    "rounded-lg border p-3 transition-all",
                     config.color.replace("text-", "").split(" ").slice(1).join(" ")
                   )}
                 >
                   <div className="flex items-start gap-3">
-                    <div className={cn("w-6 h-6 rounded-md flex items-center justify-center shrink-0", config.color.split(" ")[1])}>
-                      <Icon className={cn("w-3.5 h-3.5", config.color.split(" ")[0])} />
+                    <div
+                      className={cn(
+                        "flex h-6 w-6 shrink-0 items-center justify-center rounded-md",
+                        config.color.split(" ")[1]
+                      )}
+                    >
+                      <Icon className={cn("h-3.5 w-3.5", config.color.split(" ")[0])} />
                     </div>
-                    <div className="flex-1 min-w-0">
+                    <div className="min-w-0 flex-1">
                       <div className="flex items-center justify-between gap-2">
                         <span className={cn("text-xs font-medium", config.color.split(" ")[0])}>
                           {config.label}
-                          {event.toolId && <span className="text-foreground ml-1">· {event.toolId}</span>}
+                          {event.toolId && (
+                            <span className="text-foreground ml-1">· {event.toolId}</span>
+                          )}
                         </span>
-                        <span className="text-[10px] text-muted-foreground shrink-0">{formatTime(event.ts)}</span>
+                        <span className="text-muted-foreground shrink-0 text-[10px]">
+                          {formatTime(event.ts)}
+                        </span>
                       </div>
 
                       {(event.inputSummary || event.outputSummary) && (
-                        <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                        <p className="text-muted-foreground mt-1 line-clamp-2 text-xs">
                           {event.outputSummary || event.inputSummary}
                         </p>
                       )}
 
-                      <div className="flex items-center gap-3 mt-2 text-[10px] text-muted-foreground flex-wrap">
+                      <div className="text-muted-foreground mt-2 flex flex-wrap items-center gap-3 text-[10px]">
                         <span>County: {event.countyId}</span>
                         {event.actor?.userId && <span>User: {event.actor.userId}</span>}
                         {event.risk && <span>Risk: {event.risk}</span>}
                         {event.reasonCode && <span>Reason: {event.reasonCode}</span>}
                         <button
                           onClick={() => setDetailCorrelationId(event.correlationId)}
-                          className="flex items-center gap-1 hover:text-primary transition-colors underline underline-offset-2"
+                          className="hover:text-primary flex items-center gap-1 underline underline-offset-2 transition-colors"
                           title="View trace chain"
                         >
                           {shortenId(event.correlationId)}
                         </button>
                         <button
                           onClick={() => copyCorrelationId(event.correlationId)}
-                          className="flex items-center gap-1 hover:text-foreground transition-colors"
+                          className="hover:text-foreground flex items-center gap-1 transition-colors"
                           title="Copy ID"
                         >
                           {copiedId === event.correlationId ? (
-                            <Check className="w-3 h-3" />
+                            <Check className="h-3 w-3" />
                           ) : (
-                            <Copy className="w-3 h-3" />
+                            <Copy className="h-3 w-3" />
                           )}
                         </button>
                       </div>
@@ -230,8 +290,8 @@ export function TraceFeedDrawer({ isOpen, onClose }: TraceFeedDrawerProps) {
       </ScrollArea>
 
       {/* Footer */}
-      <div className="p-4 border-t border-border/30">
-        <div className="text-[10px] text-muted-foreground text-center space-y-1">
+      <div className="border-border/30 border-t p-4">
+        <div className="text-muted-foreground space-y-1 text-center text-[10px]">
           <p>Append-only trace (prototype). No PII. County-scoped.</p>
           <p className="text-muted-foreground/70">{filteredEvents.length} event(s) shown</p>
         </div>

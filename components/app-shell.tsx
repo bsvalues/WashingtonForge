@@ -29,7 +29,13 @@ import { TerraPilotPanel } from "@/components/pilot/terra-pilot-panel";
 import { CommandPalette } from "@/components/pilot/command-palette";
 import { TraceFeedDrawer } from "@/components/trace/trace-feed-drawer";
 import { PolicyDebugDrawer } from "@/components/pilot/policy-debug-drawer";
-import { type ToolDescriptor, defaultRiskPolicy, DEFAULT_REASON_CODES, TOOL_REGISTRY, ALL_CLAIMS } from "@/lib/pilot/tools";
+import {
+  type ToolDescriptor,
+  defaultRiskPolicy,
+  DEFAULT_REASON_CODES,
+  TOOL_REGISTRY,
+  ALL_CLAIMS,
+} from "@/lib/pilot/tools";
 import { executeTool, getDemoPilotContext, generateCorrelationId } from "@/lib/pilot/executor";
 
 interface AppShellProps {
@@ -87,29 +93,27 @@ export function AppShell({ children, user }: AppShellProps) {
   }, []);
 
   return (
-    <div className="space-bg min-h-screen flex flex-col">
+    <div className="space-bg flex min-h-screen flex-col">
       {/* Top Navigation Bar */}
-      <header className="glass-panel sticky top-0 z-50 border-b border-border/50">
-        <div className="flex items-center justify-between px-4 h-16">
+      <header className="glass-panel border-border/50 sticky top-0 z-50 border-b">
+        <div className="flex h-16 items-center justify-between px-4">
           {/* Logo & Brand */}
           <div className="flex items-center gap-4">
             <Link href="/dashboard" className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-primary/20 border border-primary/40 flex items-center justify-center">
-                <Building2 className="w-5 h-5 text-primary" />
+              <div className="bg-primary/20 border-primary/40 flex h-10 w-10 items-center justify-center rounded-lg border">
+                <Building2 className="text-primary h-5 w-5" />
               </div>
               <div className="hidden sm:block">
-                <h1 className="text-lg font-semibold text-foreground tracking-tight">
+                <h1 className="text-foreground text-lg font-semibold tracking-tight">
                   TerraFusion
                 </h1>
-                <p className="text-xs text-muted-foreground -mt-0.5">
-                  Sovereign Valuation OS
-                </p>
+                <p className="text-muted-foreground -mt-0.5 text-xs">Sovereign Valuation OS</p>
               </div>
             </Link>
           </div>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-1">
+          <nav className="hidden items-center gap-1 md:flex">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = pathname === item.href;
@@ -118,11 +122,11 @@ export function AppShell({ children, user }: AppShellProps) {
                   <Button
                     variant="ghost"
                     className={cn(
-                      "gap-2 text-muted-foreground hover:text-foreground hover:bg-secondary/50",
+                      "text-muted-foreground hover:text-foreground hover:bg-secondary/50 gap-2",
                       isActive && "bg-secondary/50 text-foreground"
                     )}
                   >
-                    <Icon className="w-4 h-4" />
+                    <Icon className="h-4 w-4" />
                     {item.label}
                   </Button>
                 </Link>
@@ -137,9 +141,9 @@ export function AppShell({ children, user }: AppShellProps) {
               variant="outline"
               size="sm"
               onClick={() => setPilotPanelOpen(true)}
-              className="hidden sm:flex gap-2 glass-btn border-primary/50 text-primary hover:bg-primary/10 bg-transparent"
+              className="glass-btn border-primary/50 text-primary hover:bg-primary/10 hidden gap-2 bg-transparent sm:flex"
             >
-              <Zap className="w-4 h-4" />
+              <Zap className="h-4 w-4" />
               TerraPilot
             </Button>
 
@@ -148,9 +152,9 @@ export function AppShell({ children, user }: AppShellProps) {
               variant="outline"
               size="sm"
               onClick={() => setTraceFeedOpen(true)}
-              className="hidden sm:flex gap-2 glass-btn border-violet-500/50 text-violet-400 hover:bg-violet-500/10 bg-transparent"
+              className="glass-btn hidden gap-2 border-violet-500/50 bg-transparent text-violet-400 hover:bg-violet-500/10 sm:flex"
             >
-              <Shield className="w-4 h-4" />
+              <Shield className="h-4 w-4" />
               Trace
             </Button>
 
@@ -159,10 +163,10 @@ export function AppShell({ children, user }: AppShellProps) {
               variant="outline"
               size="sm"
               onClick={() => setPolicyDebugOpen(true)}
-              className="hidden lg:flex gap-2 glass-btn border-amber-500/50 text-amber-400 hover:bg-amber-500/10 bg-transparent"
+              className="glass-btn hidden gap-2 border-amber-500/50 bg-transparent text-amber-400 hover:bg-amber-500/10 lg:flex"
               title="Debug policy gates"
             >
-              <Settings2 className="w-4 h-4" />
+              <Settings2 className="h-4 w-4" />
               Policy
             </Button>
 
@@ -171,9 +175,9 @@ export function AppShell({ children, user }: AppShellProps) {
               variant="outline"
               size="sm"
               onClick={() => setAuditLogOpen(true)}
-              className="hidden lg:flex gap-2 glass-btn border-border/50 text-foreground bg-transparent"
+              className="glass-btn border-border/50 text-foreground hidden gap-2 bg-transparent lg:flex"
             >
-              <FileText className="w-4 h-4" />
+              <FileText className="h-4 w-4" />
               Audit Log
             </Button>
 
@@ -182,20 +186,18 @@ export function AppShell({ children, user }: AppShellProps) {
               variant="outline"
               size="sm"
               onClick={() => setSnapshotOpen(true)}
-              className="hidden lg:flex gap-2 glass-btn border-border/50 text-foreground bg-transparent"
+              className="glass-btn border-border/50 text-foreground hidden gap-2 bg-transparent lg:flex"
             >
-              <Camera className="w-4 h-4" />
+              <Camera className="h-4 w-4" />
               Snapshot
             </Button>
 
             {/* User Info */}
             {user && (
-              <div className="hidden xl:flex items-center gap-3 ml-2 pl-4 border-l border-border/50">
+              <div className="border-border/50 ml-2 hidden items-center gap-3 border-l pl-4 xl:flex">
                 <div className="text-right">
-                  <p className="text-sm font-medium text-foreground">
-                    {user.name}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-foreground text-sm font-medium">{user.name}</p>
+                  <p className="text-muted-foreground text-xs">
                     {user.county} · {user.role}
                   </p>
                 </div>
@@ -205,7 +207,7 @@ export function AppShell({ children, user }: AppShellProps) {
                   onClick={() => router.push("/login")}
                   className="text-muted-foreground hover:text-foreground"
                 >
-                  <LogOut className="w-4 h-4" />
+                  <LogOut className="h-4 w-4" />
                   <span className="sr-only">Log out</span>
                 </Button>
               </div>
@@ -215,14 +217,10 @@ export function AppShell({ children, user }: AppShellProps) {
             <Button
               variant="ghost"
               size="icon"
-              className="md:hidden text-foreground"
+              className="text-foreground md:hidden"
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             >
-              {mobileMenuOpen ? (
-                <X className="w-5 h-5" />
-              ) : (
-                <Menu className="w-5 h-5" />
-              )}
+              {mobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
               <span className="sr-only">Toggle menu</span>
             </Button>
           </div>
@@ -230,39 +228,35 @@ export function AppShell({ children, user }: AppShellProps) {
 
         {/* Mobile Navigation */}
         {mobileMenuOpen && (
-          <nav className="md:hidden border-t border-border/50 p-4 space-y-2">
+          <nav className="border-border/50 space-y-2 border-t p-4 md:hidden">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = pathname === item.href;
               return (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={() => setMobileMenuOpen(false)}
-                >
+                <Link key={item.href} href={item.href} onClick={() => setMobileMenuOpen(false)}>
                   <Button
                     variant="ghost"
                     className={cn(
-                      "w-full justify-start gap-3 text-muted-foreground",
+                      "text-muted-foreground w-full justify-start gap-3",
                       isActive && "bg-secondary/50 text-foreground"
                     )}
                   >
-                    <Icon className="w-4 h-4" />
+                    <Icon className="h-4 w-4" />
                     {item.label}
                   </Button>
                 </Link>
               );
             })}
-            <div className="pt-2 border-t border-border/50 space-y-2">
+            <div className="border-border/50 space-y-2 border-t pt-2">
               <Button
                 variant="outline"
                 onClick={() => {
                   setMobileMenuOpen(false);
                   setPilotPanelOpen(true);
                 }}
-                className="w-full justify-start gap-3 glass-btn border-primary/50 text-primary bg-transparent"
+                className="glass-btn border-primary/50 text-primary w-full justify-start gap-3 bg-transparent"
               >
-                <Zap className="w-4 h-4" />
+                <Zap className="h-4 w-4" />
                 TerraPilot
               </Button>
               <Button
@@ -271,9 +265,9 @@ export function AppShell({ children, user }: AppShellProps) {
                   setMobileMenuOpen(false);
                   setTraceFeedOpen(true);
                 }}
-                className="w-full justify-start gap-3 glass-btn border-violet-500/50 text-violet-400 bg-transparent"
+                className="glass-btn w-full justify-start gap-3 border-violet-500/50 bg-transparent text-violet-400"
               >
-                <Shield className="w-4 h-4" />
+                <Shield className="h-4 w-4" />
                 Trace Feed
               </Button>
               <Button
@@ -282,9 +276,9 @@ export function AppShell({ children, user }: AppShellProps) {
                   setMobileMenuOpen(false);
                   setAuditLogOpen(true);
                 }}
-                className="w-full justify-start gap-3 glass-btn border-border/50 text-foreground bg-transparent"
+                className="glass-btn border-border/50 text-foreground w-full justify-start gap-3 bg-transparent"
               >
-                <FileText className="w-4 h-4" />
+                <FileText className="h-4 w-4" />
                 Audit Log
               </Button>
               <Button
@@ -293,9 +287,9 @@ export function AppShell({ children, user }: AppShellProps) {
                   setMobileMenuOpen(false);
                   setSnapshotOpen(true);
                 }}
-                className="w-full justify-start gap-3 glass-btn border-border/50 text-foreground bg-transparent"
+                className="glass-btn border-border/50 text-foreground w-full justify-start gap-3 bg-transparent"
               >
-                <Camera className="w-4 h-4" />
+                <Camera className="h-4 w-4" />
                 Roll Year Snapshot
               </Button>
             </div>
@@ -307,20 +301,11 @@ export function AppShell({ children, user }: AppShellProps) {
       <main className="flex-1">{children}</main>
 
       {/* Modals */}
-      <AuditLogModal
-        isOpen={auditLogOpen}
-        onClose={() => setAuditLogOpen(false)}
-      />
-      <SnapshotModal
-        isOpen={snapshotOpen}
-        onClose={() => setSnapshotOpen(false)}
-      />
+      <AuditLogModal isOpen={auditLogOpen} onClose={() => setAuditLogOpen(false)} />
+      <SnapshotModal isOpen={snapshotOpen} onClose={() => setSnapshotOpen(false)} />
 
       {/* TerraPilot Panel */}
-      <TerraPilotPanel
-        isOpen={pilotPanelOpen}
-        onClose={() => setPilotPanelOpen(false)}
-      />
+      <TerraPilotPanel isOpen={pilotPanelOpen} onClose={() => setPilotPanelOpen(false)} />
 
       {/* Command Palette */}
       <CommandPalette
@@ -331,10 +316,7 @@ export function AppShell({ children, user }: AppShellProps) {
       />
 
       {/* Trace Feed Drawer */}
-      <TraceFeedDrawer
-        isOpen={traceFeedOpen}
-        onClose={() => setTraceFeedOpen(false)}
-      />
+      <TraceFeedDrawer isOpen={traceFeedOpen} onClose={() => setTraceFeedOpen(false)} />
     </div>
   );
 }

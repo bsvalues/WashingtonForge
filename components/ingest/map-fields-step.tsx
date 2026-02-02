@@ -1,13 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import {
-  ArrowLeft,
-  ArrowRight,
-  Loader2,
-  Link2,
-  AlertCircle,
-} from "lucide-react";
+import { ArrowLeft, ArrowRight, Loader2, Link2, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -45,13 +39,11 @@ const requiredFields: { field: TargetField; label: string; required: boolean }[]
   { field: "square_feet", label: "Square Feet", required: false },
 ];
 
-export function MapFieldsStep({
-  dataset,
-  onComplete,
-  onBack,
-}: MapFieldsStepProps) {
+export function MapFieldsStep({ dataset, onComplete, onBack }: MapFieldsStepProps) {
   const [sourceFields, setSourceFields] = useState<string[]>([]);
-  const [mappings, setMappings] = useState<Record<TargetField, string>>({} as Record<TargetField, string>);
+  const [mappings, setMappings] = useState<Record<TargetField, string>>(
+    {} as Record<TargetField, string>
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -94,14 +86,10 @@ export function MapFieldsStep({
 
   const handleSave = async () => {
     // Check required fields
-    const missingRequired = requiredFields.filter(
-      (f) => f.required && !mappings[f.field]
-    );
+    const missingRequired = requiredFields.filter((f) => f.required && !mappings[f.field]);
 
     if (missingRequired.length > 0) {
-      setError(
-        `Please map required fields: ${missingRequired.map((f) => f.label).join(", ")}`
-      );
+      setError(`Please map required fields: ${missingRequired.map((f) => f.label).join(", ")}`);
       return;
     }
 
@@ -129,13 +117,9 @@ export function MapFieldsStep({
   if (isLoading) {
     return (
       <div className="glass-panel rounded-xl p-12 text-center">
-        <Loader2 className="w-12 h-12 mx-auto mb-4 text-primary animate-spin" />
-        <h3 className="text-lg font-medium text-foreground mb-2">
-          Loading Source Fields
-        </h3>
-        <p className="text-muted-foreground">
-          Analyzing your dataset structure...
-        </p>
+        <Loader2 className="text-primary mx-auto mb-4 h-12 w-12 animate-spin" />
+        <h3 className="text-foreground mb-2 text-lg font-medium">Loading Source Fields</h3>
+        <p className="text-muted-foreground">Analyzing your dataset structure...</p>
       </div>
     );
   }
@@ -143,29 +127,27 @@ export function MapFieldsStep({
   return (
     <div className="space-y-6">
       {/* Instructions */}
-      <div className="glass-panel rounded-xl p-4 flex items-start gap-4">
-        <Link2 className="w-6 h-6 text-primary shrink-0 mt-0.5" />
+      <div className="glass-panel flex items-start gap-4 rounded-xl p-4">
+        <Link2 className="text-primary mt-0.5 h-6 w-6 shrink-0" />
         <div>
-          <p className="font-medium text-foreground">
-            Map Your Fields
-          </p>
-          <p className="text-sm text-muted-foreground">
-            Connect your source columns to the required TerraFusion schema
-            fields. Required fields are marked with an asterisk (*).
+          <p className="text-foreground font-medium">Map Your Fields</p>
+          <p className="text-muted-foreground text-sm">
+            Connect your source columns to the required TerraFusion schema fields. Required fields
+            are marked with an asterisk (*).
           </p>
         </div>
       </div>
 
       {/* Field Mapping Grid */}
-      <div className="glass-panel rounded-xl overflow-hidden">
-        <div className="p-4 border-b border-border/50">
-          <h3 className="font-medium text-foreground">Field Mappings</h3>
+      <div className="glass-panel overflow-hidden rounded-xl">
+        <div className="border-border/50 border-b p-4">
+          <h3 className="text-foreground font-medium">Field Mappings</h3>
         </div>
-        <div className="divide-y divide-border/50">
+        <div className="divide-border/50 divide-y">
           {requiredFields.map((field) => (
             <div
               key={field.field}
-              className="p-4 flex items-center gap-4 hover:bg-muted/10 transition-colors"
+              className="hover:bg-muted/10 flex items-center gap-4 p-4 transition-colors"
             >
               <div className="flex-1">
                 <p
@@ -175,17 +157,13 @@ export function MapFieldsStep({
                   )}
                 >
                   {field.label}
-                  {field.required && (
-                    <span className="text-destructive ml-1">*</span>
-                  )}
+                  {field.required && <span className="text-destructive ml-1">*</span>}
                 </p>
-                <p className="text-xs text-muted-foreground font-mono">
-                  {field.field}
-                </p>
+                <p className="text-muted-foreground font-mono text-xs">{field.field}</p>
               </div>
 
-              <div className="w-8 flex items-center justify-center">
-                <div className="w-8 h-0.5 bg-border/50" />
+              <div className="flex w-8 items-center justify-center">
+                <div className="bg-border/50 h-0.5 w-8" />
               </div>
 
               <div className="flex-1">
@@ -195,9 +173,8 @@ export function MapFieldsStep({
                 >
                   <SelectTrigger
                     className={cn(
-                      "w-full bg-input border-border/50 text-foreground",
-                      mappings[field.field] &&
-                        "border-primary/30 bg-primary/5"
+                      "bg-input border-border/50 text-foreground w-full",
+                      mappings[field.field] && "border-primary/30 bg-primary/5"
                     )}
                   >
                     <SelectValue placeholder="Select source field" />
@@ -207,11 +184,7 @@ export function MapFieldsStep({
                       -- Not mapped --
                     </SelectItem>
                     {sourceFields.map((source) => (
-                      <SelectItem
-                        key={source}
-                        value={source}
-                        className="text-foreground"
-                      >
+                      <SelectItem key={source} value={source} className="text-foreground">
                         {source}
                       </SelectItem>
                     ))}
@@ -225,8 +198,8 @@ export function MapFieldsStep({
 
       {/* Error Message */}
       {error && (
-        <div className="flex items-center gap-3 p-4 rounded-lg bg-destructive/10 border border-destructive/30 text-destructive">
-          <AlertCircle className="w-5 h-5 shrink-0" />
+        <div className="bg-destructive/10 border-destructive/30 text-destructive flex items-center gap-3 rounded-lg border p-4">
+          <AlertCircle className="h-5 w-5 shrink-0" />
           <p className="text-sm">{error}</p>
         </div>
       )}
@@ -238,7 +211,7 @@ export function MapFieldsStep({
           onClick={onBack}
           className="glass-btn border-border/50 text-foreground bg-transparent"
         >
-          <ArrowLeft className="w-4 h-4 mr-2" />
+          <ArrowLeft className="mr-2 h-4 w-4" />
           Back
         </Button>
         <Button
@@ -248,13 +221,13 @@ export function MapFieldsStep({
         >
           {isSaving ? (
             <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
               Saving...
             </>
           ) : (
             <>
               Continue to Preview
-              <ArrowRight className="w-4 h-4 ml-2" />
+              <ArrowRight className="ml-2 h-4 w-4" />
             </>
           )}
         </Button>

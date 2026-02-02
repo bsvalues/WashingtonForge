@@ -1,5 +1,5 @@
-@import 'tailwindcss';
-@import 'tw-animate-css';
+@import "tailwindcss";
+@import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -38,12 +38,12 @@
   --sidebar-accent-foreground: oklch(0.95 0.01 260);
   --sidebar-border: oklch(0.35 0.04 260 / 0.3);
   --sidebar-ring: oklch(0.7 0.15 200);
-  
+
   /* Equity Status Colors */
   --equity-fair: oklch(0.65 0.2 150);
   --equity-progressive: oklch(0.6 0.18 250);
   --equity-regressive: oklch(0.6 0.22 25);
-  
+
   /* Glass Effect */
   --glass-bg: oklch(0.15 0.02 260 / 0.4);
   --glass-border: oklch(0.4 0.04 260 / 0.2);
@@ -86,8 +86,8 @@
 }
 
 @theme inline {
-  --font-sans: 'Geist', 'Geist Fallback';
-  --font-mono: 'Geist Mono', 'Geist Mono Fallback';
+  --font-sans: "Geist", "Geist Fallback";
+  --font-mono: "Geist Mono", "Geist Mono Fallback";
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -143,7 +143,7 @@
 
 /* Deep Space Background */
 .space-bg {
-  background: 
+  background:
     radial-gradient(ellipse at 20% 30%, oklch(0.15 0.05 280 / 0.4) 0%, transparent 50%),
     radial-gradient(ellipse at 80% 70%, oklch(0.12 0.04 200 / 0.3) 0%, transparent 50%),
     radial-gradient(ellipse at 50% 50%, oklch(0.08 0.02 260) 0%, oklch(0.05 0.01 260) 100%);
@@ -155,7 +155,7 @@
   background: oklch(0.12 0.02 260 / 0.6);
   backdrop-filter: blur(20px);
   border: 1px solid oklch(0.4 0.04 260 / 0.2);
-  box-shadow: 
+  box-shadow:
     0 8px 32px oklch(0 0 0 / 0.3),
     inset 0 1px 0 oklch(0.8 0.05 260 / 0.1);
 }

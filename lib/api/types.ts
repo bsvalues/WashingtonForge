@@ -112,8 +112,8 @@ export interface IAAOComplianceThresholds {
 }
 
 export const IAAO_RESIDENTIAL_THRESHOLDS: IAAOComplianceThresholds = {
-  ratioMin: 0.90,
-  ratioMax: 1.10,
+  ratioMin: 0.9,
+  ratioMax: 1.1,
   codMax: 15.0,
   prdMin: 0.98,
   prdMax: 1.03,
@@ -122,8 +122,8 @@ export const IAAO_RESIDENTIAL_THRESHOLDS: IAAOComplianceThresholds = {
 };
 
 export const IAAO_COMMERCIAL_THRESHOLDS: IAAOComplianceThresholds = {
-  ratioMin: 0.90,
-  ratioMax: 1.10,
+  ratioMin: 0.9,
+  ratioMax: 1.1,
   codMax: 20.0,
   prdMin: 0.98,
   prdMax: 1.03,
@@ -466,10 +466,7 @@ export interface RollYearSnapshot {
 
 export type OverlayStatus = "current" | "stale" | "none" | "error";
 
-export type UpdateLane =
-  | "A_live_sync"
-  | "B_scheduled_snapshot"
-  | "C_zero_it_upload";
+export type UpdateLane = "A_live_sync" | "B_scheduled_snapshot" | "C_zero_it_upload";
 
 export interface CountyDataFreshness {
   countyId: string;

@@ -48,7 +48,13 @@ const severityIcons = {
 };
 
 // Format metric delta with trend indicator
-function MetricDelta({ before, after, label, format = "number", higherIsBetter = false }: {
+function MetricDelta({
+  before,
+  after,
+  label,
+  format = "number",
+  higherIsBetter = false,
+}: {
   before: number;
   after: number;
   label: string;
@@ -58,32 +64,41 @@ function MetricDelta({ before, after, label, format = "number", higherIsBetter =
   const delta = after - before;
   const improved = higherIsBetter ? delta > 0 : delta < 0;
   const unchanged = Math.abs(delta) < 0.001;
-  
-  const formatValue = (v: number) => format === "percent" ? `${(v * 100).toFixed(1)}%` : v.toFixed(3);
+
+  const formatValue = (v: number) =>
+    format === "percent" ? `${(v * 100).toFixed(1)}%` : v.toFixed(3);
   const formatDelta = (d: number) => {
     const sign = d > 0 ? "+" : "";
     return format === "percent" ? `${sign}${(d * 100).toFixed(2)}%` : `${sign}${d.toFixed(3)}`;
   };
-  
+
   return (
-    <div className="flex items-center justify-between py-2 border-b border-border/30 last:border-0">
-      <span className="text-sm text-muted-foreground">{label}</span>
+    <div className="border-border/30 flex items-center justify-between border-b py-2 last:border-0">
+      <span className="text-muted-foreground text-sm">{label}</span>
       <div className="flex items-center gap-3">
-        <span className="text-sm font-mono text-muted-foreground">{formatValue(before)}</span>
-        <ArrowRight className="w-3 h-3 text-muted-foreground" />
-        <span className="text-sm font-mono font-medium">{formatValue(after)}</span>
-        <span className={cn(
-          "text-xs font-mono px-1.5 py-0.5 rounded flex items-center gap-1",
-          unchanged && "bg-muted/50 text-muted-foreground",
-          !unchanged && improved && "bg-green-500/20 text-green-400",
-          !unchanged && !improved && "bg-red-500/20 text-red-400"
-        )}>
+        <span className="text-muted-foreground font-mono text-sm">{formatValue(before)}</span>
+        <ArrowRight className="text-muted-foreground h-3 w-3" />
+        <span className="font-mono text-sm font-medium">{formatValue(after)}</span>
+        <span
+          className={cn(
+            "flex items-center gap-1 rounded px-1.5 py-0.5 font-mono text-xs",
+            unchanged && "bg-muted/50 text-muted-foreground",
+            !unchanged && improved && "bg-green-500/20 text-green-400",
+            !unchanged && !improved && "bg-red-500/20 text-red-400"
+          )}
+        >
           {unchanged ? (
-            <><Minus className="w-3 h-3" /> 0</>
+            <>
+              <Minus className="h-3 w-3" /> 0
+            </>
           ) : improved ? (
-            <><TrendingDown className="w-3 h-3" /> {formatDelta(delta)}</>
+            <>
+              <TrendingDown className="h-3 w-3" /> {formatDelta(delta)}
+            </>
           ) : (
-            <><TrendingUp className="w-3 h-3" /> {formatDelta(delta)}</>
+            <>
+              <TrendingUp className="h-3 w-3" /> {formatDelta(delta)}
+            </>
           )}
         </span>
       </div>
@@ -114,14 +129,14 @@ export function CalibrationContent() {
       setFindings(findingsData);
       setLevers(leversData);
       setVersions(versionsData);
-      
+
       // Initialize lever values
       const initialValues: Record<string, number> = {};
       leversData.forEach((l) => {
         initialValues[l.type] = l.currentValue;
       });
       setLeverValues(initialValues);
-      
+
       // Select first version
       if (versionsData.length > 0) {
         setSelectedVersion(versionsData[0]);
@@ -144,7 +159,7 @@ export function CalibrationContent() {
   // Simulate calibration
   const handleSimulate = async () => {
     if (!selectedVersion) return;
-    
+
     setIsSimulating(true);
     try {
       const leverApplies: CalibrationLeverApply[] = levers
@@ -154,10 +169,10 @@ export function CalibrationContent() {
           value: leverValues[l.type],
           delta: leverValues[l.type] - l.currentValue,
         }));
-      
+
       const scope: VEIScope = selectedFinding?.scope || "overall";
       const scopeId = selectedFinding?.scopeId;
-      
+
       const result = await simulateCalibration({
         datasetVersionId: selectedVersion.id,
         scope,
@@ -173,12 +188,12 @@ export function CalibrationContent() {
   // Apply calibration
   const handleApply = async () => {
     if (!selectedVersion || !simulation) return;
-    
+
     setIsApplying(true);
     try {
       const scope: VEIScope = selectedFinding?.scope || "overall";
       const scopeId = selectedFinding?.scopeId;
-      
+
       await applyCalibration({
         datasetVersionId: selectedVersion.id,
         scope,
@@ -200,21 +215,19 @@ export function CalibrationContent() {
 
   return (
     <div className="space-bg min-h-screen p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
+      <div className="mx-auto max-w-7xl space-y-6">
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
           <div>
-            <h1 className="text-2xl font-semibold text-foreground">
-              Unified Valuation Loop
-            </h1>
+            <h1 className="text-foreground text-2xl font-semibold">Unified Valuation Loop</h1>
             <p className="text-muted-foreground mt-1">
               VEI Diagnosis + Benton Calibration + Before/After Comparison
             </p>
           </div>
-          
+
           {/* Dataset Version Selector */}
           <div className="flex items-center gap-3">
-            <span className="text-sm text-muted-foreground">Dataset:</span>
+            <span className="text-muted-foreground text-sm">Dataset:</span>
             <select
               value={selectedVersion?.id || ""}
               onChange={(e) => {
@@ -223,7 +236,7 @@ export function CalibrationContent() {
                 setSimulation(null);
                 setApplied(false);
               }}
-              className="glass-panel px-3 py-2 rounded-lg text-sm bg-transparent border-border/50 focus:outline-none focus:ring-2 focus:ring-primary/50"
+              className="glass-panel border-border/50 focus:ring-primary/50 rounded-lg bg-transparent px-3 py-2 text-sm focus:ring-2 focus:outline-none"
             >
               {versions.map((v) => (
                 <option key={v.id} value={v.id}>
@@ -239,33 +252,45 @@ export function CalibrationContent() {
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-6">
               <div className="flex items-center gap-2">
-                <span className={cn("w-3 h-3 rounded-full", findingCounts.fail > 0 ? "bg-red-500" : "bg-muted")} />
+                <span
+                  className={cn(
+                    "h-3 w-3 rounded-full",
+                    findingCounts.fail > 0 ? "bg-red-500" : "bg-muted"
+                  )}
+                />
                 <span className="text-sm">
                   <span className="font-medium">{findingCounts.fail}</span>
                   <span className="text-muted-foreground ml-1">Critical</span>
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <span className={cn("w-3 h-3 rounded-full", findingCounts.warn > 0 ? "bg-amber-500" : "bg-muted")} />
+                <span
+                  className={cn(
+                    "h-3 w-3 rounded-full",
+                    findingCounts.warn > 0 ? "bg-amber-500" : "bg-muted"
+                  )}
+                />
                 <span className="text-sm">
                   <span className="font-medium">{findingCounts.warn}</span>
                   <span className="text-muted-foreground ml-1">Warning</span>
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <span className={cn("w-3 h-3 rounded-full bg-blue-500")} />
+                <span className={cn("h-3 w-3 rounded-full bg-blue-500")} />
                 <span className="text-sm">
                   <span className="font-medium">{findingCounts.info}</span>
                   <span className="text-muted-foreground ml-1">Info</span>
                 </span>
               </div>
             </div>
-            
+
             {selectedVersion?.metrics && (
               <div className="flex items-center gap-6 text-sm">
                 <div>
                   <span className="text-muted-foreground">Median Ratio:</span>
-                  <span className="ml-2 font-mono">{selectedVersion.metrics.medianRatio.toFixed(3)}</span>
+                  <span className="ml-2 font-mono">
+                    {selectedVersion.metrics.medianRatio.toFixed(3)}
+                  </span>
                 </div>
                 <div>
                   <span className="text-muted-foreground">COD:</span>
@@ -285,41 +310,45 @@ export function CalibrationContent() {
         </Card>
 
         {/* Three-Column Layout */}
-        <div className="grid lg:grid-cols-3 gap-6">
+        <div className="grid gap-6 lg:grid-cols-3">
           {/* Left: VEI Findings */}
           <Card className="glass-panel p-4">
-            <h2 className="text-lg font-medium mb-4">VEI Findings</h2>
+            <h2 className="mb-4 text-lg font-medium">VEI Findings</h2>
             <div className="space-y-3">
               {findings.map((finding) => {
                 const Icon = severityIcons[finding.severity];
                 const isSelected = selectedFinding?.id === finding.id;
-                
+
                 return (
                   <button
                     key={finding.id}
                     onClick={() => setSelectedFinding(isSelected ? null : finding)}
                     className={cn(
-                      "w-full text-left p-3 rounded-lg border transition-all",
+                      "w-full rounded-lg border p-3 text-left transition-all",
                       severityColors[finding.severity],
-                      isSelected && "ring-2 ring-primary"
+                      isSelected && "ring-primary ring-2"
                     )}
                   >
                     <div className="flex items-start gap-3">
-                      <Icon className="w-4 h-4 mt-0.5 shrink-0" />
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-2 mb-1">
-                          <span className="text-xs uppercase font-medium opacity-75">
+                      <Icon className="mt-0.5 h-4 w-4 shrink-0" />
+                      <div className="min-w-0 flex-1">
+                        <div className="mb-1 flex items-center gap-2">
+                          <span className="text-xs font-medium uppercase opacity-75">
                             {finding.scope}
                           </span>
                           {finding.scopeId && (
                             <span className="text-xs opacity-75">: {finding.scopeId}</span>
                           )}
                         </div>
-                        <p className="text-sm line-clamp-2">{finding.description}</p>
-                        <div className="flex items-center gap-2 mt-2 text-xs opacity-75">
-                          <span>{finding.metric}: {finding.currentValue.toFixed(3)}</span>
+                        <p className="line-clamp-2 text-sm">{finding.description}</p>
+                        <div className="mt-2 flex items-center gap-2 text-xs opacity-75">
+                          <span>
+                            {finding.metric}: {finding.currentValue.toFixed(3)}
+                          </span>
                           <span className="opacity-50">|</span>
-                          <span>Target: {finding.direction === "above" ? "<" : ">"} {finding.threshold}</span>
+                          <span>
+                            Target: {finding.direction === "above" ? "<" : ">"} {finding.threshold}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -331,7 +360,7 @@ export function CalibrationContent() {
 
           {/* Middle: Calibration Levers */}
           <Card className="glass-panel p-4">
-            <div className="flex items-center justify-between mb-4">
+            <div className="mb-4 flex items-center justify-between">
               <h2 className="text-lg font-medium">Calibration Levers</h2>
               <Button
                 variant="ghost"
@@ -339,46 +368,53 @@ export function CalibrationContent() {
                 onClick={handleReset}
                 className="text-muted-foreground hover:text-foreground"
               >
-                <RotateCcw className="w-4 h-4 mr-1" />
+                <RotateCcw className="mr-1 h-4 w-4" />
                 Reset
               </Button>
             </div>
-            
+
             {/* Recommended Levers */}
             {selectedFinding && selectedFinding.recommendedLevers.length > 0 && (
-              <div className="mb-4 p-3 rounded-lg bg-primary/10 border border-primary/30">
-                <p className="text-xs text-primary mb-2 font-medium">Recommended for selected finding:</p>
+              <div className="bg-primary/10 border-primary/30 mb-4 rounded-lg border p-3">
+                <p className="text-primary mb-2 text-xs font-medium">
+                  Recommended for selected finding:
+                </p>
                 <div className="flex flex-wrap gap-1">
                   {selectedFinding.recommendedLevers.map((lever) => (
-                    <span key={lever} className="text-xs px-2 py-0.5 rounded bg-primary/20 text-primary">
+                    <span
+                      key={lever}
+                      className="bg-primary/20 text-primary rounded px-2 py-0.5 text-xs"
+                    >
                       {levers.find((l) => l.type === lever)?.label || lever}
                     </span>
                   ))}
                 </div>
               </div>
             )}
-            
+
             <div className="space-y-6">
               {levers.map((lever) => {
                 const isRecommended = selectedFinding?.recommendedLevers.includes(lever.type);
                 const hasChanged = leverValues[lever.type] !== lever.currentValue;
-                
+
                 return (
                   <div
                     key={lever.type}
                     className={cn(
-                      "p-3 rounded-lg border transition-all",
+                      "rounded-lg border p-3 transition-all",
                       isRecommended && "border-primary/50 bg-primary/5",
                       hasChanged && "border-accent/50 bg-accent/5",
                       !isRecommended && !hasChanged && "border-border/30"
                     )}
                   >
-                    <div className="flex items-center justify-between mb-2">
+                    <div className="mb-2 flex items-center justify-between">
                       <label className="text-sm font-medium">
                         {lever.label}
-                        {isRecommended && <span className="ml-2 text-xs text-primary">(recommended)</span>}
+                        {isRecommended && (
+                          <span className="text-primary ml-2 text-xs">(recommended)</span>
+                        )}
                       </label>
-                      <span className="text-sm font-mono">
+                      <span className="font-mono text-sm">
                         {leverValues[lever.type]?.toFixed(2)} {lever.unit}
                       </span>
                     </div>
@@ -394,26 +430,26 @@ export function CalibrationContent() {
                       }}
                       className="w-full"
                     />
-                    <p className="text-xs text-muted-foreground mt-2">{lever.description}</p>
+                    <p className="text-muted-foreground mt-2 text-xs">{lever.description}</p>
                   </div>
                 );
               })}
             </div>
-            
+
             {/* Simulate Button */}
             <Button
               onClick={handleSimulate}
               disabled={isSimulating || !selectedVersion}
-              className="w-full mt-6 glass-btn-primary"
+              className="glass-btn-primary mt-6 w-full"
             >
               {isSimulating ? (
                 <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Simulating...
                 </>
               ) : (
                 <>
-                  <Play className="w-4 h-4 mr-2" />
+                  <Play className="mr-2 h-4 w-4" />
                   Simulate Changes
                 </>
               )}
@@ -422,12 +458,12 @@ export function CalibrationContent() {
 
           {/* Right: Before/After Comparison */}
           <Card className="glass-panel p-4">
-            <h2 className="text-lg font-medium mb-4">Before / After</h2>
-            
+            <h2 className="mb-4 text-lg font-medium">Before / After</h2>
+
             {!simulation ? (
-              <div className="flex flex-col items-center justify-center h-64 text-muted-foreground">
-                <Info className="w-8 h-8 mb-3 opacity-50" />
-                <p className="text-sm text-center">
+              <div className="text-muted-foreground flex h-64 flex-col items-center justify-center">
+                <Info className="mb-3 h-8 w-8 opacity-50" />
+                <p className="text-center text-sm">
                   Adjust calibration levers and click
                   <br />
                   "Simulate Changes" to see the impact.
@@ -437,15 +473,15 @@ export function CalibrationContent() {
               <div className="space-y-4">
                 {/* Scope Badge */}
                 <div className="flex items-center gap-2">
-                  <span className="text-xs uppercase text-muted-foreground">Scope:</span>
-                  <span className="text-sm px-2 py-0.5 rounded bg-secondary/50">
+                  <span className="text-muted-foreground text-xs uppercase">Scope:</span>
+                  <span className="bg-secondary/50 rounded px-2 py-0.5 text-sm">
                     {simulation.scope}
                     {simulation.scopeId && `: ${simulation.scopeId}`}
                   </span>
                 </div>
-                
+
                 {/* Metrics Comparison */}
-                <div className="border border-border/30 rounded-lg p-3">
+                <div className="border-border/30 rounded-lg border p-3">
                   <MetricDelta
                     before={simulation.beforeMetrics.medianRatio}
                     after={simulation.afterMetrics.medianRatio}
@@ -467,30 +503,32 @@ export function CalibrationContent() {
                     label="PRB"
                   />
                 </div>
-                
+
                 {/* Improvement Badge */}
-                <div className={cn(
-                  "flex items-center justify-center gap-2 p-3 rounded-lg",
-                  simulation.improvement
-                    ? "bg-green-500/20 border border-green-500/40"
-                    : "bg-amber-500/20 border border-amber-500/40"
-                )}>
+                <div
+                  className={cn(
+                    "flex items-center justify-center gap-2 rounded-lg p-3",
+                    simulation.improvement
+                      ? "border border-green-500/40 bg-green-500/20"
+                      : "border border-amber-500/40 bg-amber-500/20"
+                  )}
+                >
                   {simulation.improvement ? (
                     <>
-                      <CheckCircle className="w-5 h-5 text-green-400" />
+                      <CheckCircle className="h-5 w-5 text-green-400" />
                       <span className="font-medium text-green-400">Metrics Improved</span>
                     </>
                   ) : (
                     <>
-                      <AlertCircle className="w-5 h-5 text-amber-400" />
+                      <AlertCircle className="h-5 w-5 text-amber-400" />
                       <span className="font-medium text-amber-400">Review Changes</span>
                     </>
                   )}
                 </div>
-                
+
                 {/* Applied Levers */}
                 <div>
-                  <h3 className="text-sm font-medium mb-2">Applied Levers:</h3>
+                  <h3 className="mb-2 text-sm font-medium">Applied Levers:</h3>
                   <div className="space-y-1">
                     {simulation.levers.map((lever) => (
                       <div key={lever.type} className="flex items-center justify-between text-sm">
@@ -498,17 +536,18 @@ export function CalibrationContent() {
                           {levers.find((l) => l.type === lever.type)?.label || lever.type}
                         </span>
                         <span className="font-mono">
-                          {lever.delta > 0 ? "+" : ""}{lever.delta.toFixed(2)}
+                          {lever.delta > 0 ? "+" : ""}
+                          {lever.delta.toFixed(2)}
                         </span>
                       </div>
                     ))}
                   </div>
                 </div>
-                
+
                 {/* Apply Button */}
                 {applied ? (
-                  <div className="flex items-center justify-center gap-2 p-3 rounded-lg bg-green-500/20 border border-green-500/40">
-                    <CheckCircle className="w-5 h-5 text-green-400" />
+                  <div className="flex items-center justify-center gap-2 rounded-lg border border-green-500/40 bg-green-500/20 p-3">
+                    <CheckCircle className="h-5 w-5 text-green-400" />
                     <span className="font-medium text-green-400">
                       Calibration Applied - New Version Created
                     </span>
@@ -517,16 +556,16 @@ export function CalibrationContent() {
                   <Button
                     onClick={handleApply}
                     disabled={isApplying}
-                    className="w-full glass-btn-primary"
+                    className="glass-btn-primary w-full"
                   >
                     {isApplying ? (
                       <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                         Applying...
                       </>
                     ) : (
                       <>
-                        <Save className="w-4 h-4 mr-2" />
+                        <Save className="mr-2 h-4 w-4" />
                         Apply & Create New Version
                       </>
                     )}
