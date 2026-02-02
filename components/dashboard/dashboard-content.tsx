@@ -184,10 +184,10 @@ export function DashboardContent({ datasetVersionId }: DashboardContentProps) {
           <XCircle className="text-destructive mx-auto mb-4 h-12 w-12" />
           <h2 className="text-foreground mb-2 text-lg font-semibold">Failed to Load Dashboard</h2>
           <p className="text-muted-foreground mb-4 text-sm">{error || "Unknown error occurred"}</p>
-          <Button onClick={loadDashboardData} className="tf-glass-btn tf-glass-btn--primary">
+          <GlassButton onClick={loadDashboardData} tone="primary">
             <RefreshCw className="mr-2 h-4 w-4" />
             Retry
-          </Button>
+          </GlassButton>
         </div>
       </div>
     );
