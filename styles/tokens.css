@@ -1,0 +1,95 @@
+/* styles/tokens.css
+   TerraFusion 2026 Material Tokens
+   - Shell (glass), Workspace (matte), Touchpoints (tactile), Signals (state)
+   - Tokens only. No component rewires here.
+*/
+
+:root {
+  /* -------- Radii (coherent “instrument” geometry) -------- */
+  --r-sm: 12px;
+  --r-md: 16px;
+  --r-lg: 22px;
+
+  /* -------- Depth / Shadows (soft spatial UI) -------- */
+  --z1-shadow: 0 1px 1px rgba(0, 0, 0, 0.12), 0 8px 24px rgba(0, 0, 0, 0.18);
+  --z2-shadow: 0 2px 2px rgba(0, 0, 0, 0.16), 0 16px 48px rgba(0, 0, 0, 0.24);
+  --z3-shadow: 0 4px 4px rgba(0, 0, 0, 0.18), 0 24px 72px rgba(0, 0, 0, 0.3);
+
+  /* -------- Glass (Shell) -------- */
+  --glass-blur-1: 10px;
+  --glass-blur-2: 18px;
+  --glass-blur-3: 28px;
+
+  /* Tint is intentionally neutral; your theme can override */
+  --glass-tint: rgba(18, 18, 22, 0.42);
+  --glass-tint-strong: rgba(18, 18, 22, 0.58);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-border-strong: rgba(255, 255, 255, 0.14);
+
+  /* Micro-noise strength (kept for follow-up; not used heavily yet) */
+  --glass-noise-opacity: 0.035;
+
+  /* -------- Surfaces (Workspace) -------- */
+  --surface-matte: rgba(16, 16, 18, 0.78);
+  --surface-elevated: rgba(22, 22, 26, 0.82);
+  --surface-scrim: rgba(0, 0, 0, 0.55);
+
+  /* -------- Motion -------- */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+  --dur-1: 140ms; /* micro */
+  --dur-2: 260ms; /* panels */
+  --dur-3: 520ms; /* “ritual” moments (rare) */
+
+  /* -------- Glow strength (Signals) -------- */
+  --glow-weak: 0 0 0 1px rgba(255, 255, 255, 0.06), 0 0 18px rgba(255, 255, 255, 0.06);
+  --glow-med: 0 0 0 1px rgba(255, 255, 255, 0.1), 0 0 28px rgba(255, 255, 255, 0.1);
+  --glow-strong: 0 0 0 1px rgba(255, 255, 255, 0.14), 0 0 44px rgba(255, 255, 255, 0.14);
+
+  /* -------- Semantic State Tokens (never hardcode red/green in components) -------- */
+  --state-official: rgba(255, 255, 255, 0.86);
+  --state-overlay: rgba(160, 220, 255, 0.9);
+  --state-simulated: rgba(210, 180, 255, 0.92);
+  --state-warning: rgba(255, 206, 120, 0.92);
+  --state-blocked: rgba(255, 140, 140, 0.92);
+  --state-success: rgba(150, 245, 200, 0.92);
+
+  /* Foreground hint for badges */
+  --state-fg: rgba(10, 10, 12, 0.92);
+}
+
+/* Utility classes (no behavior) */
+.tf-glass {
+  background: var(--glass-tint);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--r-lg);
+  box-shadow: var(--z2-shadow);
+  backdrop-filter: blur(var(--glass-blur-2));
+  -webkit-backdrop-filter: blur(var(--glass-blur-2));
+}
+
+.tf-glass--strong {
+  background: var(--glass-tint-strong);
+  border: 1px solid var(--glass-border-strong);
+  backdrop-filter: blur(var(--glass-blur-3));
+  -webkit-backdrop-filter: blur(var(--glass-blur-3));
+}
+
+.tf-matte {
+  background: var(--surface-matte);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--r-lg);
+  box-shadow: var(--z1-shadow);
+}
+
+.tf-scrim {
+  background: var(--surface-scrim);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-1: 1ms;
+    --dur-2: 1ms;
+    --dur-3: 1ms;
+  }
+}
