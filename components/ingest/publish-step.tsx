@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { ArrowLeft, Loader2, CheckCircle2, Rocket, Shield, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { GlassButton } from "@/components/material";
 import { publishDataset, type Dataset } from "@/lib/api";
 
 interface PublishStepProps {
@@ -145,10 +146,11 @@ export function PublishStep({ dataset, onComplete, onBack }: PublishStepProps) {
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back
         </Button>
-        <Button
+        <GlassButton
           onClick={handlePublish}
+          tone="primary"
           disabled={isPublishing}
-          className="tf-glass-btn tf-glass-btn--primary text-foreground px-8 font-medium"
+          className="text-foreground px-8 font-medium"
         >
           {isPublishing ? (
             <>
@@ -161,7 +163,7 @@ export function PublishStep({ dataset, onComplete, onBack }: PublishStepProps) {
               Publish Dataset
             </>
           )}
-        </Button>
+        </GlassButton>
       </div>
     </div>
   );
