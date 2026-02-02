@@ -1,4 +1,5 @@
 export * from "./glass-card";
+export * from "./glass-button";
 export * from "./matte-card";
 export * from "./signal-badge";
 export * from "./drawer-shell";
