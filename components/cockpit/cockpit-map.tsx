@@ -271,6 +271,10 @@ export function CockpitMap({ filters, parcels, onZoomToParcel }: CockpitMapProps
 
     mapRef.current = map;
 
+    // Expose map instance for console debugging
+    // Usage: __tfMap?.getStyle()?.sources or __tfMap?.getStyle()?.layers?.map(l => l.id)
+    (window as any).__tfMap = map;
+
     // Handle window resize
     const handleResize = () => {
       map.resize();
