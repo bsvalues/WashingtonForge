@@ -388,7 +388,7 @@ export function CockpitMap({ filters, parcels, onZoomToParcel }: CockpitMapProps
                             y={parcel.y - 0.4}
                             width={parcel.width + 0.8}
                             height={parcel.height + 0.8}
-                            className="fill-none stroke-primary stroke-[0.5]"
+                            className="stroke-primary fill-none stroke-[0.5]"
                             rx={0.5}
                           />
                         </>
@@ -401,7 +401,7 @@ export function CockpitMap({ filters, parcels, onZoomToParcel }: CockpitMapProps
                           y={parcel.y - 0.3}
                           width={parcel.width + 0.6}
                           height={parcel.height + 0.6}
-                          className="fill-none stroke-primary/60 stroke-[0.4]"
+                          className="stroke-primary/60 fill-none stroke-[0.4]"
                           rx={0.4}
                         />
                       )}

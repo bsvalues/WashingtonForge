@@ -176,7 +176,7 @@ function HoverTooltipComponent({ parcel, position, containerRef }: HoverTooltipP
       className={cn(
         "pointer-events-none absolute z-50",
         "transition-[opacity,transform] duration-[var(--dur-1)] ease-[var(--ease-out)]",
-        visible && adjustedPosition ? "opacity-100 translate-y-0" : "opacity-0 translate-y-1"
+        visible && adjustedPosition ? "translate-y-0 opacity-100" : "translate-y-1 opacity-0"
       )}
       style={{
         left: adjustedPosition?.x ?? position.x,
@@ -187,7 +187,9 @@ function HoverTooltipComponent({ parcel, position, containerRef }: HoverTooltipP
         {/* Header */}
         <div className="mb-2 flex items-start justify-between gap-3">
           <div>
-            <p className="text-foreground font-mono text-sm font-semibold">{latchedParcel.parcelId}</p>
+            <p className="text-foreground font-mono text-sm font-semibold">
+              {latchedParcel.parcelId}
+            </p>
             <p className="text-muted-foreground max-w-40 truncate text-xs">{latchedParcel.situs}</p>
           </div>
           <SignalBadge state={getEquityState(latchedParcel.equityStatus)} className="capitalize">
@@ -201,7 +203,9 @@ function HoverTooltipComponent({ parcel, position, containerRef }: HoverTooltipP
           <span className="text-foreground font-medium">{latchedParcel.propertyClass}</span>
 
           <span className="text-muted-foreground">Assessed Value</span>
-          <span className="text-foreground font-medium">${latchedParcel.totalValue.toLocaleString()}</span>
+          <span className="text-foreground font-medium">
+            ${latchedParcel.totalValue.toLocaleString()}
+          </span>
 
           <span className="text-muted-foreground">Sale Price</span>
           <span className="text-foreground font-medium">
