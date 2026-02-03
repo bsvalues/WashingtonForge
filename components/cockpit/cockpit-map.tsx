@@ -277,13 +277,31 @@ export function CockpitMap({ filters, parcels, onZoomToParcel }: CockpitMapProps
     };
   }, []); // Only run once on mount
 
-  // Update GeoJSON data when parcels change
+  // Update GeoJSON data when parcels change and fit bounds
   useEffect(() => {
     if (!mapRef.current || !mapReady) return;
 
     const source = mapRef.current.getSource("parcels") as maplibregl.GeoJSONSource | undefined;
     if (source) {
       source.setData(geoJSON);
+
+      // Calculate bounds from parcels and fit map to them
+      if (geoJSON.features.length > 0) {
+        const bounds = new maplibregl.LngLatBounds();
+        for (const feature of geoJSON.features) {
+          if (feature.geometry.type === "Polygon") {
+            for (const ring of feature.geometry.coordinates) {
+              for (const coord of ring) {
+                bounds.extend(coord as [number, number]);
+              }
+            }
+          }
+        }
+        if (!bounds.isEmpty()) {
+          mapRef.current.fitBounds(bounds, { padding: 50, maxZoom: 14 });
+          console.log("[v0] Fitted map to parcel bounds:", bounds.toArray());
+        }
+      }
     }
   }, [geoJSON, mapReady]);
 
