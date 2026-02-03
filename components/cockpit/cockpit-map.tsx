@@ -120,20 +120,43 @@ export function CockpitMap({ filters, parcels, onZoomToParcel }: CockpitMapProps
     setTooltipPosition(null);
   }, [setHoveredParcel]);
 
+  // Phase 1B.0: Throttle cursor position updates to reduce rerender frequency
+  const cursorThrottleRef = useRef<number | null>(null);
+  const pendingCursorRef = useRef<{ x: number; y: number } | null>(null);
+
   const handleParcelMouseMove = useCallback(
     (event: React.MouseEvent) => {
       if (selectMode !== "none") return;
 
       const rect = mapContainerRef.current?.getBoundingClientRect();
       if (rect) {
-        setTooltipPosition({
+        const pos = {
           x: event.clientX - rect.left,
           y: event.clientY - rect.top,
-        });
+        };
+
+        pendingCursorRef.current = pos;
+
+        // Throttle updates to ~50ms
+        if (cursorThrottleRef.current) return;
+
+        cursorThrottleRef.current = window.setTimeout(() => {
+          if (pendingCursorRef.current) {
+            setTooltipPosition(pendingCursorRef.current);
+          }
+          cursorThrottleRef.current = null;
+        }, 50);
       }
     },
     [selectMode]
   );
+
+  // Cleanup throttle timer on unmount
+  useEffect(() => {
+    return () => {
+      if (cursorThrottleRef.current) window.clearTimeout(cursorThrottleRef.current);
+    };
+  }, []);
 
   const handleParcelClick = useCallback(
     (parcel: ParcelWithPosition, event: React.MouseEvent) => {
