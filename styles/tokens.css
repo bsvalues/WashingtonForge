@@ -189,6 +189,7 @@
   content: "";
   position: absolute;
   inset: 0;
+  z-index: 0; /* CRITICAL: Must stay below tf-map-canvas (z-index: 1) */
   pointer-events: none;
   border-radius: inherit;
   opacity: var(--glass-noise-opacity);
@@ -215,6 +216,7 @@
   content: "";
   position: absolute;
   inset: -1px; /* bleed under border */
+  z-index: 0; /* CRITICAL: Must stay below tf-map-canvas (z-index: 1) */
   pointer-events: none;
   border-radius: inherit;
   opacity: 0.55;

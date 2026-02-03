@@ -164,6 +164,27 @@ export function CockpitMap({ filters, parcels, onZoomToParcel }: CockpitMapProps
       console.log("[v0] MapLibre loaded");
       logMapStyle(map);
 
+      // Debug: Check container sizing
+      const container = mapContainerRef.current;
+      if (container) {
+        const rect = container.getBoundingClientRect();
+        console.log("[v0] Map container size:", rect.width, "x", rect.height);
+        if (rect.width === 0 || rect.height === 0) {
+          console.warn("[v0] WARNING: Map container has zero width or height!");
+        }
+      }
+
+      // Debug: Check if tiles are loading
+      map.on("data", (e) => {
+        if (e.dataType === "source" && e.sourceId === "carto") {
+          console.log("[v0] Tile data event:", e.isSourceLoaded ? "loaded" : "loading");
+        }
+      });
+
+      map.on("error", (e) => {
+        console.error("[v0] MapLibre error:", e.error?.message || e);
+      });
+
       // Add parcels source
       map.addSource("parcels", {
         type: "geojson",
