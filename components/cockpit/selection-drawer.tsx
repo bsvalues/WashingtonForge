@@ -70,11 +70,14 @@ export function SelectionDrawer({ allParcels, filters, onZoomToParcel }: Selecti
       >
         <div className="flex items-center gap-3">
           <span className="text-foreground font-medium">Selected Parcels</span>
-          <span className="bg-primary/20 text-primary rounded-full px-2 py-0.5 text-xs font-medium">
+          {/* Phase 1B.1B-2: Smooth count with tabular nums for stability */}
+          <span className="bg-primary/20 text-primary rounded-full px-2 py-0.5 text-xs font-medium tabular-nums transition-[opacity,transform] duration-[var(--dur-1)] ease-[var(--ease-out)]">
             {selectedCount}
           </span>
           {hiddenCount > 0 && (
-            <span className="text-xs text-amber-400">({hiddenCount} hidden by filters)</span>
+            <span className="text-xs text-amber-400 tabular-nums transition-opacity duration-[var(--dur-1)]">
+              ({hiddenCount} hidden by filters)
+            </span>
           )}
         </div>
         <div className="flex items-center gap-2">
