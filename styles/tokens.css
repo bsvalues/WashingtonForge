@@ -297,3 +297,41 @@
     transform: none;
   }
 }
+
+/* ==================================================================
+   TerraFusion Glass Layering Contract — MUST BE LAST
+   This is a rendering invariant, not styling preference.
+   The !important ensures no later CSS can override and break the map.
+=================================================================== */
+
+.tf-glass,
+.tf-glass--strong {
+  position: relative !important;
+  isolation: isolate !important;
+}
+
+.tf-glass::before,
+.tf-glass::after,
+.tf-glass--strong::before,
+.tf-glass--strong::after {
+  z-index: 0 !important;
+  pointer-events: none !important;
+}
+
+.tf-map-canvas {
+  position: absolute !important;
+  inset: 0 !important;
+  z-index: 1 !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.tf-map-ui {
+  position: absolute !important;
+  z-index: 2 !important;
+}
+
+.tf-map-tooltip {
+  position: absolute !important;
+  z-index: 3 !important;
+}

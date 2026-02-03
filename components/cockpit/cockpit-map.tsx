@@ -261,6 +261,10 @@ export function CockpitMap({ filters, parcels, onZoomToParcel }: CockpitMapProps
         },
       });
 
+      // Force resize to handle layout timing issues
+      requestAnimationFrame(() => map.resize());
+      setTimeout(() => map.resize(), 0);
+
       setMapReady(true);
       setIsLoading(false);
     });
