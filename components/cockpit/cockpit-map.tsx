@@ -73,7 +73,6 @@ export function CockpitMap({ filters, parcels, onZoomToParcel }: CockpitMapProps
     selectMode,
     setSelectMode,
     singleSelectMode,
-    selectedCount,
   } = useSelection();
 
   // Generate positioned parcels with memoization
@@ -469,25 +468,6 @@ export function CockpitMap({ filters, parcels, onZoomToParcel }: CockpitMapProps
             position={tooltipPosition}
             containerRef={mapContainerRef}
           />
-        </div>
-
-        {/* HUD Row (top-left) - County, parcel count, selection badge */}
-        <div className="tf-map-ui top-4 left-4 flex items-center gap-2">
-          <GlassCard className="flex items-center gap-3 rounded-lg px-3 py-2">
-            <span className="text-foreground text-xs font-semibold">Benton County</span>
-            <span className="bg-border/30 h-4 w-px" />
-            <span className="text-muted-foreground text-xs">
-              {positionedParcels.length.toLocaleString()} parcels
-            </span>
-            {selectedCount > 0 && (
-              <>
-                <span className="bg-border/30 h-4 w-px" />
-                <span className="bg-primary/20 text-primary rounded-full px-2 py-0.5 text-xs font-medium">
-                  {selectedCount} selected
-                </span>
-              </>
-            )}
-          </GlassCard>
         </div>
 
         {/* Map Controls */}
