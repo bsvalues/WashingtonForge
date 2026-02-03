@@ -312,7 +312,10 @@ export function CockpitMap({ filters, parcels, onZoomToParcel }: CockpitMapProps
         {/* Map Container */}
         <div
           ref={mapContainerRef}
-          className={cn("absolute inset-0", selectMode === "box" && "cursor-crosshair")}
+          className={cn(
+            "absolute inset-0",
+            (selectMode === "box" || selectMode === "lasso") && "cursor-crosshair"
+          )}
           style={{
             background: `
               radial-gradient(ellipse at 30% 40%, oklch(0.12 0.03 220 / 0.4) 0%, transparent 50%),
@@ -386,7 +389,8 @@ export function CockpitMap({ filters, parcels, onZoomToParcel }: CockpitMapProps
                         width={parcel.width}
                         height={parcel.height}
                         className={cn(
-                          "cursor-pointer transition-all duration-100",
+                          "transition-all duration-100",
+                          selectMode === "none" && "cursor-pointer",
                           colors.fill,
                           colors.stroke,
                           "stroke-[0.3]",
