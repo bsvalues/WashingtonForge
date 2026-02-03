@@ -370,15 +370,39 @@ export function CockpitMap({ filters, parcels, onZoomToParcel }: CockpitMapProps
 
                   return (
                     <g key={parcel.id}>
-                      {/* Selection glow */}
+                      {/* Phase 1B.1B-1: Magnetic selection ring with outer glow */}
                       {selected && (
+                        <>
+                          {/* Outer glow (subtle) */}
+                          <rect
+                            x={parcel.x - 0.8}
+                            y={parcel.y - 0.8}
+                            width={parcel.width + 1.6}
+                            height={parcel.height + 1.6}
+                            className="fill-primary/10 stroke-primary/40 stroke-[0.6] blur-[0.3px]"
+                            rx={0.6}
+                          />
+                          {/* Crisp rim */}
+                          <rect
+                            x={parcel.x - 0.4}
+                            y={parcel.y - 0.4}
+                            width={parcel.width + 0.8}
+                            height={parcel.height + 0.8}
+                            className="fill-none stroke-primary stroke-[0.5]"
+                            rx={0.5}
+                          />
+                        </>
+                      )}
+
+                      {/* Phase 1B.1B-1: Hover ring (dimmer, only when not selected) */}
+                      {hovered && !selected && (
                         <rect
-                          x={parcel.x - 0.5}
-                          y={parcel.y - 0.5}
-                          width={parcel.width + 1}
-                          height={parcel.height + 1}
-                          className="fill-primary/20 stroke-primary stroke-[0.8]"
-                          rx={0.5}
+                          x={parcel.x - 0.3}
+                          y={parcel.y - 0.3}
+                          width={parcel.width + 0.6}
+                          height={parcel.height + 0.6}
+                          className="fill-none stroke-primary/60 stroke-[0.4]"
+                          rx={0.4}
                         />
                       )}
 
@@ -394,8 +418,8 @@ export function CockpitMap({ filters, parcels, onZoomToParcel }: CockpitMapProps
                           colors.fill,
                           colors.stroke,
                           "stroke-[0.3]",
-                          hovered && "stroke-[0.6] brightness-125",
-                          selected && "stroke-primary stroke-[0.5]"
+                          hovered && !selected && "brightness-110",
+                          selected && "brightness-105"
                         )}
                         rx={0.3}
                         onMouseEnter={(e) => handleParcelMouseEnter(parcel, e)}
