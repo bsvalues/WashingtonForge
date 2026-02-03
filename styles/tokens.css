@@ -4,6 +4,51 @@
    - Tokens only. No component rewires here.
 */
 
+/* --- TerraFusion Glass Layering Contract ---
+   Ensures glass pseudo-elements never sit above MapLibre canvas.
+   The map must ALWAYS be visible.
+*/
+
+.tf-glass,
+.tf-glass--strong {
+  isolation: isolate;
+}
+
+.tf-glass::before,
+.tf-glass::after,
+.tf-glass--strong::before,
+.tf-glass--strong::after {
+  z-index: 0;
+  pointer-events: none;
+}
+
+.tf-glass > *,
+.tf-glass--strong > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* MapLibre/Map canvas must sit above glass optics */
+.tf-map-canvas {
+  position: absolute !important;
+  inset: 0;
+  z-index: 1;
+}
+
+/* UI overlays (buttons/tooltips/legends) above map */
+.tf-map-ui {
+  position: absolute;
+  z-index: 2;
+  pointer-events: auto;
+}
+
+/* Tooltip layer (highest in map context) */
+.tf-map-tooltip {
+  position: absolute;
+  z-index: 3;
+  pointer-events: none;
+}
+
 :root {
   /* -------- Radii (coherent “instrument” geometry) -------- */
   --r-sm: 12px;

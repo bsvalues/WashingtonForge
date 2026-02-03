@@ -59,7 +59,7 @@ function MapControlsComponent({
   } = useSelection();
 
   return (
-    <div className="absolute top-4 right-4 z-20 flex flex-col gap-2">
+    <div className="tf-map-ui top-4 right-4 flex flex-col gap-2">
       {/* Selection Controls Panel */}
       <GlassCard className="space-y-2 rounded-lg p-2">
         {/* Single Select Toggle */}

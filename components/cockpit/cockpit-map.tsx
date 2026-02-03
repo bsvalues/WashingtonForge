@@ -73,6 +73,7 @@ export function CockpitMap({ filters, parcels, onZoomToParcel }: CockpitMapProps
     selectMode,
     setSelectMode,
     singleSelectMode,
+    selectedCount,
   } = useSelection();
 
   // Generate positioned parcels with memoization
@@ -308,12 +309,12 @@ export function CockpitMap({ filters, parcels, onZoomToParcel }: CockpitMapProps
 
   return (
     <TooltipProvider>
-      <div className="relative h-full w-full overflow-hidden">
-        {/* Map Container */}
+      <div className="tf-glass relative h-full min-h-[560px] w-full overflow-hidden rounded-2xl">
+        {/* Map Container - tf-map-canvas ensures it sits above glass pseudo-elements */}
         <div
           ref={mapContainerRef}
           className={cn(
-            "absolute inset-0",
+            "tf-map-canvas",
             (selectMode === "box" || selectMode === "lasso") && "cursor-crosshair"
           )}
           style={{
@@ -461,12 +462,33 @@ export function CockpitMap({ filters, parcels, onZoomToParcel }: CockpitMapProps
           )}
         </div>
 
-        {/* Hover Tooltip */}
-        <HoverTooltip
-          parcel={hoveredParcel}
-          position={tooltipPosition}
-          containerRef={mapContainerRef}
-        />
+        {/* Hover Tooltip - tf-map-tooltip ensures highest z-index in map context */}
+        <div className="tf-map-tooltip">
+          <HoverTooltip
+            parcel={hoveredParcel}
+            position={tooltipPosition}
+            containerRef={mapContainerRef}
+          />
+        </div>
+
+        {/* HUD Row (top-left) - County, parcel count, selection badge */}
+        <div className="tf-map-ui top-4 left-4 flex items-center gap-2">
+          <GlassCard className="flex items-center gap-3 rounded-lg px-3 py-2">
+            <span className="text-foreground text-xs font-semibold">Benton County</span>
+            <span className="bg-border/30 h-4 w-px" />
+            <span className="text-muted-foreground text-xs">
+              {positionedParcels.length.toLocaleString()} parcels
+            </span>
+            {selectedCount > 0 && (
+              <>
+                <span className="bg-border/30 h-4 w-px" />
+                <span className="bg-primary/20 text-primary rounded-full px-2 py-0.5 text-xs font-medium">
+                  {selectedCount} selected
+                </span>
+              </>
+            )}
+          </GlassCard>
+        </div>
 
         {/* Map Controls */}
         <MapControls
@@ -480,7 +502,7 @@ export function CockpitMap({ filters, parcels, onZoomToParcel }: CockpitMapProps
         />
 
         {/* Legend */}
-        <GlassCard className="absolute bottom-4 left-4 z-10 rounded-lg p-3">
+        <GlassCard className="tf-map-ui bottom-4 left-4 rounded-lg p-3">
           <p className="text-foreground mb-2 text-xs font-semibold">Equity Status</p>
           <div className="space-y-1.5">
             <div className="flex items-center gap-2">
@@ -505,7 +527,7 @@ export function CockpitMap({ filters, parcels, onZoomToParcel }: CockpitMapProps
 
         {/* Select Mode Indicator */}
         {selectMode !== "none" && (
-          <GlassCard className="absolute top-4 left-1/2 z-20 flex -translate-x-1/2 items-center gap-3 rounded-lg px-4 py-2">
+          <GlassCard className="tf-map-ui top-4 left-1/2 flex -translate-x-1/2 items-center gap-3 rounded-lg px-4 py-2">
             {selectMode === "lasso" && (
               <>
                 <Lasso className="text-primary h-4 w-4" />
