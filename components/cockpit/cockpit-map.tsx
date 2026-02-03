@@ -11,7 +11,7 @@ import { MapControls } from "./map-controls";
 import { useSelection } from "@/lib/selection";
 import { getMapLayers, type ParcelFilter, type Parcel, type MapLayer } from "@/lib/api";
 import { cn } from "@/lib/utils";
-import { DARK_RASTER_STYLE, BENTON_COUNTY_CENTER, DEFAULT_ZOOM, logMapStyle } from "@/lib/map/styles";
+import { RASTER_STYLE, BENTON_COUNTY_CENTER, DEFAULT_ZOOM, logMapStyle } from "@/lib/map/styles";
 
 interface CockpitMapProps {
   filters: ParcelFilter;
@@ -152,7 +152,7 @@ export function CockpitMap({ filters, parcels, onZoomToParcel }: CockpitMapProps
 
     const map = new maplibregl.Map({
       container: mapContainerRef.current,
-      style: DARK_RASTER_STYLE,
+      style: RASTER_STYLE,
       center: BENTON_COUNTY_CENTER,
       zoom: DEFAULT_ZOOM,
       attributionControl: false,
@@ -176,7 +176,7 @@ export function CockpitMap({ filters, parcels, onZoomToParcel }: CockpitMapProps
 
       // Debug: Check if tiles are loading
       map.on("data", (e) => {
-        if (e.dataType === "source" && e.sourceId === "carto") {
+        if (e.dataType === "source" && e.sourceId === "osm") {
           console.log("[v0] Tile data event:", e.isSourceLoaded ? "loaded" : "loading");
         }
       });
@@ -555,11 +555,11 @@ export function CockpitMap({ filters, parcels, onZoomToParcel }: CockpitMapProps
   return (
     <TooltipProvider>
       <div className="tf-glass relative h-full min-h-[560px] w-full overflow-hidden rounded-2xl">
-        {/* MapLibre Container */}
+        {/* MapLibre Container - explicit z-[1] ensures it sits above glass pseudo-elements */}
         <div
           ref={mapContainerRef}
           className={cn(
-            "tf-map-canvas",
+            "tf-map-canvas absolute inset-0 z-[1]",
             (selectMode === "box" || selectMode === "lasso") && "cursor-crosshair"
           )}
           onMouseDown={handleMapMouseDown}
