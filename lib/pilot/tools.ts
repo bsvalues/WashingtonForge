@@ -351,6 +351,4 @@ export function getSuiteLabel(suite: SuiteOwner): string {
 }
 
 // All available claims derived from the tool registry
-export const ALL_CLAIMS = [
-  ...new Set(TOOL_REGISTRY.flatMap((t) => t.requiredClaims)),
-] as const;
+export const ALL_CLAIMS = [...new Set(TOOL_REGISTRY.flatMap((t) => t.requiredClaims))] as const;

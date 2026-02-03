@@ -20,6 +20,7 @@ import {
   type EquityStatus,
 } from "@/lib/api";
 import { cn } from "@/lib/utils";
+import { GlassCard, TactileButton } from "@/components/material";
 
 interface FilterPanelProps {
   filters: ParcelFilter;
@@ -100,21 +101,21 @@ export function FilterPanel({ filters, onFilterChange }: FilterPanelProps) {
   if (isCollapsed) {
     return (
       <div className="absolute top-4 left-0 z-10">
-        <Button
+        <TactileButton
           variant="outline"
           size="icon"
           onClick={() => setIsCollapsed(false)}
-          className="glass-btn border-border/50 text-foreground rounded-l-none"
+          className="border-border/50 text-foreground rounded-l-none"
         >
           <ChevronRight className="h-4 w-4" />
           <span className="sr-only">Expand filters</span>
-        </Button>
+        </TactileButton>
       </div>
     );
   }
 
   return (
-    <div className="glass-panel border-border/50 flex w-72 shrink-0 flex-col border-r">
+    <GlassCard className="border-border/50 flex w-72 shrink-0 flex-col rounded-none border-r">
       {/* Header */}
       <div className="border-border/50 flex items-center justify-between border-b p-4">
         <div className="flex items-center gap-2">
@@ -255,6 +256,6 @@ export function FilterPanel({ filters, onFilterChange }: FilterPanelProps) {
           </div>
         </div>
       </div>
-    </div>
+    </GlassCard>
   );
 }

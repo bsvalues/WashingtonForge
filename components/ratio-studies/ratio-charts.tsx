@@ -107,7 +107,7 @@ export function RatioCharts({
     <div className="space-y-6">
       {/* Ratio by Neighborhood */}
       {neighborhoodData.length > 0 && (
-        <div className="glass-panel rounded-xl p-5">
+        <div className="tf-glass rounded-xl p-5">
           <div className="mb-4 flex items-center justify-between">
             <h3 className="text-foreground font-semibold">Median Ratio by Neighborhood</h3>
             <span className="text-muted-foreground text-xs">
@@ -145,7 +145,7 @@ export function RatioCharts({
                     if (!payload?.[0]) return null;
                     const data = payload[0].payload;
                     return (
-                      <div className="glass-panel border-border/50 rounded-lg border p-2 text-xs">
+                      <div className="tf-glass border-border/50 rounded-lg border p-2 text-xs">
                         <p className="text-foreground font-medium">{data.name}</p>
                         <p className="text-muted-foreground">
                           Median Ratio: {data.ratio.toFixed(3)}
@@ -192,7 +192,7 @@ export function RatioCharts({
 
       {/* Ratio by Property Class */}
       {propertyClassData.length > 0 && (
-        <div className="glass-panel rounded-xl p-5">
+        <div className="tf-glass rounded-xl p-5">
           <div className="mb-4 flex items-center justify-between">
             <h3 className="text-foreground font-semibold">Median Ratio by Property Class</h3>
             <span className="text-muted-foreground text-xs">
@@ -229,7 +229,7 @@ export function RatioCharts({
                     if (!payload?.[0]) return null;
                     const data = payload[0].payload;
                     return (
-                      <div className="glass-panel border-border/50 rounded-lg border p-2 text-xs">
+                      <div className="tf-glass border-border/50 rounded-lg border p-2 text-xs">
                         <p className="text-foreground font-medium">{data.name}</p>
                         <p className="text-muted-foreground">
                           Median Ratio: {data.ratio.toFixed(3)}
@@ -268,7 +268,7 @@ export function RatioCharts({
       )}
 
       {/* Historical Trend with Compliance Band */}
-      <div className="glass-panel rounded-xl p-5">
+      <div className="tf-glass rounded-xl p-5">
         <div className="mb-4 flex items-center justify-between">
           <h3 className="text-foreground font-semibold">Historical Ratio Trend</h3>
           <span className="text-muted-foreground text-xs">5-Year Comparison</span>
@@ -312,7 +312,7 @@ export function RatioCharts({
                 content={({ payload, label }) => {
                   if (!payload?.length) return null;
                   return (
-                    <div className="glass-panel border-border/50 rounded-lg border p-2 text-xs">
+                    <div className="tf-glass border-border/50 rounded-lg border p-2 text-xs">
                       <p className="text-foreground mb-1 font-medium">{label}</p>
                       {payload.map((p, i) => (
                         <p key={i} className="text-muted-foreground">
@@ -391,7 +391,7 @@ export function RatioCharts({
       </div>
 
       {/* Ratio Distribution Scatter */}
-      <div className="glass-panel rounded-xl p-5">
+      <div className="tf-glass rounded-xl p-5">
         <div className="mb-4 flex items-center justify-between">
           <h3 className="text-foreground font-semibold">Ratio vs Sale Price Distribution</h3>
           <span className="text-muted-foreground text-xs">
@@ -429,7 +429,7 @@ export function RatioCharts({
                   if (!payload?.[0]) return null;
                   const data = payload[0].payload;
                   return (
-                    <div className="glass-panel border-border/50 rounded-lg border p-2 text-xs">
+                    <div className="tf-glass border-border/50 rounded-lg border p-2 text-xs">
                       <p className="text-foreground">Sale: ${data.salePrice.toLocaleString()}</p>
                       <p className="text-foreground">Ratio: {data.ratio.toFixed(3)}</p>
                       <p className="text-muted-foreground">

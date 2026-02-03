@@ -1,0 +1,252 @@
+/* styles/tokens.css
+   TerraFusion 2026 Material Tokens
+   - Shell (glass), Workspace (matte), Touchpoints (tactile), Signals (state)
+   - Tokens only. No component rewires here.
+*/
+
+:root {
+  /* -------- Radii (coherent “instrument” geometry) -------- */
+  --r-sm: 12px;
+  --r-md: 16px;
+  --r-lg: 22px;
+
+  /* -------- Depth / Shadows (soft spatial UI) -------- */
+  --z1-shadow: 0 1px 1px rgba(0, 0, 0, 0.12), 0 8px 24px rgba(0, 0, 0, 0.18);
+  --z2-shadow: 0 2px 2px rgba(0, 0, 0, 0.16), 0 16px 48px rgba(0, 0, 0, 0.24);
+  --z3-shadow: 0 4px 4px rgba(0, 0, 0, 0.18), 0 24px 72px rgba(0, 0, 0, 0.3);
+
+  /* -------- Glass (Shell) -------- */
+  --glass-blur-1: 10px;
+  --glass-blur-2: 18px;
+  --glass-blur-3: 28px;
+
+  /* Tint is intentionally neutral; your theme can override */
+  --glass-tint: rgba(18, 18, 22, 0.42);
+  --glass-tint-strong: rgba(18, 18, 22, 0.58);
+  --glass-border: rgba(255, 255, 255, 0.1);
+  --glass-border-strong: rgba(255, 255, 255, 0.14);
+
+  /* Micro-noise strength (kept for follow-up; not used heavily yet) */
+  --glass-noise-opacity: 0.035;
+
+  /* -------- Surfaces (Workspace) -------- */
+  --surface-matte: rgba(16, 16, 18, 0.78);
+  --surface-elevated: rgba(22, 22, 26, 0.82);
+  --surface-scrim: rgba(0, 0, 0, 0.55);
+
+  /* -------- Motion -------- */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+  --dur-1: 140ms; /* micro */
+  --dur-2: 260ms; /* panels */
+  --dur-3: 520ms; /* “ritual” moments (rare) */
+
+  /* -------- Glow strength (Signals) -------- */
+  --glow-weak: 0 0 0 1px rgba(255, 255, 255, 0.06), 0 0 18px rgba(255, 255, 255, 0.06);
+  --glow-med: 0 0 0 1px rgba(255, 255, 255, 0.1), 0 0 28px rgba(255, 255, 255, 0.1);
+  --glow-strong: 0 0 0 1px rgba(255, 255, 255, 0.14), 0 0 44px rgba(255, 255, 255, 0.14);
+
+  /* -------- Semantic State Tokens (never hardcode red/green in components) -------- */
+  --state-official: rgba(255, 255, 255, 0.86);
+  --state-overlay: rgba(160, 220, 255, 0.9);
+  --state-simulated: rgba(210, 180, 255, 0.92);
+  --state-warning: rgba(255, 206, 120, 0.92);
+  --state-blocked: rgba(255, 140, 140, 0.92);
+  --state-success: rgba(150, 245, 200, 0.92);
+
+  /* Foreground hint for badges */
+  --state-fg: rgba(10, 10, 12, 0.92);
+}
+
+/* Utility classes (no behavior) */
+.tf-glass {
+  background: var(--glass-tint);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--r-lg);
+  box-shadow: var(--z2-shadow);
+  backdrop-filter: blur(var(--glass-blur-2));
+  -webkit-backdrop-filter: blur(var(--glass-blur-2));
+}
+
+.tf-glass--strong {
+  background: var(--glass-tint-strong);
+  border: 1px solid var(--glass-border-strong);
+  backdrop-filter: blur(var(--glass-blur-3));
+  -webkit-backdrop-filter: blur(var(--glass-blur-3));
+}
+
+.tf-matte {
+  background: var(--surface-matte);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--r-lg);
+  box-shadow: var(--z1-shadow);
+}
+
+.tf-scrim {
+  background: var(--surface-scrim);
+}
+
+/* Glass buttons (Touchpoints) */
+.tf-glass-btn {
+  background: var(--glass-tint);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--r-md);
+  box-shadow: var(--z1-shadow);
+  backdrop-filter: blur(var(--glass-blur-1));
+  -webkit-backdrop-filter: blur(var(--glass-blur-1));
+  transition:
+    background-color var(--dur-1) var(--ease-out),
+    border-color var(--dur-1) var(--ease-out),
+    transform var(--dur-1) var(--ease-out),
+    box-shadow var(--dur-1) var(--ease-out);
+}
+
+.tf-glass-btn:hover {
+  background: var(--glass-tint-strong);
+  border-color: var(--glass-border-strong);
+}
+
+.tf-glass-btn--primary {
+  background: rgba(160, 220, 255, 0.18);
+  border-color: rgba(160, 220, 255, 0.36);
+}
+
+.tf-glass-btn--primary:hover {
+  background: rgba(160, 220, 255, 0.24);
+  border-color: rgba(160, 220, 255, 0.5);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-1: 1ms;
+    --dur-2: 1ms;
+    --dur-3: 1ms;
+  }
+}
+
+/* ------------------------------------------------------------------
+   Phase 1A: Micro-noise + subtle refraction (tokens unchanged)
+   - No new CSS variables
+   - No animation
+   - Pointer-events: none
+------------------------------------------------------------------- */
+
+.tf-glass,
+.tf-glass--strong {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate; /* keeps blend layers contained */
+}
+
+/* Micro-noise overlay (procedural; no image assets) */
+.tf-glass::before,
+.tf-glass--strong::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  opacity: var(--glass-noise-opacity);
+  mix-blend-mode: overlay;
+  transform: translateZ(0);
+
+  /* Two-layer procedural grain: fine speckle + soft cloud */
+  background:
+    repeating-radial-gradient(
+      circle at 12% 18%,
+      rgba(255, 255, 255, 0.1) 0 0.6px,
+      rgba(0, 0, 0, 0.1) 0.6px 1.2px
+    ),
+    repeating-radial-gradient(
+      circle at 78% 62%,
+      rgba(255, 255, 255, 0.06) 0 1px,
+      rgba(0, 0, 0, 0.06) 1px 2px
+    );
+}
+
+/* Subtle refraction / edge highlight (feels like "glass thickness") */
+.tf-glass::after,
+.tf-glass--strong::after {
+  content: "";
+  position: absolute;
+  inset: -1px; /* bleed under border */
+  pointer-events: none;
+  border-radius: inherit;
+  opacity: 0.55;
+  transform: translateZ(0);
+
+  background:
+    /* top-left sheen */
+    radial-gradient(
+      120% 90% at 12% 8%,
+      rgba(255, 255, 255, 0.18),
+      rgba(255, 255, 255, 0.06) 42%,
+      rgba(255, 255, 255, 0) 70%
+    ),
+    /* bottom-right counter-sheen */
+    radial-gradient(120% 100% at 92% 92%, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0) 62%),
+    /* thin inner rim highlight */
+    linear-gradient(
+        to bottom,
+        rgba(255, 255, 255, 0.1),
+        rgba(255, 255, 255, 0) 24%,
+        rgba(0, 0, 0, 0.06) 78%,
+        rgba(0, 0, 0, 0.1)
+      );
+
+  /* keep it subtle + "in the material" */
+  mix-blend-mode: soft-light;
+}
+
+/* Strong glass gets slightly more pronounced refraction */
+.tf-glass--strong::after {
+  opacity: 0.72;
+}
+
+/* ------------------------------------------------------------------
+   Phase 1A.2: Chromatic edge split (tokens unchanged, no animation)
+   - Adds subtle spectral separation along the rim
+------------------------------------------------------------------- */
+
+.tf-glass::after,
+.tf-glass--strong::after {
+  /* Add two ultra-subtle chroma rims on top of existing refraction */
+  background:
+    /* chroma rim: warm edge (top/left) */
+    linear-gradient(135deg, rgba(255, 120, 120, 0.1), rgba(255, 120, 120, 0) 22%),
+    /* chroma rim: cool edge (bottom/right) */
+    linear-gradient(315deg, rgba(120, 210, 255, 0.1), rgba(120, 210, 255, 0) 22%),
+    /* keep your existing refraction layers */
+    radial-gradient(
+        120% 90% at 12% 8%,
+        rgba(255, 255, 255, 0.18),
+        rgba(255, 255, 255, 0.06) 42%,
+        rgba(255, 255, 255, 0) 70%
+      ),
+    radial-gradient(120% 100% at 92% 92%, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0) 62%),
+    linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.1),
+      rgba(255, 255, 255, 0) 24%,
+      rgba(0, 0, 0, 0.06) 78%,
+      rgba(0, 0, 0, 0.1)
+    );
+
+  /* Keep it in-material */
+  mix-blend-mode: soft-light;
+}
+
+/* Slightly stronger for strong glass, still subtle */
+.tf-glass--strong::after {
+  opacity: 0.78; /* previously 0.72 */
+}
+
+/* Respect reduced motion (we're not animating, but keep transforms safe) */
+@media (prefers-reduced-motion: reduce) {
+  .tf-glass::before,
+  .tf-glass--strong::before,
+  .tf-glass::after,
+  .tf-glass--strong::after {
+    transform: none;
+  }
+}

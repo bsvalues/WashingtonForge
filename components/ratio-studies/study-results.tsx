@@ -57,7 +57,7 @@ export function StudyResults({ study }: StudyResultsProps) {
 
   if (!study) {
     return (
-      <div className="glass-panel flex h-[600px] flex-col items-center justify-center rounded-xl p-12 text-center">
+      <div className="tf-glass flex h-[600px] flex-col items-center justify-center rounded-xl p-12 text-center">
         <div className="bg-muted/30 mb-4 flex h-16 w-16 items-center justify-center rounded-xl">
           <FileBarChart className="text-muted-foreground h-8 w-8" />
         </div>
@@ -71,7 +71,7 @@ export function StudyResults({ study }: StudyResultsProps) {
 
   if (study.status === "running" || study.status === "pending") {
     return (
-      <div className="glass-panel flex h-[600px] flex-col items-center justify-center rounded-xl p-12 text-center">
+      <div className="tf-glass flex h-[600px] flex-col items-center justify-center rounded-xl p-12 text-center">
         <Loader2 className="text-primary mb-4 h-12 w-12 animate-spin" />
         <p className="text-foreground mb-1 font-medium">
           {study.status === "running" ? "Processing..." : "Queued"}
@@ -87,7 +87,7 @@ export function StudyResults({ study }: StudyResultsProps) {
 
   if (study.status === "failed") {
     return (
-      <div className="glass-panel flex h-[600px] flex-col items-center justify-center rounded-xl p-12 text-center">
+      <div className="tf-glass flex h-[600px] flex-col items-center justify-center rounded-xl p-12 text-center">
         <div className="bg-destructive/20 mb-4 flex h-16 w-16 items-center justify-center rounded-xl">
           <AlertTriangle className="text-destructive h-8 w-8" />
         </div>
@@ -135,7 +135,7 @@ export function StudyResults({ study }: StudyResultsProps) {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="glass-panel flex items-center justify-between rounded-xl p-4">
+      <div className="tf-glass flex items-center justify-between rounded-xl p-4">
         <div>
           <h2 className="text-foreground text-lg font-semibold">{study.name}</h2>
           <p className="text-muted-foreground text-sm">
@@ -148,7 +148,7 @@ export function StudyResults({ study }: StudyResultsProps) {
             size="sm"
             onClick={() => handleExport("pdf")}
             disabled={isExporting}
-            className="glass-btn border-border/50 text-foreground"
+            className="tf-glass-btn border-border/50 text-foreground"
           >
             <Download className="mr-2 h-4 w-4" />
             PDF
@@ -158,7 +158,7 @@ export function StudyResults({ study }: StudyResultsProps) {
             size="sm"
             onClick={() => handleExport("xlsx")}
             disabled={isExporting}
-            className="glass-btn border-border/50 text-foreground"
+            className="tf-glass-btn border-border/50 text-foreground"
           >
             <Download className="mr-2 h-4 w-4" />
             Excel
@@ -200,11 +200,11 @@ export function StudyResults({ study }: StudyResultsProps) {
 
       {/* Additional Stats */}
       <div className="grid gap-4 md:grid-cols-3">
-        <div className="glass-panel rounded-xl p-4">
+        <div className="tf-glass rounded-xl p-4">
           <p className="text-muted-foreground mb-1 text-xs tracking-wide uppercase">Mean Ratio</p>
           <p className="text-foreground text-xl font-semibold">{results.meanRatio.toFixed(3)}</p>
         </div>
-        <div className="glass-panel rounded-xl p-4">
+        <div className="tf-glass rounded-xl p-4">
           <div className="mb-1 flex items-center gap-2">
             <Users className="text-muted-foreground h-4 w-4" />
             <p className="text-muted-foreground text-xs tracking-wide uppercase">Sample Size</p>
@@ -213,7 +213,7 @@ export function StudyResults({ study }: StudyResultsProps) {
             {results.sampleSize.toLocaleString()}
           </p>
         </div>
-        <div className="glass-panel rounded-xl p-4">
+        <div className="tf-glass rounded-xl p-4">
           <div className="mb-1 flex items-center gap-2">
             <AlertTriangle className="text-muted-foreground h-4 w-4" />
             <p className="text-muted-foreground text-xs tracking-wide uppercase">
@@ -230,7 +230,7 @@ export function StudyResults({ study }: StudyResultsProps) {
       {/* Breakdown Tables */}
       <div className="grid gap-6 md:grid-cols-2">
         {/* By Neighborhood */}
-        <div className="glass-panel overflow-hidden rounded-xl">
+        <div className="tf-glass overflow-hidden rounded-xl">
           <div className="border-border/50 border-b p-4">
             <h3 className="text-foreground font-medium">By Neighborhood</h3>
           </div>
@@ -275,7 +275,7 @@ export function StudyResults({ study }: StudyResultsProps) {
         </div>
 
         {/* By Property Class */}
-        <div className="glass-panel overflow-hidden rounded-xl">
+        <div className="tf-glass overflow-hidden rounded-xl">
           <div className="border-border/50 border-b p-4">
             <h3 className="text-foreground font-medium">By Property Class</h3>
           </div>
@@ -339,7 +339,7 @@ function MetricCard({ label, value, target, icon: Icon, status }: MetricCardProp
   };
 
   return (
-    <div className="glass-panel rounded-xl p-4">
+    <div className="tf-glass rounded-xl p-4">
       <div className="mb-3 flex items-center gap-2">
         <div
           className={cn(

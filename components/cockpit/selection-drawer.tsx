@@ -10,6 +10,7 @@ import { useSelection, downloadSelectionJSON } from "@/lib/selection";
 import type { Parcel, ParcelFilter } from "@/lib/api/types";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
+import { DrawerShell, TactileButton } from "@/components/material";
 
 interface SelectionDrawerProps {
   allParcels: Parcel[];
@@ -55,9 +56,9 @@ export function SelectionDrawer({ allParcels, filters, onZoomToParcel }: Selecti
   }
 
   return (
-    <div
+    <DrawerShell
       className={cn(
-        "glass-panel border-border/50 absolute right-0 bottom-0 left-0 z-30 border-t transition-all duration-300",
+        "border-border/50 absolute right-0 bottom-0 left-0 z-30 rounded-none border-t transition-all duration-300",
         isExpanded ? "h-80" : "h-12"
       )}
     >
@@ -69,11 +70,14 @@ export function SelectionDrawer({ allParcels, filters, onZoomToParcel }: Selecti
       >
         <div className="flex items-center gap-3">
           <span className="text-foreground font-medium">Selected Parcels</span>
-          <span className="bg-primary/20 text-primary rounded-full px-2 py-0.5 text-xs font-medium">
+          {/* Phase 1B.1B-2: Smooth count with tabular nums for stability */}
+          <span className="bg-primary/20 text-primary rounded-full px-2 py-0.5 text-xs font-medium tabular-nums transition-[opacity,transform] duration-[var(--dur-1)] ease-[var(--ease-out)]">
             {selectedCount}
           </span>
           {hiddenCount > 0 && (
-            <span className="text-xs text-amber-400">({hiddenCount} hidden by filters)</span>
+            <span className="text-xs text-amber-400 tabular-nums transition-opacity duration-[var(--dur-1)]">
+              ({hiddenCount} hidden by filters)
+            </span>
           )}
         </div>
         <div className="flex items-center gap-2">
@@ -111,24 +115,24 @@ export function SelectionDrawer({ allParcels, filters, onZoomToParcel }: Selecti
 
             {/* Actions */}
             <div className="flex items-center gap-2">
-              <Button
+              <TactileButton
                 variant="outline"
                 size="sm"
                 onClick={handleExport}
-                className="glass-btn border-border/50 text-foreground h-7 bg-transparent px-3 text-xs"
+                className="border-border/50 text-foreground h-7 bg-transparent px-3 text-xs"
               >
                 <Download className="mr-1.5 h-3.5 w-3.5" />
                 Export JSON
-              </Button>
-              <Button
+              </TactileButton>
+              <TactileButton
                 variant="outline"
                 size="sm"
                 onClick={handleCreateCalibrationZone}
-                className="glass-btn border-border/50 text-foreground h-7 bg-transparent px-3 text-xs"
+                className="border-border/50 text-foreground h-7 bg-transparent px-3 text-xs"
               >
                 <Sliders className="mr-1.5 h-3.5 w-3.5" />
                 Create Calibration Zone
-              </Button>
+              </TactileButton>
               <Button
                 variant="ghost"
                 size="sm"
@@ -152,6 +156,6 @@ export function SelectionDrawer({ allParcels, filters, onZoomToParcel }: Selecti
           </div>
         </div>
       )}
-    </div>
+    </DrawerShell>
   );
 }

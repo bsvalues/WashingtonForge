@@ -154,7 +154,7 @@ export default function DataSourcesPage() {
         </div>
 
         {/* Controls */}
-        <div className="glass-panel mb-4 rounded-xl p-4">
+        <div className="tf-glass mb-4 rounded-xl p-4">
           <div className="grid gap-3 md:grid-cols-4">
             <div className="relative">
               <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
@@ -229,7 +229,7 @@ export default function DataSourcesPage() {
         </div>
 
         {/* Table */}
-        <div className="glass-panel overflow-hidden rounded-xl">
+        <div className="tf-glass overflow-hidden rounded-xl">
           <div className="border-border/30 text-muted-foreground grid grid-cols-12 gap-3 border-b px-4 py-3 text-xs font-medium">
             <div className="col-span-3">County</div>
             <div className="col-span-2">Baseline coverage</div>
@@ -303,7 +303,7 @@ export default function DataSourcesPage() {
         </div>
 
         {/* Footer notes */}
-        <div className="glass-panel text-muted-foreground mt-5 rounded-xl p-4 text-xs">
+        <div className="tf-glass text-muted-foreground mt-5 rounded-xl p-4 text-xs">
           <div className="text-foreground mb-2 font-medium">Provenance Rules</div>
           <ul className="list-disc space-y-1 pl-5">
             <li>

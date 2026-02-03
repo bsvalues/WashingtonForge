@@ -206,7 +206,7 @@ export function AuditContent() {
             <Button
               variant="outline"
               onClick={handleExport}
-              className="glass-btn text-foreground bg-transparent"
+              className="tf-glass-btn text-foreground bg-transparent"
             >
               <Download className="mr-2 h-4 w-4" />
               Export CSV
@@ -215,7 +215,7 @@ export function AuditContent() {
         </div>
 
         {/* Filters */}
-        <Card className="glass-panel p-4">
+        <Card className="tf-glass p-4">
           <div className="flex flex-col gap-4 md:flex-row">
             {/* Search */}
             <div className="relative flex-1">
@@ -232,7 +232,7 @@ export function AuditContent() {
             <select
               value={selectedAction || ""}
               onChange={(e) => setSelectedAction(e.target.value || null)}
-              className="glass-panel border-border/50 focus:ring-primary/50 rounded-lg bg-transparent px-3 py-2 text-sm focus:ring-2 focus:outline-none"
+              className="tf-glass border-border/50 focus:ring-primary/50 rounded-lg bg-transparent px-3 py-2 text-sm focus:ring-2 focus:outline-none"
             >
               <option value="">All Actions</option>
               {uniqueActions.map((action) => (
@@ -246,7 +246,7 @@ export function AuditContent() {
             <select
               value={selectedUser || ""}
               onChange={(e) => setSelectedUser(e.target.value || null)}
-              className="glass-panel border-border/50 focus:ring-primary/50 rounded-lg bg-transparent px-3 py-2 text-sm focus:ring-2 focus:outline-none"
+              className="tf-glass border-border/50 focus:ring-primary/50 rounded-lg bg-transparent px-3 py-2 text-sm focus:ring-2 focus:outline-none"
             >
               <option value="">All Users</option>
               {uniqueUsers.map((userId) => {
@@ -290,7 +290,7 @@ export function AuditContent() {
         </div>
 
         {/* Audit Log Table */}
-        <Card className="glass-panel overflow-hidden">
+        <Card className="tf-glass overflow-hidden">
           {isLoading ? (
             <div className="text-muted-foreground p-8 text-center">
               <RefreshCw className="mx-auto mb-2 h-6 w-6 animate-spin" />

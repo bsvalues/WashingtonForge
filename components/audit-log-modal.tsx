@@ -57,7 +57,7 @@ export function AuditLogModal({ isOpen, onClose }: AuditLogModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="glass-panel border-border/50 flex max-h-[80vh] max-w-2xl flex-col">
+      <DialogContent className="tf-glass border-border/50 flex max-h-[80vh] max-w-2xl flex-col">
         <DialogHeader>
           <DialogTitle className="text-foreground flex items-center gap-2">
             <FileText className="text-primary h-5 w-5" />
@@ -79,7 +79,7 @@ export function AuditLogModal({ isOpen, onClose }: AuditLogModalProps) {
           <Button
             variant="outline"
             size="sm"
-            className="glass-btn border-border/50 text-foreground bg-transparent"
+            className="tf-glass-btn border-border/50 text-foreground bg-transparent"
           >
             <Filter className="mr-2 h-4 w-4" />
             Filter
@@ -87,7 +87,7 @@ export function AuditLogModal({ isOpen, onClose }: AuditLogModalProps) {
           <Button
             variant="outline"
             size="sm"
-            className="glass-btn border-border/50 text-foreground bg-transparent"
+            className="tf-glass-btn border-border/50 text-foreground bg-transparent"
           >
             <Download className="mr-2 h-4 w-4" />
             Export

@@ -102,7 +102,7 @@ export function UploadStep({ onComplete }: UploadStepProps) {
   return (
     <div className="space-y-6">
       {/* Dataset Type Selection */}
-      <div className="glass-panel rounded-xl p-6">
+      <div className="tf-glass rounded-xl p-6">
         <Label className="text-foreground mb-3 block">Dataset Type</Label>
         <Select value={datasetType} onValueChange={(v) => setDatasetType(v as DatasetType)}>
           <SelectTrigger className="bg-input border-border/50 text-foreground w-full max-w-md">
@@ -121,7 +121,7 @@ export function UploadStep({ onComplete }: UploadStepProps) {
       {/* Drop Zone */}
       <div
         className={cn(
-          "glass-panel rounded-xl border-2 border-dashed p-8 transition-all",
+          "tf-glass rounded-xl border-2 border-dashed p-8 transition-all",
           isDragging ? "border-primary bg-primary/5" : "border-border/50 hover:border-border",
           file && "border-primary/30 border-solid"
         )}
@@ -171,7 +171,7 @@ export function UploadStep({ onComplete }: UploadStepProps) {
               <Button
                 asChild
                 variant="outline"
-                className="glass-btn border-border/50 text-foreground cursor-pointer bg-transparent"
+                className="tf-glass-btn border-border/50 text-foreground cursor-pointer bg-transparent"
               >
                 <span>Browse Files</span>
               </Button>
@@ -209,7 +209,7 @@ export function UploadStep({ onComplete }: UploadStepProps) {
         <Button
           onClick={handleUpload}
           disabled={!file || isUploading}
-          className="glass-btn-primary text-foreground px-8 font-medium"
+          className="tf-glass-btn tf-glass-btn--primary text-foreground px-8 font-medium"
         >
           {isUploading ? (
             <>

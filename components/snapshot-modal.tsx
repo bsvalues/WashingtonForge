@@ -86,7 +86,7 @@ export function SnapshotModal({ isOpen, onClose }: SnapshotModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="glass-panel border-border/50 max-w-xl">
+      <DialogContent className="tf-glass border-border/50 max-w-xl">
         <DialogHeader>
           <DialogTitle className="text-foreground flex items-center gap-2">
             <Camera className="text-primary h-5 w-5" />
@@ -106,7 +106,7 @@ export function SnapshotModal({ isOpen, onClose }: SnapshotModalProps) {
             <Button
               onClick={handleCreateSnapshot}
               disabled={isCreating}
-              className="glass-btn-primary text-foreground"
+              className="tf-glass-btn tf-glass-btn--primary text-foreground"
               size="sm"
             >
               {isCreating ? (
@@ -178,7 +178,7 @@ export function SnapshotModal({ isOpen, onClose }: SnapshotModalProps) {
                       disabled={isPublishing === snapshot.id}
                       variant="outline"
                       size="sm"
-                      className="glass-btn border-chart-1/40 text-chart-1 hover:bg-chart-1/20 bg-transparent"
+                      className="tf-glass-btn border-chart-1/40 text-chart-1 hover:bg-chart-1/20 bg-transparent"
                     >
                       {isPublishing === snapshot.id ? (
                         <div className="mr-2 h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />

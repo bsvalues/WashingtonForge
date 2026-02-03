@@ -134,7 +134,7 @@ export function SnapshotsContent() {
           <Button
             onClick={handleCreateSnapshot}
             disabled={isCreating}
-            className="glass-btn-primary"
+            className="tf-glass-btn tf-glass-btn--primary"
           >
             {isCreating ? (
               <>
@@ -164,7 +164,7 @@ export function SnapshotsContent() {
                 const ratioStudy = getRatioStudyForYear(snapshot.rollYear);
 
                 return (
-                  <Card key={snapshot.id} className="glass-panel p-5">
+                  <Card key={snapshot.id} className="tf-glass p-5">
                     {/* Header */}
                     <div className="mb-4 flex items-start justify-between">
                       <div className="flex items-center gap-3">
@@ -268,7 +268,7 @@ export function SnapshotsContent() {
                           size="sm"
                           onClick={() => handlePublish(snapshot.id)}
                           disabled={isPublishing === snapshot.id}
-                          className="glass-btn text-foreground flex-1 bg-transparent"
+                          className="tf-glass-btn text-foreground flex-1 bg-transparent"
                         >
                           {isPublishing === snapshot.id ? (
                             <Loader2 className="mr-1 h-4 w-4 animate-spin" />
@@ -285,7 +285,7 @@ export function SnapshotsContent() {
                           size="sm"
                           onClick={() => handleExportRatioSnapshot(ratioStudy.id)}
                           disabled={isExporting === ratioStudy.id}
-                          className="glass-btn text-foreground flex-1 bg-transparent"
+                          className="tf-glass-btn text-foreground flex-1 bg-transparent"
                         >
                           {isExporting === ratioStudy.id ? (
                             <Loader2 className="mr-1 h-4 w-4 animate-spin" />
@@ -302,7 +302,7 @@ export function SnapshotsContent() {
             </div>
 
             {/* Ratio Studies List */}
-            <Card className="glass-panel p-5">
+            <Card className="tf-glass p-5">
               <h2 className="text-foreground mb-4 flex items-center gap-2 text-lg font-semibold">
                 <BarChart3 className="text-primary h-5 w-5" />
                 Completed Ratio Studies
@@ -362,7 +362,7 @@ export function SnapshotsContent() {
                           size="sm"
                           onClick={() => handleExportRatioSnapshot(study.id)}
                           disabled={isExporting === study.id}
-                          className="glass-btn text-foreground bg-transparent"
+                          className="tf-glass-btn text-foreground bg-transparent"
                         >
                           {isExporting === study.id ? (
                             <Loader2 className="h-4 w-4 animate-spin" />

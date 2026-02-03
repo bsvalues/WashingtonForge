@@ -20,6 +20,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { DrawerShell, SignalBadge, TactileButton } from "@/components/material";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
@@ -28,7 +29,6 @@ import {
   getToolsByMode,
   getTool,
   defaultRiskPolicy,
-  getRiskBadgeColor,
   getRiskLabel,
   getSuiteLabel,
   DEFAULT_REASON_CODES,
@@ -133,7 +133,10 @@ export function TerraPilotPanel({ isOpen, onClose }: TerraPilotPanelProps) {
 
   return (
     <>
-      <div className="glass-panel border-border/30 fixed top-0 right-0 z-50 flex h-full w-96 flex-col border-l">
+      <DrawerShell
+        strength="strong"
+        className="border-border/30 fixed top-0 right-0 z-50 flex h-full w-96 flex-col border-l"
+      >
         {/* Header */}
         <div className="border-border/30 border-b p-4">
           <div className="mb-4 flex items-center justify-between">
@@ -248,14 +251,19 @@ export function TerraPilotPanel({ isOpen, onClose }: TerraPilotPanelProps) {
                         {tool.description}
                       </p>
                       <div className="mt-2 flex items-center gap-2">
-                        <span
-                          className={cn(
-                            "rounded border px-1.5 py-0.5 text-[10px] font-medium",
-                            getRiskBadgeColor(tool.risk)
-                          )}
+                        <SignalBadge
+                          state={
+                            tool.risk === "read_only"
+                              ? "official"
+                              : tool.risk === "write_low"
+                                ? "overlay"
+                                : tool.risk === "write_high"
+                                  ? "warning"
+                                  : "blocked"
+                          }
                         >
                           {getRiskLabel(tool.risk)}
-                        </span>
+                        </SignalBadge>
                         <span className="text-muted-foreground text-[10px]">
                           {getSuiteLabel(tool.suiteOwner)}
                         </span>
@@ -279,115 +287,122 @@ export function TerraPilotPanel({ isOpen, onClose }: TerraPilotPanelProps) {
             for command palette
           </p>
         </div>
-      </div>
+      </DrawerShell>
 
       {/* Confirmation Dialog */}
       <Dialog
         open={confirmDialog !== null}
         onOpenChange={(open) => !open && setConfirmDialog(null)}
       >
-        <DialogContent className="glass-panel border-border/30">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <AlertTriangle className="h-5 w-5 text-amber-400" />
-              Confirm Action
-            </DialogTitle>
-            <DialogDescription>
-              This action requires confirmation before execution.
-            </DialogDescription>
-          </DialogHeader>
+        <DialogContent className="border-0 bg-transparent p-0 shadow-none">
+          <DrawerShell strength="strong" className="p-6">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2">
+                <AlertTriangle className="h-5 w-5 text-amber-400" />
+                Confirm Action
+              </DialogTitle>
+              <DialogDescription>
+                This action requires confirmation before execution.
+              </DialogDescription>
+            </DialogHeader>
 
-          {confirmDialog && (
-            <div className="space-y-4">
-              <div className="bg-muted/30 border-border/30 rounded-lg border p-3">
-                <p className="text-sm font-medium">{confirmDialog.tool.title}</p>
-                <p className="text-muted-foreground mt-1 text-xs">
-                  {confirmDialog.tool.description}
-                </p>
-                <div className="mt-2 flex items-center gap-2">
-                  <span
-                    className={cn(
-                      "rounded border px-1.5 py-0.5 text-[10px] font-medium",
-                      getRiskBadgeColor(confirmDialog.tool.risk)
+            {confirmDialog && (
+              <div className="space-y-4">
+                <div className="bg-muted/30 border-border/30 rounded-lg border p-3">
+                  <p className="text-sm font-medium">{confirmDialog.tool.title}</p>
+                  <p className="text-muted-foreground mt-1 text-xs">
+                    {confirmDialog.tool.description}
+                  </p>
+                  <div className="mt-2 flex items-center gap-2">
+                    <SignalBadge
+                      state={
+                        confirmDialog.tool.risk === "read_only"
+                          ? "official"
+                          : confirmDialog.tool.risk === "write_low"
+                            ? "overlay"
+                            : confirmDialog.tool.risk === "write_high"
+                              ? "warning"
+                              : "blocked"
+                      }
+                    >
+                      {getRiskLabel(confirmDialog.tool.risk)}
+                    </SignalBadge>
+                    {confirmDialog.tool.writesTo.length > 0 && (
+                      <span className="text-muted-foreground text-[10px]">
+                        Writes to: {confirmDialog.tool.writesTo.join(", ")}
+                      </span>
                     )}
-                  >
-                    {getRiskLabel(confirmDialog.tool.risk)}
-                  </span>
-                  {confirmDialog.tool.writesTo.length > 0 && (
-                    <span className="text-muted-foreground text-[10px]">
-                      Writes to: {confirmDialog.tool.writesTo.join(", ")}
-                    </span>
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <div>
+                    <Label className="text-xs">Reason Code *</Label>
+                    <Select
+                      value={confirmDialog.reasonCode}
+                      onValueChange={(v) => setConfirmDialog({ ...confirmDialog, reasonCode: v })}
+                    >
+                      <SelectTrigger className="bg-input/50 border-border/30 mt-1">
+                        <SelectValue placeholder="Select reason..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {DEFAULT_REASON_CODES.map((rc) => (
+                          <SelectItem key={rc.code} value={rc.code}>
+                            {rc.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <Label className="text-xs">Note (optional)</Label>
+                    <Textarea
+                      value={confirmDialog.note}
+                      onChange={(e) => setConfirmDialog({ ...confirmDialog, note: e.target.value })}
+                      placeholder="Add context..."
+                      className="bg-input/50 border-border/30 mt-1 h-20"
+                    />
+                  </div>
+
+                  {defaultRiskPolicy(confirmDialog.tool.risk).requiresSupervisor && (
+                    <div>
+                      <Label className="text-xs">Supervisor Approval Ref *</Label>
+                      <Input
+                        value={confirmDialog.supervisorRef}
+                        onChange={(e) =>
+                          setConfirmDialog({ ...confirmDialog, supervisorRef: e.target.value })
+                        }
+                        placeholder="e.g., SUP-2024-001"
+                        className="bg-input/50 border-border/30 mt-1"
+                      />
+                    </div>
                   )}
                 </div>
               </div>
+            )}
 
-              <div className="space-y-3">
-                <div>
-                  <Label className="text-xs">Reason Code *</Label>
-                  <Select
-                    value={confirmDialog.reasonCode}
-                    onValueChange={(v) => setConfirmDialog({ ...confirmDialog, reasonCode: v })}
-                  >
-                    <SelectTrigger className="bg-input/50 border-border/30 mt-1">
-                      <SelectValue placeholder="Select reason..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {DEFAULT_REASON_CODES.map((rc) => (
-                        <SelectItem key={rc.code} value={rc.code}>
-                          {rc.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label className="text-xs">Note (optional)</Label>
-                  <Textarea
-                    value={confirmDialog.note}
-                    onChange={(e) => setConfirmDialog({ ...confirmDialog, note: e.target.value })}
-                    placeholder="Add context..."
-                    className="bg-input/50 border-border/30 mt-1 h-20"
-                  />
-                </div>
-
-                {defaultRiskPolicy(confirmDialog.tool.risk).requiresSupervisor && (
-                  <div>
-                    <Label className="text-xs">Supervisor Approval Ref *</Label>
-                    <Input
-                      value={confirmDialog.supervisorRef}
-                      onChange={(e) =>
-                        setConfirmDialog({ ...confirmDialog, supervisorRef: e.target.value })
-                      }
-                      placeholder="e.g., SUP-2024-001"
-                      className="bg-input/50 border-border/30 mt-1"
-                    />
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          <DialogFooter>
-            <Button
-              variant="outline"
-              onClick={() => setConfirmDialog(null)}
-              className="bg-transparent"
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleConfirmExecute}
-              disabled={
-                !confirmDialog?.reasonCode ||
-                (defaultRiskPolicy(confirmDialog?.tool.risk || "read_only").requiresSupervisor &&
-                  !confirmDialog?.supervisorRef)
-              }
-              className="bg-primary/20 hover:bg-primary/30 text-primary border-primary/30 border"
-            >
-              Confirm & Execute
-            </Button>
-          </DialogFooter>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setConfirmDialog(null)}
+                className="bg-transparent"
+              >
+                Cancel
+              </Button>
+              <TactileButton
+                onClick={handleConfirmExecute}
+                disabled={
+                  !confirmDialog?.reasonCode ||
+                  (defaultRiskPolicy(confirmDialog?.tool.risk || "read_only").requiresSupervisor &&
+                    !confirmDialog?.supervisorRef)
+                }
+                className="bg-primary/20 hover:bg-primary/30 text-primary border-primary/30 border"
+              >
+                Confirm & Execute
+              </TactileButton>
+            </DialogFooter>
+          </DrawerShell>
         </DialogContent>
       </Dialog>
     </>

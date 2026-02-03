@@ -43,7 +43,7 @@ export default function LoginPage() {
 
       {/* Login Card */}
       <div className="relative w-full max-w-md">
-        <div className="glass-panel rounded-2xl p-8">
+        <div className="tf-glass rounded-2xl p-8">
           {/* Logo & Header */}
           <div className="mb-8 text-center">
             <div className="bg-primary/20 border-primary/40 mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-xl border">
@@ -100,7 +100,7 @@ export default function LoginPage() {
             <Button
               type="submit"
               disabled={isLoading}
-              className="glass-btn-primary text-foreground h-11 w-full font-medium"
+              className="tf-glass-btn tf-glass-btn--primary text-foreground h-11 w-full font-medium"
             >
               {isLoading ? (
                 <>
@@ -125,7 +125,7 @@ export default function LoginPage() {
               type="button"
               variant="outline"
               onClick={() => router.push("/county")}
-              className="glass-btn text-foreground border-accent/40 hover:border-accent/60 w-full"
+              className="tf-glass-btn text-foreground border-accent/40 hover:border-accent/60 w-full"
             >
               Enter Demo Mode
               <ArrowRight className="ml-2 h-4 w-4" />

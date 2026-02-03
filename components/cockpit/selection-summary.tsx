@@ -4,6 +4,7 @@ import { memo, useMemo } from "react";
 import { AlertTriangle } from "lucide-react";
 import type { Parcel } from "@/lib/api/types";
 import { cn } from "@/lib/utils";
+import { MatteCard } from "@/components/material";
 
 interface SelectionSummaryProps {
   parcels: Parcel[];
@@ -89,13 +90,13 @@ function SelectionSummaryComponent({ parcels, hiddenCount }: SelectionSummaryPro
     <div className="space-y-6 p-4">
       {/* Key Metrics */}
       <div className="grid grid-cols-4 gap-4">
-        <div className="glass-panel rounded-lg p-3">
+        <MatteCard className="rounded-lg p-3">
           <p className="text-muted-foreground mb-1 text-xs">Count</p>
           <p className="text-foreground text-xl font-semibold">{stats.count}</p>
           {hiddenCount > 0 && <p className="mt-1 text-xs text-amber-400">+{hiddenCount} hidden</p>}
-        </div>
+        </MatteCard>
 
-        <div className="glass-panel rounded-lg p-3">
+        <MatteCard className="rounded-lg p-3">
           <p className="text-muted-foreground mb-1 text-xs">Median Ratio</p>
           <p
             className={cn(
@@ -107,9 +108,9 @@ function SelectionSummaryComponent({ parcels, hiddenCount }: SelectionSummaryPro
           >
             {stats.medianRatio?.toFixed(3) || "N/A"}
           </p>
-        </div>
+        </MatteCard>
 
-        <div className="glass-panel rounded-lg p-3">
+        <MatteCard className="rounded-lg p-3">
           <p className="text-muted-foreground mb-1 text-xs">COD</p>
           <p
             className={cn(
@@ -119,14 +120,14 @@ function SelectionSummaryComponent({ parcels, hiddenCount }: SelectionSummaryPro
           >
             {stats.cod?.toFixed(1) || "N/A"}
           </p>
-        </div>
+        </MatteCard>
 
-        <div className="glass-panel rounded-lg p-3">
+        <MatteCard className="rounded-lg p-3">
           <p className="text-muted-foreground mb-1 text-xs">Total Assessed</p>
           <p className="text-foreground text-xl font-semibold">
             ${(stats.totalAssessed / 1000000).toFixed(1)}M
           </p>
-        </div>
+        </MatteCard>
       </div>
 
       {/* Equity Distribution */}

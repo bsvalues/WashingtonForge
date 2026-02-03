@@ -6,6 +6,7 @@ import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { Loader2, Lasso, Square } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { GlassCard } from "@/components/material";
 import { HoverTooltip } from "./hover-tooltip";
 import { MapControls } from "./map-controls";
 import { useSelection } from "@/lib/selection";
@@ -119,20 +120,43 @@ export function CockpitMap({ filters, parcels, onZoomToParcel }: CockpitMapProps
     setTooltipPosition(null);
   }, [setHoveredParcel]);
 
+  // Phase 1B.0: Throttle cursor position updates to reduce rerender frequency
+  const cursorThrottleRef = useRef<number | null>(null);
+  const pendingCursorRef = useRef<{ x: number; y: number } | null>(null);
+
   const handleParcelMouseMove = useCallback(
     (event: React.MouseEvent) => {
       if (selectMode !== "none") return;
 
       const rect = mapContainerRef.current?.getBoundingClientRect();
       if (rect) {
-        setTooltipPosition({
+        const pos = {
           x: event.clientX - rect.left,
           y: event.clientY - rect.top,
-        });
+        };
+
+        pendingCursorRef.current = pos;
+
+        // Throttle updates to ~50ms
+        if (cursorThrottleRef.current) return;
+
+        cursorThrottleRef.current = window.setTimeout(() => {
+          if (pendingCursorRef.current) {
+            setTooltipPosition(pendingCursorRef.current);
+          }
+          cursorThrottleRef.current = null;
+        }, 50);
       }
     },
     [selectMode]
   );
+
+  // Cleanup throttle timer on unmount
+  useEffect(() => {
+    return () => {
+      if (cursorThrottleRef.current) window.clearTimeout(cursorThrottleRef.current);
+    };
+  }, []);
 
   const handleParcelClick = useCallback(
     (parcel: ParcelWithPosition, event: React.MouseEvent) => {
@@ -288,7 +312,10 @@ export function CockpitMap({ filters, parcels, onZoomToParcel }: CockpitMapProps
         {/* Map Container */}
         <div
           ref={mapContainerRef}
-          className={cn("absolute inset-0", selectMode === "box" && "cursor-crosshair")}
+          className={cn(
+            "absolute inset-0",
+            (selectMode === "box" || selectMode === "lasso") && "cursor-crosshair"
+          )}
           style={{
             background: `
               radial-gradient(ellipse at 30% 40%, oklch(0.12 0.03 220 / 0.4) 0%, transparent 50%),
@@ -343,15 +370,39 @@ export function CockpitMap({ filters, parcels, onZoomToParcel }: CockpitMapProps
 
                   return (
                     <g key={parcel.id}>
-                      {/* Selection glow */}
+                      {/* Phase 1B.1B-1: Magnetic selection ring with outer glow */}
                       {selected && (
+                        <>
+                          {/* Outer glow (subtle) */}
+                          <rect
+                            x={parcel.x - 0.8}
+                            y={parcel.y - 0.8}
+                            width={parcel.width + 1.6}
+                            height={parcel.height + 1.6}
+                            className="fill-primary/10 stroke-primary/40 stroke-[0.6] blur-[0.3px]"
+                            rx={0.6}
+                          />
+                          {/* Crisp rim */}
+                          <rect
+                            x={parcel.x - 0.4}
+                            y={parcel.y - 0.4}
+                            width={parcel.width + 0.8}
+                            height={parcel.height + 0.8}
+                            className="stroke-primary fill-none stroke-[0.5]"
+                            rx={0.5}
+                          />
+                        </>
+                      )}
+
+                      {/* Phase 1B.1B-1: Hover ring (dimmer, only when not selected) */}
+                      {hovered && !selected && (
                         <rect
-                          x={parcel.x - 0.5}
-                          y={parcel.y - 0.5}
-                          width={parcel.width + 1}
-                          height={parcel.height + 1}
-                          className="fill-primary/20 stroke-primary stroke-[0.8]"
-                          rx={0.5}
+                          x={parcel.x - 0.3}
+                          y={parcel.y - 0.3}
+                          width={parcel.width + 0.6}
+                          height={parcel.height + 0.6}
+                          className="stroke-primary/60 fill-none stroke-[0.4]"
+                          rx={0.4}
                         />
                       )}
 
@@ -362,12 +413,13 @@ export function CockpitMap({ filters, parcels, onZoomToParcel }: CockpitMapProps
                         width={parcel.width}
                         height={parcel.height}
                         className={cn(
-                          "cursor-pointer transition-all duration-100",
+                          "transition-all duration-100",
+                          selectMode === "none" && "cursor-pointer",
                           colors.fill,
                           colors.stroke,
                           "stroke-[0.3]",
-                          hovered && "stroke-[0.6] brightness-125",
-                          selected && "stroke-primary stroke-[0.5]"
+                          hovered && !selected && "brightness-110",
+                          selected && "brightness-105"
                         )}
                         rx={0.3}
                         onMouseEnter={(e) => handleParcelMouseEnter(parcel, e)}
@@ -428,7 +480,7 @@ export function CockpitMap({ filters, parcels, onZoomToParcel }: CockpitMapProps
         />
 
         {/* Legend */}
-        <div className="glass-panel absolute bottom-4 left-4 z-10 rounded-lg p-3">
+        <GlassCard className="absolute bottom-4 left-4 z-10 rounded-lg p-3">
           <p className="text-foreground mb-2 text-xs font-semibold">Equity Status</p>
           <div className="space-y-1.5">
             <div className="flex items-center gap-2">
@@ -449,11 +501,11 @@ export function CockpitMap({ filters, parcels, onZoomToParcel }: CockpitMapProps
               {positionedParcels.length} parcels shown
             </p>
           </div>
-        </div>
+        </GlassCard>
 
         {/* Select Mode Indicator */}
         {selectMode !== "none" && (
-          <div className="glass-panel absolute top-4 left-1/2 z-20 flex -translate-x-1/2 items-center gap-3 rounded-lg px-4 py-2">
+          <GlassCard className="absolute top-4 left-1/2 z-20 flex -translate-x-1/2 items-center gap-3 rounded-lg px-4 py-2">
             {selectMode === "lasso" && (
               <>
                 <Lasso className="text-primary h-4 w-4" />
@@ -482,7 +534,7 @@ export function CockpitMap({ filters, parcels, onZoomToParcel }: CockpitMapProps
             >
               Cancel
             </Button>
-          </div>
+          </GlassCard>
         )}
       </div>
     </TooltipProvider>
