@@ -1,11 +1,12 @@
 "use client";
 
-import React from "react"
+import React from "react";
 
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { Loader2, Lasso, Square } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { GlassCard } from "@/components/material";
 import { HoverTooltip } from "./hover-tooltip";
 import { MapControls } from "./map-controls";
 import { useSelection } from "@/lib/selection";
@@ -31,15 +32,15 @@ function generateParcelPositions(parcels: Parcel[]): ParcelWithPosition[] {
   const gridSize = Math.ceil(Math.sqrt(parcels.length));
   const cellWidth = 90 / gridSize;
   const cellHeight = 90 / gridSize;
-  
+
   return parcels.map((parcel, index) => {
     const row = Math.floor(index / gridSize);
     const col = index % gridSize;
-    
+
     // Add some randomness to make it look more natural
     const offsetX = (Math.random() - 0.5) * (cellWidth * 0.2);
     const offsetY = (Math.random() - 0.5) * (cellHeight * 0.2);
-    
+
     return {
       ...parcel,
       x: 5 + col * cellWidth + offsetX,
@@ -57,7 +58,7 @@ export function CockpitMap({ filters, parcels, onZoomToParcel }: CockpitMapProps
   const [visibleLayers, setVisibleLayers] = useState<Set<string>>(new Set(["drift-hotspots"]));
   const [zoom, setZoom] = useState(1);
   const [tooltipPosition, setTooltipPosition] = useState<{ x: number; y: number } | null>(null);
-  
+
   // Box select state
   const [boxSelectStart, setBoxSelectStart] = useState<{ x: number; y: number } | null>(null);
   const [boxSelectEnd, setBoxSelectEnd] = useState<{ x: number; y: number } | null>(null);
@@ -101,7 +102,7 @@ export function CockpitMap({ filters, parcels, onZoomToParcel }: CockpitMapProps
   const handleParcelMouseEnter = useCallback(
     (parcel: ParcelWithPosition, event: React.MouseEvent) => {
       if (selectMode !== "none") return;
-      
+
       setHoveredParcel(parcel.id);
       const rect = mapContainerRef.current?.getBoundingClientRect();
       if (rect) {
@@ -119,25 +120,48 @@ export function CockpitMap({ filters, parcels, onZoomToParcel }: CockpitMapProps
     setTooltipPosition(null);
   }, [setHoveredParcel]);
 
+  // Phase 1B.0: Throttle cursor position updates to reduce rerender frequency
+  const cursorThrottleRef = useRef<number | null>(null);
+  const pendingCursorRef = useRef<{ x: number; y: number } | null>(null);
+
   const handleParcelMouseMove = useCallback(
     (event: React.MouseEvent) => {
       if (selectMode !== "none") return;
-      
+
       const rect = mapContainerRef.current?.getBoundingClientRect();
       if (rect) {
-        setTooltipPosition({
+        const pos = {
           x: event.clientX - rect.left,
           y: event.clientY - rect.top,
-        });
+        };
+
+        pendingCursorRef.current = pos;
+
+        // Throttle updates to ~50ms
+        if (cursorThrottleRef.current) return;
+
+        cursorThrottleRef.current = window.setTimeout(() => {
+          if (pendingCursorRef.current) {
+            setTooltipPosition(pendingCursorRef.current);
+          }
+          cursorThrottleRef.current = null;
+        }, 50);
       }
     },
     [selectMode]
   );
 
+  // Cleanup throttle timer on unmount
+  useEffect(() => {
+    return () => {
+      if (cursorThrottleRef.current) window.clearTimeout(cursorThrottleRef.current);
+    };
+  }, []);
+
   const handleParcelClick = useCallback(
     (parcel: ParcelWithPosition, event: React.MouseEvent) => {
       event.stopPropagation();
-      
+
       if (selectMode === "lasso") {
         // In lasso mode, toggle selection
         toggleParcel(parcel.id);
@@ -156,7 +180,7 @@ export function CockpitMap({ filters, parcels, onZoomToParcel }: CockpitMapProps
   const handleMapMouseDown = useCallback(
     (event: React.MouseEvent) => {
       if (selectMode !== "box") return;
-      
+
       const rect = mapContainerRef.current?.getBoundingClientRect();
       if (rect) {
         setBoxSelectStart({
@@ -172,7 +196,7 @@ export function CockpitMap({ filters, parcels, onZoomToParcel }: CockpitMapProps
   const handleMapMouseMove = useCallback(
     (event: React.MouseEvent) => {
       if (selectMode !== "box" || !boxSelectStart) return;
-      
+
       const rect = mapContainerRef.current?.getBoundingClientRect();
       if (rect) {
         setBoxSelectEnd({
@@ -200,10 +224,10 @@ export function CockpitMap({ filters, parcels, onZoomToParcel }: CockpitMapProps
     const svgHeight = rect.height;
 
     // Convert pixel coordinates to viewBox coordinates (0-100)
-    const minX = Math.min(boxSelectStart.x, boxSelectEnd.x) / svgWidth * 100;
-    const maxX = Math.max(boxSelectStart.x, boxSelectEnd.x) / svgWidth * 100;
-    const minY = Math.min(boxSelectStart.y, boxSelectEnd.y) / svgHeight * 100;
-    const maxY = Math.max(boxSelectStart.y, boxSelectEnd.y) / svgHeight * 100;
+    const minX = (Math.min(boxSelectStart.x, boxSelectEnd.x) / svgWidth) * 100;
+    const maxX = (Math.max(boxSelectStart.x, boxSelectEnd.x) / svgWidth) * 100;
+    const minY = (Math.min(boxSelectStart.y, boxSelectEnd.y) / svgHeight) * 100;
+    const maxY = (Math.max(boxSelectStart.y, boxSelectEnd.y) / svgHeight) * 100;
 
     // Find parcels within the box
     const selectedIds: string[] = [];
@@ -284,13 +308,13 @@ export function CockpitMap({ filters, parcels, onZoomToParcel }: CockpitMapProps
 
   return (
     <TooltipProvider>
-      <div className="w-full h-full relative overflow-hidden">
+      <div className="relative h-full w-full overflow-hidden">
         {/* Map Container */}
         <div
           ref={mapContainerRef}
           className={cn(
             "absolute inset-0",
-            selectMode === "box" && "cursor-crosshair"
+            (selectMode === "box" || selectMode === "lasso") && "cursor-crosshair"
           )}
           style={{
             background: `
@@ -309,10 +333,10 @@ export function CockpitMap({ filters, parcels, onZoomToParcel }: CockpitMapProps
         >
           {/* Loading State */}
           {isLoading && (
-            <div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm z-10">
+            <div className="bg-background/80 absolute inset-0 z-10 flex items-center justify-center backdrop-blur-sm">
               <div className="text-center">
-                <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto mb-3" />
-                <p className="text-sm text-muted-foreground">Loading parcels...</p>
+                <Loader2 className="text-primary mx-auto mb-3 h-8 w-8 animate-spin" />
+                <p className="text-muted-foreground text-sm">Loading parcels...</p>
               </div>
             </div>
           )}
@@ -334,7 +358,7 @@ export function CockpitMap({ filters, parcels, onZoomToParcel }: CockpitMapProps
 
               {/* SVG Parcels */}
               <svg
-                className="absolute inset-0 w-full h-full"
+                className="absolute inset-0 h-full w-full"
                 viewBox="0 0 100 100"
                 preserveAspectRatio="xMidYMid meet"
                 style={{ transform: `scale(${zoom})`, transformOrigin: "center" }}
@@ -346,18 +370,42 @@ export function CockpitMap({ filters, parcels, onZoomToParcel }: CockpitMapProps
 
                   return (
                     <g key={parcel.id}>
-                      {/* Selection glow */}
+                      {/* Phase 1B.1B-1: Magnetic selection ring with outer glow */}
                       {selected && (
+                        <>
+                          {/* Outer glow (subtle) */}
+                          <rect
+                            x={parcel.x - 0.8}
+                            y={parcel.y - 0.8}
+                            width={parcel.width + 1.6}
+                            height={parcel.height + 1.6}
+                            className="fill-primary/10 stroke-primary/40 stroke-[0.6] blur-[0.3px]"
+                            rx={0.6}
+                          />
+                          {/* Crisp rim */}
+                          <rect
+                            x={parcel.x - 0.4}
+                            y={parcel.y - 0.4}
+                            width={parcel.width + 0.8}
+                            height={parcel.height + 0.8}
+                            className="stroke-primary fill-none stroke-[0.5]"
+                            rx={0.5}
+                          />
+                        </>
+                      )}
+
+                      {/* Phase 1B.1B-1: Hover ring (dimmer, only when not selected) */}
+                      {hovered && !selected && (
                         <rect
-                          x={parcel.x - 0.5}
-                          y={parcel.y - 0.5}
-                          width={parcel.width + 1}
-                          height={parcel.height + 1}
-                          className="fill-primary/20 stroke-primary stroke-[0.8]"
-                          rx={0.5}
+                          x={parcel.x - 0.3}
+                          y={parcel.y - 0.3}
+                          width={parcel.width + 0.6}
+                          height={parcel.height + 0.6}
+                          className="stroke-primary/60 fill-none stroke-[0.4]"
+                          rx={0.4}
                         />
                       )}
-                      
+
                       {/* Parcel polygon */}
                       <rect
                         x={parcel.x}
@@ -365,12 +413,13 @@ export function CockpitMap({ filters, parcels, onZoomToParcel }: CockpitMapProps
                         width={parcel.width}
                         height={parcel.height}
                         className={cn(
-                          "cursor-pointer transition-all duration-100",
+                          "transition-all duration-100",
+                          selectMode === "none" && "cursor-pointer",
                           colors.fill,
                           colors.stroke,
                           "stroke-[0.3]",
-                          hovered && "stroke-[0.6] brightness-125",
-                          selected && "stroke-primary stroke-[0.5]"
+                          hovered && !selected && "brightness-110",
+                          selected && "brightness-105"
                         )}
                         rx={0.3}
                         onMouseEnter={(e) => handleParcelMouseEnter(parcel, e)}
@@ -386,7 +435,7 @@ export function CockpitMap({ filters, parcels, onZoomToParcel }: CockpitMapProps
                           y={parcel.y + parcel.height / 2}
                           textAnchor="middle"
                           dominantBaseline="middle"
-                          className="fill-foreground text-[1.8px] font-semibold pointer-events-none"
+                          className="fill-foreground pointer-events-none text-[1.8px] font-semibold"
                         >
                           {parcel.ratio?.toFixed(2) || "—"}
                         </text>
@@ -399,7 +448,7 @@ export function CockpitMap({ filters, parcels, onZoomToParcel }: CockpitMapProps
               {/* Box Selection Overlay */}
               {selectionBox && (
                 <div
-                  className="absolute border-2 border-primary border-dashed bg-primary/10 pointer-events-none z-20"
+                  className="border-primary bg-primary/10 pointer-events-none absolute z-20 border-2 border-dashed"
                   style={{
                     left: selectionBox.x,
                     top: selectionBox.y,
@@ -431,36 +480,36 @@ export function CockpitMap({ filters, parcels, onZoomToParcel }: CockpitMapProps
         />
 
         {/* Legend */}
-        <div className="absolute bottom-4 left-4 glass-panel rounded-lg p-3 z-10">
-          <p className="text-xs font-semibold text-foreground mb-2">Equity Status</p>
+        <GlassCard className="absolute bottom-4 left-4 z-10 rounded-lg p-3">
+          <p className="text-foreground mb-2 text-xs font-semibold">Equity Status</p>
           <div className="space-y-1.5">
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-sm bg-emerald-500" />
-              <span className="text-xs text-muted-foreground">Fair (0.95-1.05)</span>
+              <div className="h-3 w-3 rounded-sm bg-emerald-500" />
+              <span className="text-muted-foreground text-xs">Fair (0.95-1.05)</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-sm bg-sky-500" />
-              <span className="text-xs text-muted-foreground">{"Progressive (<0.95)"}</span>
+              <div className="h-3 w-3 rounded-sm bg-sky-500" />
+              <span className="text-muted-foreground text-xs">{"Progressive (<0.95)"}</span>
             </div>
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-sm bg-amber-500" />
-              <span className="text-xs text-muted-foreground">{"Regressive (>1.05)"}</span>
+              <div className="h-3 w-3 rounded-sm bg-amber-500" />
+              <span className="text-muted-foreground text-xs">{"Regressive (>1.05)"}</span>
             </div>
           </div>
-          <div className="mt-3 pt-2 border-t border-border/30">
-            <p className="text-xs text-muted-foreground">
+          <div className="border-border/30 mt-3 border-t pt-2">
+            <p className="text-muted-foreground text-xs">
               {positionedParcels.length} parcels shown
             </p>
           </div>
-        </div>
+        </GlassCard>
 
         {/* Select Mode Indicator */}
         {selectMode !== "none" && (
-          <div className="absolute top-4 left-1/2 -translate-x-1/2 glass-panel rounded-lg px-4 py-2 flex items-center gap-3 z-20">
+          <GlassCard className="absolute top-4 left-1/2 z-20 flex -translate-x-1/2 items-center gap-3 rounded-lg px-4 py-2">
             {selectMode === "lasso" && (
               <>
-                <Lasso className="w-4 h-4 text-primary" />
-                <span className="text-sm text-foreground">Click parcels to add to selection</span>
+                <Lasso className="text-primary h-4 w-4" />
+                <span className="text-foreground text-sm">Click parcels to add to selection</span>
                 <Button
                   variant="default"
                   size="sm"
@@ -473,19 +522,19 @@ export function CockpitMap({ filters, parcels, onZoomToParcel }: CockpitMapProps
             )}
             {selectMode === "box" && (
               <>
-                <Square className="w-4 h-4 text-primary" />
-                <span className="text-sm text-foreground">Drag to draw selection rectangle</span>
+                <Square className="text-primary h-4 w-4" />
+                <span className="text-foreground text-sm">Drag to draw selection rectangle</span>
               </>
             )}
             <Button
               variant="ghost"
               size="sm"
               onClick={() => setSelectMode("none")}
-              className="h-7 px-2 text-xs text-muted-foreground"
+              className="text-muted-foreground h-7 px-2 text-xs"
             >
               Cancel
             </Button>
-          </div>
+          </GlassCard>
         )}
       </div>
     </TooltipProvider>

@@ -1,23 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { getAuditLog, type AuditLogEntry } from "@/lib/api";
-import {
-  Search,
-  FileText,
-  User,
-  Calendar,
-  Filter,
-  Download,
-} from "lucide-react";
+import { Search, FileText, User, Calendar, Filter, Download } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface AuditLogModalProps {
@@ -69,85 +57,84 @@ export function AuditLogModal({ isOpen, onClose }: AuditLogModalProps) {
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="glass-panel border-border/50 max-w-2xl max-h-[80vh] flex flex-col">
+      <DialogContent className="tf-glass border-border/50 flex max-h-[80vh] max-w-2xl flex-col">
         <DialogHeader>
-          <DialogTitle className="flex items-center gap-2 text-foreground">
-            <FileText className="w-5 h-5 text-primary" />
+          <DialogTitle className="text-foreground flex items-center gap-2">
+            <FileText className="text-primary h-5 w-5" />
             Audit Log
           </DialogTitle>
         </DialogHeader>
 
         {/* Search & Filters */}
-        <div className="flex items-center gap-3 py-3 border-b border-border/30">
+        <div className="border-border/30 flex items-center gap-3 border-b py-3">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
             <Input
               placeholder="Search actions, users..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 bg-input border-border/50"
+              className="bg-input border-border/50 pl-9"
             />
           </div>
           <Button
             variant="outline"
             size="sm"
-            className="glass-btn border-border/50 text-foreground bg-transparent"
+            className="tf-glass-btn border-border/50 text-foreground bg-transparent"
           >
-            <Filter className="w-4 h-4 mr-2" />
+            <Filter className="mr-2 h-4 w-4" />
             Filter
           </Button>
           <Button
             variant="outline"
             size="sm"
-            className="glass-btn border-border/50 text-foreground bg-transparent"
+            className="tf-glass-btn border-border/50 text-foreground bg-transparent"
           >
-            <Download className="w-4 h-4 mr-2" />
+            <Download className="mr-2 h-4 w-4" />
             Export
           </Button>
         </div>
 
         {/* Log Entries */}
-        <div className="flex-1 overflow-y-auto space-y-2 py-3">
+        <div className="flex-1 space-y-2 overflow-y-auto py-3">
           {isLoading ? (
             <div className="flex items-center justify-center py-12">
-              <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+              <div className="border-primary h-6 w-6 animate-spin rounded-full border-2 border-t-transparent" />
             </div>
           ) : filteredEntries.length === 0 ? (
-            <div className="text-center py-12 text-muted-foreground">
+            <div className="text-muted-foreground py-12 text-center">
               No audit log entries found
             </div>
           ) : (
             filteredEntries.map((entry) => (
               <div
                 key={entry.id}
-                className="flex items-center gap-4 p-3 rounded-lg bg-secondary/30 hover:bg-secondary/50 transition-colors"
+                className="bg-secondary/30 hover:bg-secondary/50 flex items-center gap-4 rounded-lg p-3 transition-colors"
               >
                 {/* Action Badge */}
                 <span
                   className={cn(
-                    "px-2 py-1 rounded text-xs font-medium border",
-                    actionColors[entry.action] || "bg-muted/40 text-muted-foreground border-muted/60"
+                    "rounded border px-2 py-1 text-xs font-medium",
+                    actionColors[entry.action] ||
+                      "bg-muted/40 text-muted-foreground border-muted/60"
                   )}
                 >
                   {entry.action.replace(/_/g, " ")}
                 </span>
 
                 {/* Details */}
-                <div className="flex-1 min-w-0">
+                <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2 text-sm">
-                    <User className="w-3.5 h-3.5 text-muted-foreground" />
-                    <span className="text-foreground font-medium">
-                      {entry.userName}
-                    </span>
+                    <User className="text-muted-foreground h-3.5 w-3.5" />
+                    <span className="text-foreground font-medium">{entry.userName}</span>
                   </div>
-                  <p className="text-xs text-muted-foreground truncate mt-0.5">
+                  <p className="text-muted-foreground mt-0.5 truncate text-xs">
                     {entry.resourceType}: {entry.resourceId}
                   </p>
                 </div>
 
                 {/* Timestamp */}
-                <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                  <Calendar className="w-3.5 h-3.5" />
+                <div className="text-muted-foreground flex items-center gap-1.5 text-xs">
+                  <Calendar className="h-3.5 w-3.5" />
                   {formatTimestamp(entry.timestamp)}
                 </div>
               </div>

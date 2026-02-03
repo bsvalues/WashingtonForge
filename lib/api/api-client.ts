@@ -31,10 +31,7 @@ const API_BASE = process.env.NEXT_PUBLIC_API_URL || "/api";
 // Safe JSON Fetch
 // ============================================
 
-async function safeFetchJson<T>(
-  url: string,
-  options: RequestInit = {}
-): Promise<T> {
+async function safeFetchJson<T>(url: string, options: RequestInit = {}): Promise<T> {
   const response = await fetch(url, {
     ...options,
     headers: {
@@ -104,10 +101,7 @@ export async function selectCounty(countyId: string, role: UserRole): Promise<Us
 // Data Ingestion
 // ============================================
 
-export async function uploadDataset(
-  file: File,
-  datasetType: DatasetType
-): Promise<Dataset> {
+export async function uploadDataset(file: File, datasetType: DatasetType): Promise<Dataset> {
   const formData = new FormData();
   formData.append("file", file);
   formData.append("type", datasetType);
@@ -146,10 +140,7 @@ export async function getSourceFields(datasetId: string): Promise<string[]> {
   return safeFetchJson<string[]>(`${API_BASE}/ingest/${datasetId}/fields`);
 }
 
-export async function saveFieldMapping(
-  datasetId: string,
-  mappings: FieldMapping[]
-): Promise<void> {
+export async function saveFieldMapping(datasetId: string, mappings: FieldMapping[]): Promise<void> {
   await safeFetchJson(`${API_BASE}/ingest/${datasetId}/mapping`, {
     method: "POST",
     body: JSON.stringify({ mappings }),
@@ -161,7 +152,9 @@ export async function previewDataset(
   limit?: number
 ): Promise<Record<string, unknown>[]> {
   const params = limit ? `?limit=${limit}` : "";
-  return safeFetchJson<Record<string, unknown>[]>(`${API_BASE}/ingest/${datasetId}/preview${params}`);
+  return safeFetchJson<Record<string, unknown>[]>(
+    `${API_BASE}/ingest/${datasetId}/preview${params}`
+  );
 }
 
 export async function publishDataset(datasetId: string): Promise<Dataset> {
@@ -188,9 +181,7 @@ export async function getParcelGeoJson(filter?: ParcelFilter): Promise<GeoJSON.F
   return safeFetchJson<GeoJSON.FeatureCollection>(`${API_BASE}/parcels/geojson${params}`);
 }
 
-export async function selectParcelsInPolygon(
-  polygon: GeoJSON.Polygon
-): Promise<SelectionResult> {
+export async function selectParcelsInPolygon(polygon: GeoJSON.Polygon): Promise<SelectionResult> {
   return safeFetchJson<SelectionResult>(`${API_BASE}/selection/polygon`, {
     method: "POST",
     body: JSON.stringify({ polygon }),

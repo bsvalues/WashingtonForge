@@ -1,15 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import {
-  ChevronUp,
-  ChevronDown,
-  Download,
-  X,
-  Sliders,
-  List,
-  BarChart3,
-} from "lucide-react";
+import { ChevronUp, ChevronDown, Download, X, Sliders, List, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { SelectionTable } from "./selection-table";
@@ -18,6 +10,7 @@ import { useSelection, downloadSelectionJSON } from "@/lib/selection";
 import type { Parcel, ParcelFilter } from "@/lib/api/types";
 import { cn } from "@/lib/utils";
 import { useRouter } from "next/navigation";
+import { DrawerShell, TactileButton } from "@/components/material";
 
 interface SelectionDrawerProps {
   allParcels: Parcel[];
@@ -25,21 +18,12 @@ interface SelectionDrawerProps {
   onZoomToParcel: (parcel: Parcel) => void;
 }
 
-export function SelectionDrawer({
-  allParcels,
-  filters,
-  onZoomToParcel,
-}: SelectionDrawerProps) {
+export function SelectionDrawer({ allParcels, filters, onZoomToParcel }: SelectionDrawerProps) {
   const router = useRouter();
   const [isExpanded, setIsExpanded] = useState(true);
   const [activeTab, setActiveTab] = useState("parcels");
 
-  const {
-    selectedParcelIds,
-    selectionGeometry,
-    selectedCount,
-    clearSelection,
-  } = useSelection();
+  const { selectedParcelIds, selectionGeometry, selectedCount, clearSelection } = useSelection();
 
   // Get selected parcels from the full list
   const selectedParcels = useMemo(() => {
@@ -72,9 +56,9 @@ export function SelectionDrawer({
   }
 
   return (
-    <div
+    <DrawerShell
       className={cn(
-        "absolute bottom-0 left-0 right-0 glass-panel border-t border-border/50 transition-all duration-300 z-30",
+        "border-border/50 absolute right-0 bottom-0 left-0 z-30 rounded-none border-t transition-all duration-300",
         isExpanded ? "h-80" : "h-12"
       )}
     >
@@ -82,47 +66,48 @@ export function SelectionDrawer({
       <button
         type="button"
         onClick={() => setIsExpanded(!isExpanded)}
-        className="w-full h-12 px-4 flex items-center justify-between hover:bg-muted/10 transition-colors"
+        className="hover:bg-muted/10 flex h-12 w-full items-center justify-between px-4 transition-colors"
       >
         <div className="flex items-center gap-3">
-          <span className="font-medium text-foreground">Selected Parcels</span>
-          <span className="px-2 py-0.5 rounded-full bg-primary/20 text-primary text-xs font-medium">
+          <span className="text-foreground font-medium">Selected Parcels</span>
+          {/* Phase 1B.1B-2: Smooth count with tabular nums for stability */}
+          <span className="bg-primary/20 text-primary rounded-full px-2 py-0.5 text-xs font-medium tabular-nums transition-[opacity,transform] duration-[var(--dur-1)] ease-[var(--ease-out)]">
             {selectedCount}
           </span>
           {hiddenCount > 0 && (
-            <span className="text-xs text-amber-400">
+            <span className="text-xs text-amber-400 tabular-nums transition-opacity duration-[var(--dur-1)]">
               ({hiddenCount} hidden by filters)
             </span>
           )}
         </div>
         <div className="flex items-center gap-2">
           {isExpanded ? (
-            <ChevronDown className="w-4 h-4 text-muted-foreground" />
+            <ChevronDown className="text-muted-foreground h-4 w-4" />
           ) : (
-            <ChevronUp className="w-4 h-4 text-muted-foreground" />
+            <ChevronUp className="text-muted-foreground h-4 w-4" />
           )}
         </div>
       </button>
 
       {/* Content */}
       {isExpanded && (
-        <div className="h-[calc(100%-3rem)] flex flex-col">
+        <div className="flex h-[calc(100%-3rem)] flex-col">
           {/* Tabs + Actions */}
-          <div className="px-4 py-2 border-b border-border/30 flex items-center justify-between">
+          <div className="border-border/30 flex items-center justify-between border-b px-4 py-2">
             <Tabs value={activeTab} onValueChange={setActiveTab}>
               <TabsList className="bg-muted/30 h-8">
                 <TabsTrigger
                   value="parcels"
-                  className="h-6 px-3 text-xs data-[state=active]:bg-primary/20 data-[state=active]:text-primary"
+                  className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary h-6 px-3 text-xs"
                 >
-                  <List className="w-3.5 h-3.5 mr-1.5" />
+                  <List className="mr-1.5 h-3.5 w-3.5" />
                   Parcels
                 </TabsTrigger>
                 <TabsTrigger
                   value="summary"
-                  className="h-6 px-3 text-xs data-[state=active]:bg-primary/20 data-[state=active]:text-primary"
+                  className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary h-6 px-3 text-xs"
                 >
-                  <BarChart3 className="w-3.5 h-3.5 mr-1.5" />
+                  <BarChart3 className="mr-1.5 h-3.5 w-3.5" />
                   Summary
                 </TabsTrigger>
               </TabsList>
@@ -130,31 +115,31 @@ export function SelectionDrawer({
 
             {/* Actions */}
             <div className="flex items-center gap-2">
-              <Button
+              <TactileButton
                 variant="outline"
                 size="sm"
                 onClick={handleExport}
-                className="h-7 px-3 text-xs glass-btn border-border/50 text-foreground bg-transparent"
+                className="border-border/50 text-foreground h-7 bg-transparent px-3 text-xs"
               >
-                <Download className="w-3.5 h-3.5 mr-1.5" />
+                <Download className="mr-1.5 h-3.5 w-3.5" />
                 Export JSON
-              </Button>
-              <Button
+              </TactileButton>
+              <TactileButton
                 variant="outline"
                 size="sm"
                 onClick={handleCreateCalibrationZone}
-                className="h-7 px-3 text-xs glass-btn border-border/50 text-foreground bg-transparent"
+                className="border-border/50 text-foreground h-7 bg-transparent px-3 text-xs"
               >
-                <Sliders className="w-3.5 h-3.5 mr-1.5" />
+                <Sliders className="mr-1.5 h-3.5 w-3.5" />
                 Create Calibration Zone
-              </Button>
+              </TactileButton>
               <Button
                 variant="ghost"
                 size="sm"
                 onClick={clearSelection}
-                className="h-7 px-2 text-xs text-muted-foreground hover:text-foreground"
+                className="text-muted-foreground hover:text-foreground h-7 px-2 text-xs"
               >
-                <X className="w-3.5 h-3.5 mr-1" />
+                <X className="mr-1 h-3.5 w-3.5" />
                 Clear
               </Button>
             </div>
@@ -171,6 +156,6 @@ export function SelectionDrawer({
           </div>
         </div>
       )}
-    </div>
+    </DrawerShell>
   );
 }

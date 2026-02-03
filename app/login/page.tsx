@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react"
+import React from "react";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
@@ -34,27 +34,23 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="space-bg min-h-screen flex items-center justify-center p-4">
+    <div className="space-bg flex min-h-screen items-center justify-center p-4">
       {/* Decorative Elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-accent/5 rounded-full blur-3xl" />
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="bg-primary/5 absolute top-1/4 left-1/4 h-96 w-96 rounded-full blur-3xl" />
+        <div className="bg-accent/5 absolute right-1/4 bottom-1/4 h-96 w-96 rounded-full blur-3xl" />
       </div>
 
       {/* Login Card */}
       <div className="relative w-full max-w-md">
-        <div className="glass-panel rounded-2xl p-8">
+        <div className="tf-glass rounded-2xl p-8">
           {/* Logo & Header */}
-          <div className="text-center mb-8">
-            <div className="w-16 h-16 mx-auto mb-4 rounded-xl bg-primary/20 border border-primary/40 flex items-center justify-center">
-              <Building2 className="w-8 h-8 text-primary" />
+          <div className="mb-8 text-center">
+            <div className="bg-primary/20 border-primary/40 mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-xl border">
+              <Building2 className="text-primary h-8 w-8" />
             </div>
-            <h1 className="text-2xl font-semibold text-foreground mb-2">
-              TerraFusion
-            </h1>
-            <p className="text-muted-foreground text-sm">
-              Sovereign Valuation Operating System
-            </p>
+            <h1 className="text-foreground mb-2 text-2xl font-semibold">TerraFusion</h1>
+            <p className="text-muted-foreground text-sm">Sovereign Valuation Operating System</p>
           </div>
 
           {/* Login Form */}
@@ -64,14 +60,14 @@ export default function LoginPage() {
                 Email Address
               </Label>
               <div className="relative">
-                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Mail className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
                 <Input
                   id="email"
                   type="email"
                   placeholder="assessor@county.gov"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="pl-10 bg-input border-border/50 text-foreground placeholder:text-muted-foreground focus:border-primary/50"
+                  className="bg-input border-border/50 text-foreground placeholder:text-muted-foreground focus:border-primary/50 pl-10"
                   required
                 />
               </div>
@@ -82,21 +78,21 @@ export default function LoginPage() {
                 Password
               </Label>
               <div className="relative">
-                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                <Lock className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
                 <Input
                   id="password"
                   type="password"
                   placeholder="Enter your password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="pl-10 bg-input border-border/50 text-foreground placeholder:text-muted-foreground focus:border-primary/50"
+                  className="bg-input border-border/50 text-foreground placeholder:text-muted-foreground focus:border-primary/50 pl-10"
                   required
                 />
               </div>
             </div>
 
             {error && (
-              <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/30 text-destructive text-sm">
+              <div className="bg-destructive/10 border-destructive/30 text-destructive rounded-lg border p-3 text-sm">
                 {error}
               </div>
             )}
@@ -104,35 +100,35 @@ export default function LoginPage() {
             <Button
               type="submit"
               disabled={isLoading}
-              className="w-full glass-btn-primary text-foreground font-medium h-11"
+              className="tf-glass-btn tf-glass-btn--primary text-foreground h-11 w-full font-medium"
             >
               {isLoading ? (
                 <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Authenticating...
                 </>
               ) : (
                 <>
                   Sign In
-                  <ArrowRight className="w-4 h-4 ml-2" />
+                  <ArrowRight className="ml-2 h-4 w-4" />
                 </>
               )}
             </Button>
           </form>
 
           {/* Demo Mode */}
-          <div className="mt-6 pt-6 border-t border-border/30">
-            <p className="text-xs text-muted-foreground text-center mb-3">
+          <div className="border-border/30 mt-6 border-t pt-6">
+            <p className="text-muted-foreground mb-3 text-center text-xs">
               No account? Try the demo:
             </p>
             <Button
               type="button"
               variant="outline"
               onClick={() => router.push("/county")}
-              className="w-full glass-btn text-foreground border-accent/40 hover:border-accent/60"
+              className="tf-glass-btn text-foreground border-accent/40 hover:border-accent/60 w-full"
             >
               Enter Demo Mode
-              <ArrowRight className="w-4 h-4 ml-2" />
+              <ArrowRight className="ml-2 h-4 w-4" />
             </Button>
           </div>
 
@@ -140,7 +136,7 @@ export default function LoginPage() {
           <div className="mt-4 text-center">
             <button
               type="button"
-              className="text-sm text-muted-foreground hover:text-primary transition-colors"
+              className="text-muted-foreground hover:text-primary text-sm transition-colors"
             >
               Forgot your password?
             </button>
@@ -148,7 +144,7 @@ export default function LoginPage() {
         </div>
 
         {/* Security Note */}
-        <p className="text-center text-xs text-muted-foreground mt-6 px-4">
+        <p className="text-muted-foreground mt-6 px-4 text-center text-xs">
           Protected by FISMA-High compliant security protocols.
           <br />
           All access is logged and monitored.

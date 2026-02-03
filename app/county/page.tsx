@@ -16,12 +16,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  getCounties,
-  selectCounty,
-  type County,
-  type UserRole,
-} from "@/lib/api";
+import { getCounties, selectCounty, type County, type UserRole } from "@/lib/api";
 import { ApiError } from "@/components/api-error";
 import { cn } from "@/lib/utils";
 
@@ -103,29 +98,25 @@ export default function CountyPage() {
   return (
     <div className="space-bg min-h-screen p-4 md:p-8">
       {/* Decorative Elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-1/3 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl" />
-        <div className="absolute bottom-1/3 right-1/4 w-96 h-96 bg-accent/5 rounded-full blur-3xl" />
+      <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="bg-primary/5 absolute top-1/3 left-1/4 h-96 w-96 rounded-full blur-3xl" />
+        <div className="bg-accent/5 absolute right-1/4 bottom-1/3 h-96 w-96 rounded-full blur-3xl" />
       </div>
 
-      <div className="relative max-w-4xl mx-auto">
+      <div className="relative mx-auto max-w-4xl">
         {/* Header */}
-        <div className="text-center mb-8">
-          <div className="w-16 h-16 mx-auto mb-4 rounded-xl bg-primary/20 border border-primary/40 flex items-center justify-center">
-            <Building2 className="w-8 h-8 text-primary" />
+        <div className="mb-8 text-center">
+          <div className="bg-primary/20 border-primary/40 mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-xl border">
+            <Building2 className="text-primary h-8 w-8" />
           </div>
-          <h1 className="text-2xl font-semibold text-foreground mb-2">
-            Select Your Workspace
-          </h1>
-          <p className="text-muted-foreground">
-            Choose your county and role to continue
-          </p>
+          <h1 className="text-foreground mb-2 text-2xl font-semibold">Select Your Workspace</h1>
+          <p className="text-muted-foreground">Choose your county and role to continue</p>
         </div>
 
         {error && (
           <div className="mb-6">
-            <ApiError 
-              error={error} 
+            <ApiError
+              error={error}
               onRetry={() => {
                 setError(null);
                 setIsLoading(true);
@@ -133,42 +124,38 @@ export default function CountyPage() {
                   .then(setCounties)
                   .catch((err) => setError(err.message || "Failed to load counties"))
                   .finally(() => setIsLoading(false));
-              }} 
+              }}
             />
           </div>
         )}
 
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid gap-6 md:grid-cols-2">
           {/* County Selection */}
-          <div className="glass-panel rounded-xl p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <MapPin className="w-5 h-5 text-primary" />
-              <h2 className="text-lg font-medium text-foreground">
-                Select County
-              </h2>
+          <div className="tf-glass rounded-xl p-6">
+            <div className="mb-4 flex items-center gap-3">
+              <MapPin className="text-primary h-5 w-5" />
+              <h2 className="text-foreground text-lg font-medium">Select County</h2>
             </div>
 
             {/* Search */}
             <div className="relative mb-4">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
               <Input
                 placeholder="Search counties..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 bg-input border-border/50 text-foreground placeholder:text-muted-foreground"
+                className="bg-input border-border/50 text-foreground placeholder:text-muted-foreground pl-10"
               />
             </div>
 
             {/* County List */}
-            <div className="space-y-2 max-h-80 overflow-y-auto pr-2">
+            <div className="max-h-80 space-y-2 overflow-y-auto pr-2">
               {isLoading ? (
                 <div className="flex items-center justify-center py-8">
-                  <Loader2 className="w-6 h-6 animate-spin text-muted-foreground" />
+                  <Loader2 className="text-muted-foreground h-6 w-6 animate-spin" />
                 </div>
               ) : filteredCounties.length === 0 ? (
-                <p className="text-center text-muted-foreground py-8">
-                  No counties found
-                </p>
+                <p className="text-muted-foreground py-8 text-center">No counties found</p>
               ) : (
                 filteredCounties.map((county) => (
                   <button
@@ -176,8 +163,8 @@ export default function CountyPage() {
                     type="button"
                     onClick={() => setSelectedCounty(county.id)}
                     className={cn(
-                      "w-full p-4 rounded-lg text-left transition-all",
-                      "glass-btn border border-transparent",
+                      "w-full rounded-lg p-4 text-left transition-all",
+                      "tf-glass-btn border border-transparent",
                       selectedCounty === county.id
                         ? "border-primary/50 bg-primary/10"
                         : "hover:border-border/50"
@@ -185,15 +172,11 @@ export default function CountyPage() {
                   >
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="font-medium text-foreground">
-                          {county.name}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          {county.state}
-                        </p>
+                        <p className="text-foreground font-medium">{county.name}</p>
+                        <p className="text-muted-foreground text-sm">{county.state}</p>
                       </div>
                       <div className="text-right">
-                        <p className="text-sm text-muted-foreground">
+                        <p className="text-muted-foreground text-sm">
                           {county.parcelCount.toLocaleString()} parcels
                         </p>
                       </div>
@@ -205,12 +188,10 @@ export default function CountyPage() {
           </div>
 
           {/* Role Selection */}
-          <div className="glass-panel rounded-xl p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <Users className="w-5 h-5 text-primary" />
-              <h2 className="text-lg font-medium text-foreground">
-                Select Role
-              </h2>
+          <div className="tf-glass rounded-xl p-6">
+            <div className="mb-4 flex items-center gap-3">
+              <Users className="text-primary h-5 w-5" />
+              <h2 className="text-foreground text-lg font-medium">Select Role</h2>
             </div>
 
             <div className="space-y-3">
@@ -222,8 +203,8 @@ export default function CountyPage() {
                     type="button"
                     onClick={() => setSelectedRole(role.value)}
                     className={cn(
-                      "w-full p-4 rounded-lg text-left transition-all",
-                      "glass-btn border border-transparent",
+                      "w-full rounded-lg p-4 text-left transition-all",
+                      "tf-glass-btn border border-transparent",
                       selectedRole === role.value
                         ? "border-primary/50 bg-primary/10"
                         : "hover:border-border/50"
@@ -232,28 +213,20 @@ export default function CountyPage() {
                     <div className="flex items-start gap-3">
                       <div
                         className={cn(
-                          "w-10 h-10 rounded-lg flex items-center justify-center shrink-0",
-                          selectedRole === role.value
-                            ? "bg-primary/20"
-                            : "bg-muted/50"
+                          "flex h-10 w-10 shrink-0 items-center justify-center rounded-lg",
+                          selectedRole === role.value ? "bg-primary/20" : "bg-muted/50"
                         )}
                       >
                         <Icon
                           className={cn(
-                            "w-5 h-5",
-                            selectedRole === role.value
-                              ? "text-primary"
-                              : "text-muted-foreground"
+                            "h-5 w-5",
+                            selectedRole === role.value ? "text-primary" : "text-muted-foreground"
                           )}
                         />
                       </div>
                       <div>
-                        <p className="font-medium text-foreground">
-                          {role.label}
-                        </p>
-                        <p className="text-sm text-muted-foreground">
-                          {role.description}
-                        </p>
+                        <p className="text-foreground font-medium">{role.label}</p>
+                        <p className="text-muted-foreground text-sm">{role.description}</p>
                       </div>
                     </div>
                   </button>
@@ -268,17 +241,17 @@ export default function CountyPage() {
           <Button
             onClick={handleContinue}
             disabled={!selectedCounty || !selectedRole || isSubmitting}
-            className="glass-btn-primary text-foreground font-medium px-8 h-12"
+            className="tf-glass-btn tf-glass-btn--primary text-foreground h-12 px-8 font-medium"
           >
             {isSubmitting ? (
               <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Setting up workspace...
               </>
             ) : (
               <>
                 Continue to Dashboard
-                <ArrowRight className="w-4 h-4 ml-2" />
+                <ArrowRight className="ml-2 h-4 w-4" />
               </>
             )}
           </Button>

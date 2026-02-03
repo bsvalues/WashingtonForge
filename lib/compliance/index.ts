@@ -35,10 +35,7 @@ export function computeComplianceStatus(
   return "non-compliant";
 }
 
-export function computeCODCompliance(
-  cod: number,
-  maxThreshold: number
-): ComplianceStatus {
+export function computeCODCompliance(cod: number, maxThreshold: number): ComplianceStatus {
   if (cod <= maxThreshold) {
     return "compliant";
   }
@@ -69,17 +66,11 @@ export function evaluateCompliance(
   // COD compliance
   const codStatus = computeCODCompliance(metrics.cod, thresholds.codMax);
   if (codStatus !== "compliant") {
-    details.push(
-      `COD ${metrics.cod.toFixed(1)}% exceeds maximum ${thresholds.codMax}%`
-    );
+    details.push(`COD ${metrics.cod.toFixed(1)}% exceeds maximum ${thresholds.codMax}%`);
   }
 
   // PRD compliance
-  const prdStatus = computeComplianceStatus(
-    metrics.prd,
-    thresholds.prdMin,
-    thresholds.prdMax
-  );
+  const prdStatus = computeComplianceStatus(metrics.prd, thresholds.prdMin, thresholds.prdMax);
   if (prdStatus !== "compliant") {
     const direction = metrics.prd > 1 ? "regressive" : "progressive";
     details.push(
@@ -88,11 +79,7 @@ export function evaluateCompliance(
   }
 
   // PRB compliance
-  const prbStatus = computeComplianceStatus(
-    metrics.prb,
-    thresholds.prbMin,
-    thresholds.prbMax
-  );
+  const prbStatus = computeComplianceStatus(metrics.prb, thresholds.prbMin, thresholds.prbMax);
   if (prbStatus !== "compliant") {
     const direction = metrics.prb > 0 ? "regressive" : "progressive";
     details.push(
@@ -132,9 +119,7 @@ export function evaluateRatioStudyCompliance(
   propertyType: "residential" | "commercial" = "residential"
 ): ComplianceResult {
   const thresholds =
-    propertyType === "commercial"
-      ? IAAO_COMMERCIAL_THRESHOLDS
-      : IAAO_RESIDENTIAL_THRESHOLDS;
+    propertyType === "commercial" ? IAAO_COMMERCIAL_THRESHOLDS : IAAO_RESIDENTIAL_THRESHOLDS;
 
   return evaluateCompliance(
     {
@@ -156,9 +141,7 @@ export function evaluateDatasetCompliance(
   propertyType: "residential" | "commercial" = "residential"
 ): ComplianceResult {
   const thresholds =
-    propertyType === "commercial"
-      ? IAAO_COMMERCIAL_THRESHOLDS
-      : IAAO_RESIDENTIAL_THRESHOLDS;
+    propertyType === "commercial" ? IAAO_COMMERCIAL_THRESHOLDS : IAAO_RESIDENTIAL_THRESHOLDS;
 
   return evaluateCompliance(
     {

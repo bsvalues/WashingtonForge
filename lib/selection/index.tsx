@@ -28,21 +28,21 @@ export interface SelectionActions {
   selectParcel: (parcelId: string, shiftKey?: boolean) => void;
   deselectParcel: (parcelId: string) => void;
   toggleParcel: (parcelId: string) => void;
-  
+
   // Bulk operations
   selectParcels: (parcelIds: string[]) => void;
   clearSelection: () => void;
-  
+
   // Hover
   setHoveredParcel: (parcelId: string | null) => void;
-  
+
   // Selection mode
   setSingleSelectMode: (enabled: boolean) => void;
   setSelectMode: (mode: "none" | "lasso" | "box") => void;
-  
+
   // Geometry
   setSelectionGeometry: (geometry: GeoJSON.Polygon | null) => void;
-  
+
   // Utilities
   isSelected: (parcelId: string) => boolean;
 }
@@ -74,28 +74,31 @@ export function SelectionProvider({ children }: SelectionProviderProps) {
   const [selectMode, setSelectMode] = useState<"none" | "lasso" | "box">("none");
 
   // Select a single parcel (with optional shift key for multi-select)
-  const selectParcel = useCallback((parcelId: string, shiftKey = false) => {
-    setSelectedParcelIds((prev) => {
-      if (singleSelectMode && !shiftKey) {
-        // Single select mode: replace selection
-        return new Set([parcelId]);
-      }
-      if (shiftKey) {
-        // Shift+click: toggle without clearing
-        const next = new Set(prev);
-        if (next.has(parcelId)) {
-          next.delete(parcelId);
-        } else {
-          next.add(parcelId);
+  const selectParcel = useCallback(
+    (parcelId: string, shiftKey = false) => {
+      setSelectedParcelIds((prev) => {
+        if (singleSelectMode && !shiftKey) {
+          // Single select mode: replace selection
+          return new Set([parcelId]);
         }
+        if (shiftKey) {
+          // Shift+click: toggle without clearing
+          const next = new Set(prev);
+          if (next.has(parcelId)) {
+            next.delete(parcelId);
+          } else {
+            next.add(parcelId);
+          }
+          return next;
+        }
+        // Default: add to selection
+        const next = new Set(prev);
+        next.add(parcelId);
         return next;
-      }
-      // Default: add to selection
-      const next = new Set(prev);
-      next.add(parcelId);
-      return next;
-    });
-  }, [singleSelectMode]);
+      });
+    },
+    [singleSelectMode]
+  );
 
   const deselectParcel = useCallback((parcelId: string) => {
     setSelectedParcelIds((prev) => {
@@ -136,50 +139,52 @@ export function SelectionProvider({ children }: SelectionProviderProps) {
     setHoveredParcelId(parcelId);
   }, []);
 
-  const isSelected = useCallback((parcelId: string) => {
-    return selectedParcelIds.has(parcelId);
-  }, [selectedParcelIds]);
-
-  const value = useMemo<SelectionContextValue>(() => ({
-    // State
-    selectedParcelIds,
-    selectionGeometry,
-    hoveredParcelId,
-    singleSelectMode,
-    selectMode,
-    // Actions
-    selectParcel,
-    deselectParcel,
-    toggleParcel,
-    selectParcels,
-    clearSelection,
-    setHoveredParcel,
-    setSingleSelectMode,
-    setSelectMode,
-    setSelectionGeometry,
-    isSelected,
-    // Derived
-    selectedCount: selectedParcelIds.size,
-  }), [
-    selectedParcelIds,
-    selectionGeometry,
-    hoveredParcelId,
-    singleSelectMode,
-    selectMode,
-    selectParcel,
-    deselectParcel,
-    toggleParcel,
-    selectParcels,
-    clearSelection,
-    setHoveredParcel,
-    isSelected,
-  ]);
-
-  return (
-    <SelectionContext.Provider value={value}>
-      {children}
-    </SelectionContext.Provider>
+  const isSelected = useCallback(
+    (parcelId: string) => {
+      return selectedParcelIds.has(parcelId);
+    },
+    [selectedParcelIds]
   );
+
+  const value = useMemo<SelectionContextValue>(
+    () => ({
+      // State
+      selectedParcelIds,
+      selectionGeometry,
+      hoveredParcelId,
+      singleSelectMode,
+      selectMode,
+      // Actions
+      selectParcel,
+      deselectParcel,
+      toggleParcel,
+      selectParcels,
+      clearSelection,
+      setHoveredParcel,
+      setSingleSelectMode,
+      setSelectMode,
+      setSelectionGeometry,
+      isSelected,
+      // Derived
+      selectedCount: selectedParcelIds.size,
+    }),
+    [
+      selectedParcelIds,
+      selectionGeometry,
+      hoveredParcelId,
+      singleSelectMode,
+      selectMode,
+      selectParcel,
+      deselectParcel,
+      toggleParcel,
+      selectParcels,
+      clearSelection,
+      setHoveredParcel,
+      isSelected,
+    ]
+  );
+
+  return <SelectionContext.Provider value={value}>{children}</SelectionContext.Provider>;
 }
 
 // ============================================
@@ -198,10 +203,7 @@ export function useSelection(): SelectionContextValue {
 // Export Selection Utility
 // ============================================
 
-export function exportSelectionJSON(
-  parcelIds: string[],
-  geometry: GeoJSON.Polygon | null
-): string {
+export function exportSelectionJSON(parcelIds: string[], geometry: GeoJSON.Polygon | null): string {
   const data = {
     exportedAt: new Date().toISOString(),
     parcelCount: parcelIds.length,
@@ -211,10 +213,7 @@ export function exportSelectionJSON(
   return JSON.stringify(data, null, 2);
 }
 
-export function downloadSelectionJSON(
-  parcelIds: string[],
-  geometry: GeoJSON.Polygon | null
-) {
+export function downloadSelectionJSON(parcelIds: string[], geometry: GeoJSON.Polygon | null) {
   const json = exportSelectionJSON(parcelIds, geometry);
   const blob = new Blob([json], { type: "application/json" });
   const url = URL.createObjectURL(blob);

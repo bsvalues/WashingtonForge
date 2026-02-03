@@ -87,7 +87,15 @@ export const MOCK_PARCELS: Parcel[] = [
     yearBuilt: 1985,
     geometry: {
       type: "Polygon",
-      coordinates: [[[-119.28, 46.28], [-119.279, 46.28], [-119.279, 46.281], [-119.28, 46.281], [-119.28, 46.28]]],
+      coordinates: [
+        [
+          [-119.28, 46.28],
+          [-119.279, 46.28],
+          [-119.279, 46.281],
+          [-119.28, 46.281],
+          [-119.28, 46.28],
+        ],
+      ],
     },
   },
   {
@@ -106,7 +114,15 @@ export const MOCK_PARCELS: Parcel[] = [
     yearBuilt: 2001,
     geometry: {
       type: "Polygon",
-      coordinates: [[[-119.30, 46.21], [-119.299, 46.21], [-119.299, 46.211], [-119.30, 46.211], [-119.30, 46.21]]],
+      coordinates: [
+        [
+          [-119.3, 46.21],
+          [-119.299, 46.21],
+          [-119.299, 46.211],
+          [-119.3, 46.211],
+          [-119.3, 46.21],
+        ],
+      ],
     },
   },
   {
@@ -125,7 +141,15 @@ export const MOCK_PARCELS: Parcel[] = [
     yearBuilt: 2015,
     geometry: {
       type: "Polygon",
-      coordinates: [[[-119.35, 46.30], [-119.349, 46.30], [-119.349, 46.301], [-119.35, 46.301], [-119.35, 46.30]]],
+      coordinates: [
+        [
+          [-119.35, 46.3],
+          [-119.349, 46.3],
+          [-119.349, 46.301],
+          [-119.35, 46.301],
+          [-119.35, 46.3],
+        ],
+      ],
     },
   },
   {
@@ -144,7 +168,15 @@ export const MOCK_PARCELS: Parcel[] = [
     yearBuilt: 2018,
     geometry: {
       type: "Polygon",
-      coordinates: [[[-119.27, 46.32], [-119.269, 46.32], [-119.269, 46.321], [-119.27, 46.321], [-119.27, 46.32]]],
+      coordinates: [
+        [
+          [-119.27, 46.32],
+          [-119.269, 46.32],
+          [-119.269, 46.321],
+          [-119.27, 46.321],
+          [-119.27, 46.32],
+        ],
+      ],
     },
   },
   {
@@ -163,7 +195,15 @@ export const MOCK_PARCELS: Parcel[] = [
     yearBuilt: 1972,
     geometry: {
       type: "Polygon",
-      coordinates: [[[-119.32, 46.19], [-119.319, 46.19], [-119.319, 46.191], [-119.32, 46.191], [-119.32, 46.19]]],
+      coordinates: [
+        [
+          [-119.32, 46.19],
+          [-119.319, 46.19],
+          [-119.319, 46.191],
+          [-119.32, 46.191],
+          [-119.32, 46.19],
+        ],
+      ],
     },
   },
 ];
@@ -604,7 +644,8 @@ export const MOCK_VEI_FINDINGS: VEIFinding[] = [
     currentValue: 1.08,
     threshold: 1.03,
     direction: "above",
-    description: "Downtown strata shows regressive bias - high-value properties under-assessed relative to low-value",
+    description:
+      "Downtown strata shows regressive bias - high-value properties under-assessed relative to low-value",
     recommendedLevers: ["schedule_factor", "depreciation_curve_shift"],
   },
   {
@@ -617,7 +658,8 @@ export const MOCK_VEI_FINDINGS: VEIFinding[] = [
     currentValue: 15.6,
     threshold: 15.0,
     direction: "above",
-    description: "Multi-Family class COD slightly exceeds IAAO threshold - consider quality/condition normalization",
+    description:
+      "Multi-Family class COD slightly exceeds IAAO threshold - consider quality/condition normalization",
     recommendedLevers: ["quality_mapping_adjust", "location_factor_adjust"],
   },
   {
@@ -628,7 +670,7 @@ export const MOCK_VEI_FINDINGS: VEIFinding[] = [
     severity: "warn",
     metric: "median_ratio",
     currentValue: 0.88,
-    threshold: 0.90,
+    threshold: 0.9,
     direction: "below",
     description: "High-value tier median ratio below target range - potential under-assessment",
     recommendedLevers: ["schedule_factor", "land_allocation_adjust"],
@@ -758,11 +800,56 @@ export interface DriftHotspot {
 }
 
 export const MOCK_DRIFT_HOTSPOTS: DriftHotspot[] = [
-  { id: "dh-1", name: "Downtown", type: "neighborhood", metric: "PRD", value: 1.08, threshold: 1.03, severity: "fail", parcelCount: 245 },
-  { id: "dh-2", name: "Multi-Family", type: "class", metric: "COD", value: 15.6, threshold: 15.0, severity: "warn", parcelCount: 210 },
-  { id: "dh-3", name: "High Value (>$500K)", type: "tier", metric: "median_ratio", value: 0.88, threshold: 0.90, severity: "warn", parcelCount: 412 },
-  { id: "dh-4", name: "Southend", type: "neighborhood", metric: "COD", value: 14.2, threshold: 15.0, severity: "warn", parcelCount: 336 },
-  { id: "dh-5", name: "Commercial", type: "class", metric: "PRD", value: 1.04, threshold: 1.03, severity: "warn", parcelCount: 312 },
+  {
+    id: "dh-1",
+    name: "Downtown",
+    type: "neighborhood",
+    metric: "PRD",
+    value: 1.08,
+    threshold: 1.03,
+    severity: "fail",
+    parcelCount: 245,
+  },
+  {
+    id: "dh-2",
+    name: "Multi-Family",
+    type: "class",
+    metric: "COD",
+    value: 15.6,
+    threshold: 15.0,
+    severity: "warn",
+    parcelCount: 210,
+  },
+  {
+    id: "dh-3",
+    name: "High Value (>$500K)",
+    type: "tier",
+    metric: "median_ratio",
+    value: 0.88,
+    threshold: 0.9,
+    severity: "warn",
+    parcelCount: 412,
+  },
+  {
+    id: "dh-4",
+    name: "Southend",
+    type: "neighborhood",
+    metric: "COD",
+    value: 14.2,
+    threshold: 15.0,
+    severity: "warn",
+    parcelCount: 336,
+  },
+  {
+    id: "dh-5",
+    name: "Commercial",
+    type: "class",
+    metric: "PRD",
+    value: 1.04,
+    threshold: 1.03,
+    severity: "warn",
+    parcelCount: 312,
+  },
 ];
 
 // ============================================

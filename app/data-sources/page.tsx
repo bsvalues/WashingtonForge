@@ -3,11 +3,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { AppShell } from "@/components/app-shell";
 import { loadCountyDataFreshness } from "@/lib/api";
-import type {
-  CountyDataFreshness,
-  OverlayStatus,
-  UpdateLane,
-} from "@/lib/api/types";
+import type { CountyDataFreshness, OverlayStatus, UpdateLane } from "@/lib/api/types";
 import { cn } from "@/lib/utils";
 import { Database, Search, ArrowUpDown } from "lucide-react";
 
@@ -42,20 +38,16 @@ function ProgressBar({ pct }: { pct: number }) {
   const safe = Math.max(0, Math.min(100, pct));
   return (
     <div className="w-full">
-      <div className="h-2 w-full rounded-full bg-muted/30">
+      <div className="bg-muted/30 h-2 w-full rounded-full">
         <div
           className={cn(
             "h-2 rounded-full transition-all",
-            safe === 100
-              ? "bg-emerald-500/60"
-              : safe >= 95
-                ? "bg-primary/60"
-                : "bg-amber-500/60"
+            safe === 100 ? "bg-emerald-500/60" : safe >= 95 ? "bg-primary/60" : "bg-amber-500/60"
           )}
           style={{ width: `${safe}%` }}
         />
       </div>
-      <div className="mt-1 text-xs text-muted-foreground">{safe.toFixed(0)}%</div>
+      <div className="text-muted-foreground mt-1 text-xs">{safe.toFixed(0)}%</div>
     </div>
   );
 }
@@ -98,9 +90,9 @@ export default function DataSourcesPage() {
   const [q, setQ] = useState("");
   const [status, setStatus] = useState<OverlayStatus | "all">("all");
   const [lane, setLane] = useState<UpdateLane | "all">("all");
-  const [sort, setSort] = useState<
-    "county" | "baseline" | "status" | "lastUpdate" | "lane"
-  >("county");
+  const [sort, setSort] = useState<"county" | "baseline" | "status" | "lastUpdate" | "lane">(
+    "county"
+  );
   const [dir, setDir] = useState<"asc" | "desc">("asc");
 
   useEffect(() => {
@@ -118,9 +110,7 @@ export default function DataSourcesPage() {
     if (q.trim()) {
       const s = q.trim().toLowerCase();
       r = r.filter(
-        (x) =>
-          x.countyName.toLowerCase().includes(s) ||
-          x.countyId.toLowerCase().includes(s)
+        (x) => x.countyName.toLowerCase().includes(s) || x.countyId.toLowerCase().includes(s)
       );
     }
     if (status !== "all") r = r.filter((x) => x.overlayStatus === status);
@@ -134,12 +124,10 @@ export default function DataSourcesPage() {
     r.sort((a, b) => {
       let c = 0;
       if (sort === "county") c = cmpStr(a.countyName, b.countyName);
-      if (sort === "baseline")
-        c = cmpNum(a.baselineCoveragePct, b.baselineCoveragePct);
+      if (sort === "baseline") c = cmpNum(a.baselineCoveragePct, b.baselineCoveragePct);
       if (sort === "status") c = cmpStr(a.overlayStatus, b.overlayStatus);
       if (sort === "lane") c = cmpStr(a.updateLane, b.updateLane);
-      if (sort === "lastUpdate")
-        c = cmpDate(a.lastOverlayUpdateAt, b.lastOverlayUpdateAt);
+      if (sort === "lastUpdate") c = cmpDate(a.lastOverlayUpdateAt, b.lastOverlayUpdateAt);
       return dir === "asc" ? c : -c;
     });
 
@@ -147,45 +135,41 @@ export default function DataSourcesPage() {
   }, [rows, q, status, lane, sort, dir]);
 
   return (
-    <AppShell
-      user={{ name: "Demo User", role: "Assessor", county: "Benton County" }}
-    >
-      <div className="p-6 max-w-7xl mx-auto">
+    <AppShell user={{ name: "Demo User", role: "Assessor", county: "Benton County" }}>
+      <div className="mx-auto max-w-7xl p-6">
         {/* Header */}
         <div className="mb-6">
-          <div className="flex items-center gap-3 mb-2">
-            <div className="w-10 h-10 rounded-lg bg-primary/20 border border-primary/40 flex items-center justify-center">
-              <Database className="w-5 h-5 text-primary" />
+          <div className="mb-2 flex items-center gap-3">
+            <div className="bg-primary/20 border-primary/40 flex h-10 w-10 items-center justify-center rounded-lg border">
+              <Database className="text-primary h-5 w-5" />
             </div>
             <div>
-              <h1 className="text-2xl font-semibold text-foreground">
-                Data Sources & Freshness
-              </h1>
-              <p className="text-sm text-muted-foreground">
-                Statewide baseline coverage + per-county overlays. Everything is
-                labeled so simulated and official data are never confused.
+              <h1 className="text-foreground text-2xl font-semibold">Data Sources & Freshness</h1>
+              <p className="text-muted-foreground text-sm">
+                Statewide baseline coverage + per-county overlays. Everything is labeled so
+                simulated and official data are never confused.
               </p>
             </div>
           </div>
         </div>
 
         {/* Controls */}
-        <div className="mb-4 glass-panel rounded-xl p-4">
+        <div className="tf-glass mb-4 rounded-xl p-4">
           <div className="grid gap-3 md:grid-cols-4">
             <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
               <input
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 placeholder="Search county..."
-                className="w-full rounded-lg border border-border/50 bg-input px-9 py-2 text-sm text-foreground outline-none focus:border-primary/50 focus:ring-1 focus:ring-primary/30"
+                className="border-border/50 bg-input text-foreground focus:border-primary/50 focus:ring-primary/30 w-full rounded-lg border px-9 py-2 text-sm outline-none focus:ring-1"
               />
             </div>
 
             <select
               value={status}
               onChange={(e) => setStatus(e.target.value as OverlayStatus | "all")}
-              className="rounded-lg border border-border/50 bg-input px-3 py-2 text-sm text-foreground outline-none focus:border-primary/50"
+              className="border-border/50 bg-input text-foreground focus:border-primary/50 rounded-lg border px-3 py-2 text-sm outline-none"
             >
               <option value="all">Overlay status: All</option>
               <option value="current">Current</option>
@@ -197,7 +181,7 @@ export default function DataSourcesPage() {
             <select
               value={lane}
               onChange={(e) => setLane(e.target.value as UpdateLane | "all")}
-              className="rounded-lg border border-border/50 bg-input px-3 py-2 text-sm text-foreground outline-none focus:border-primary/50"
+              className="border-border/50 bg-input text-foreground focus:border-primary/50 rounded-lg border px-3 py-2 text-sm outline-none"
             >
               <option value="all">Update lane: All</option>
               <option value="A_live_sync">Lane A — Live Sync</option>
@@ -210,15 +194,10 @@ export default function DataSourcesPage() {
                 value={sort}
                 onChange={(e) =>
                   setSort(
-                    e.target.value as
-                      | "county"
-                      | "baseline"
-                      | "status"
-                      | "lane"
-                      | "lastUpdate"
+                    e.target.value as "county" | "baseline" | "status" | "lane" | "lastUpdate"
                   )
                 }
-                className="w-full rounded-lg border border-border/50 bg-input px-3 py-2 text-sm text-foreground outline-none focus:border-primary/50"
+                className="border-border/50 bg-input text-foreground focus:border-primary/50 w-full rounded-lg border px-3 py-2 text-sm outline-none"
               >
                 <option value="county">Sort: County</option>
                 <option value="baseline">Sort: Baseline coverage</option>
@@ -230,28 +209,28 @@ export default function DataSourcesPage() {
               <button
                 type="button"
                 onClick={() => setDir((d) => (d === "asc" ? "desc" : "asc"))}
-                className="rounded-lg border border-border/50 bg-secondary/50 p-2 text-sm text-foreground hover:bg-secondary/70 transition-colors"
+                className="border-border/50 bg-secondary/50 text-foreground hover:bg-secondary/70 rounded-lg border p-2 text-sm transition-colors"
               >
-                <ArrowUpDown className="w-4 h-4" />
+                <ArrowUpDown className="h-4 w-4" />
               </button>
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2 mt-3 text-xs">
+          <div className="mt-3 flex flex-wrap items-center gap-2 text-xs">
             <Badge tone="info">Public Baseline</Badge>
             <Badge tone="neutral">County Overlay</Badge>
             <Badge tone="warn">Stale</Badge>
             <Badge tone="good">Current</Badge>
             <Badge tone="bad">Error</Badge>
-            <span className="ml-auto text-muted-foreground">
+            <span className="text-muted-foreground ml-auto">
               {loading ? "Loading..." : `${filtered.length} counties`}
             </span>
           </div>
         </div>
 
         {/* Table */}
-        <div className="glass-panel rounded-xl overflow-hidden">
-          <div className="grid grid-cols-12 gap-3 border-b border-border/30 px-4 py-3 text-xs font-medium text-muted-foreground">
+        <div className="tf-glass overflow-hidden rounded-xl">
+          <div className="border-border/30 text-muted-foreground grid grid-cols-12 gap-3 border-b px-4 py-3 text-xs font-medium">
             <div className="col-span-3">County</div>
             <div className="col-span-2">Baseline coverage</div>
             <div className="col-span-2">Overlay status</div>
@@ -260,24 +239,22 @@ export default function DataSourcesPage() {
           </div>
 
           {loading ? (
-            <div className="px-4 py-10 text-sm text-muted-foreground text-center">
+            <div className="text-muted-foreground px-4 py-10 text-center text-sm">
               Loading county freshness...
             </div>
           ) : filtered.length === 0 ? (
-            <div className="px-4 py-10 text-sm text-muted-foreground text-center">
+            <div className="text-muted-foreground px-4 py-10 text-center text-sm">
               No counties match filters.
             </div>
           ) : (
-            <div className="divide-y divide-border/20">
+            <div className="divide-border/20 divide-y">
               {filtered.map((x) => (
                 <div
                   key={x.countyId}
-                  className="grid grid-cols-12 gap-3 px-4 py-4 hover:bg-muted/10 transition-colors"
+                  className="hover:bg-muted/10 grid grid-cols-12 gap-3 px-4 py-4 transition-colors"
                 >
                   <div className="col-span-3">
-                    <div className="text-sm font-medium text-foreground">
-                      {x.countyName}
-                    </div>
+                    <div className="text-foreground text-sm font-medium">{x.countyName}</div>
                     <div className="mt-1 flex flex-wrap gap-1">
                       <Badge tone="info">{x.baselineSourceLabel}</Badge>
                       {x.overlaySourceLabel ? (
@@ -299,10 +276,10 @@ export default function DataSourcesPage() {
                   </div>
 
                   <div className="col-span-3">
-                    <div className="text-sm text-foreground">
+                    <div className="text-foreground text-sm">
                       {formatDate(x.lastOverlayUpdateAt)}
                     </div>
-                    <div className="mt-1 text-xs text-muted-foreground">
+                    <div className="text-muted-foreground mt-1 text-xs">
                       {x.overlayStatus === "stale" && x.stalenessNote
                         ? x.stalenessNote
                         : x.overlayStatus === "none"
@@ -316,12 +293,8 @@ export default function DataSourcesPage() {
                   </div>
 
                   <div className="col-span-2">
-                    <div className="text-sm text-foreground">
-                      {laneLabel(x.updateLane)}
-                    </div>
-                    <div className="mt-1 text-xs text-muted-foreground">
-                      {x.updateLaneDetail}
-                    </div>
+                    <div className="text-foreground text-sm">{laneLabel(x.updateLane)}</div>
+                    <div className="text-muted-foreground mt-1 text-xs">{x.updateLaneDetail}</div>
                   </div>
                 </div>
               ))}
@@ -330,21 +303,14 @@ export default function DataSourcesPage() {
         </div>
 
         {/* Footer notes */}
-        <div className="mt-5 glass-panel rounded-xl p-4 text-xs text-muted-foreground">
-          <div className="font-medium text-foreground mb-2">Provenance Rules</div>
+        <div className="tf-glass text-muted-foreground mt-5 rounded-xl p-4 text-xs">
+          <div className="text-foreground mb-2 font-medium">Provenance Rules</div>
           <ul className="list-disc space-y-1 pl-5">
             <li>
-              Every dataset is labeled: Public Baseline / County Overlay /
-              Synthetic / Simulated.
+              Every dataset is labeled: Public Baseline / County Overlay / Synthetic / Simulated.
             </li>
-            <li>
-              Overlay never mutates baseline; it supersedes it per county and is
-              versioned.
-            </li>
-            <li>
-              Any simulated outputs must show a SIMULATED label in UI and
-              exports.
-            </li>
+            <li>Overlay never mutates baseline; it supersedes it per county and is versioned.</li>
+            <li>Any simulated outputs must show a SIMULATED label in UI and exports.</li>
           </ul>
         </div>
       </div>

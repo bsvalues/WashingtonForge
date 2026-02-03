@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  CheckCircle2,
-  Clock,
-  Loader2,
-  XCircle,
-  FileBarChart,
-} from "lucide-react";
+import { CheckCircle2, Clock, Loader2, XCircle, FileBarChart } from "lucide-react";
 import type { RatioStudy } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
@@ -48,21 +42,21 @@ export function RatioStudyList({
 }: RatioStudyListProps) {
   if (isLoading) {
     return (
-      <div className="glass-panel rounded-xl p-8 text-center">
-        <Loader2 className="w-8 h-8 mx-auto mb-3 text-primary animate-spin" />
-        <p className="text-sm text-muted-foreground">Loading studies...</p>
+      <div className="tf-glass rounded-xl p-8 text-center">
+        <Loader2 className="text-primary mx-auto mb-3 h-8 w-8 animate-spin" />
+        <p className="text-muted-foreground text-sm">Loading studies...</p>
       </div>
     );
   }
 
   if (studies.length === 0) {
     return (
-      <div className="glass-panel rounded-xl p-8 text-center">
-        <div className="w-12 h-12 mx-auto mb-4 rounded-xl bg-muted/30 flex items-center justify-center">
-          <FileBarChart className="w-6 h-6 text-muted-foreground" />
+      <div className="tf-glass rounded-xl p-8 text-center">
+        <div className="bg-muted/30 mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-xl">
+          <FileBarChart className="text-muted-foreground h-6 w-6" />
         </div>
-        <p className="text-foreground font-medium mb-1">No Studies Yet</p>
-        <p className="text-sm text-muted-foreground">
+        <p className="text-foreground mb-1 font-medium">No Studies Yet</p>
+        <p className="text-muted-foreground text-sm">
           Run your first ratio study to analyze assessment equity
         </p>
       </div>
@@ -70,11 +64,11 @@ export function RatioStudyList({
   }
 
   return (
-    <div className="glass-panel rounded-xl overflow-hidden">
-      <div className="p-4 border-b border-border/50">
-        <h2 className="font-medium text-foreground">Recent Studies</h2>
+    <div className="tf-glass overflow-hidden rounded-xl">
+      <div className="border-border/50 border-b p-4">
+        <h2 className="text-foreground font-medium">Recent Studies</h2>
       </div>
-      <div className="divide-y divide-border/50 max-h-[600px] overflow-y-auto">
+      <div className="divide-border/50 max-h-[600px] divide-y overflow-y-auto">
         {studies.map((study) => {
           const status = statusConfig[study.status];
           const StatusIcon = status.icon;
@@ -91,24 +85,22 @@ export function RatioStudyList({
               )}
             >
               <div className="flex items-start justify-between gap-3">
-                <div className="flex-1 min-w-0">
+                <div className="min-w-0 flex-1">
                   <p
                     className={cn(
-                      "font-medium truncate",
+                      "truncate font-medium",
                       isSelected ? "text-primary" : "text-foreground"
                     )}
                   >
                     {study.name}
                   </p>
-                  <p className="text-sm text-muted-foreground">
-                    Roll Year {study.rollYear}
-                  </p>
-                  <p className="text-xs text-muted-foreground mt-1">
+                  <p className="text-muted-foreground text-sm">Roll Year {study.rollYear}</p>
+                  <p className="text-muted-foreground mt-1 text-xs">
                     {new Date(study.createdAt).toLocaleDateString()}
                   </p>
                 </div>
                 <div className="flex items-center gap-2">
-                  <StatusIcon className={cn("w-4 h-4", status.className)} />
+                  <StatusIcon className={cn("h-4 w-4", status.className)} />
                   <span
                     className={cn(
                       "text-xs",

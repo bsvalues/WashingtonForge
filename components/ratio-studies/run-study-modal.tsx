@@ -1,10 +1,11 @@
 "use client";
 
-import React from "react"
+import React from "react";
 
 import { useState } from "react";
 import { X, Loader2, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { GlassButton } from "@/components/material";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -25,11 +26,7 @@ interface RunStudyModalProps {
 const currentYear = new Date().getFullYear();
 const rollYears = [currentYear, currentYear - 1, currentYear - 2];
 
-export function RunStudyModal({
-  isOpen,
-  onClose,
-  onStudyCreated,
-}: RunStudyModalProps) {
+export function RunStudyModal({ isOpen, onClose, onStudyCreated }: RunStudyModalProps) {
   const [name, setName] = useState("");
   const [rollYear, setRollYear] = useState(currentYear.toString());
   const [isRunning, setIsRunning] = useState(false);
@@ -62,25 +59,20 @@ export function RunStudyModal({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       {/* Backdrop */}
-      <div
-        className="absolute inset-0 bg-background/80 backdrop-blur-sm"
-        onClick={onClose}
-      />
+      <div className="bg-background/80 absolute inset-0 backdrop-blur-sm" onClick={onClose} />
 
       {/* Modal */}
-      <div className="relative glass-panel rounded-xl w-full max-w-md mx-4 p-6">
+      <div className="tf-glass relative mx-4 w-full max-w-md rounded-xl p-6">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-lg font-semibold text-foreground">
-            Run New Ratio Study
-          </h2>
+        <div className="mb-6 flex items-center justify-between">
+          <h2 className="text-foreground text-lg font-semibold">Run New Ratio Study</h2>
           <Button
             variant="ghost"
             size="icon"
             onClick={onClose}
             className="text-muted-foreground hover:text-foreground"
           >
-            <X className="w-4 h-4" />
+            <X className="h-4 w-4" />
             <span className="sr-only">Close</span>
           </Button>
         </div>
@@ -98,7 +90,7 @@ export function RunStudyModal({
               onChange={(e) => setName(e.target.value)}
               className="bg-input border-border/50 text-foreground placeholder:text-muted-foreground"
             />
-            <p className="text-xs text-muted-foreground">
+            <p className="text-muted-foreground text-xs">
               Optional - a default name will be generated
             </p>
           </div>
@@ -108,16 +100,12 @@ export function RunStudyModal({
               Roll Year
             </Label>
             <Select value={rollYear} onValueChange={setRollYear}>
-              <SelectTrigger className="w-full bg-input border-border/50 text-foreground">
+              <SelectTrigger className="bg-input border-border/50 text-foreground w-full">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-popover border-border/50">
                 {rollYears.map((year) => (
-                  <SelectItem
-                    key={year}
-                    value={year.toString()}
-                    className="text-foreground"
-                  >
+                  <SelectItem key={year} value={year.toString()} className="text-foreground">
                     {year}
                   </SelectItem>
                 ))}
@@ -126,48 +114,43 @@ export function RunStudyModal({
           </div>
 
           {error && (
-            <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/30 text-destructive text-sm">
+            <div className="bg-destructive/10 border-destructive/30 text-destructive rounded-lg border p-3 text-sm">
               {error}
             </div>
           )}
 
           {/* Info Box */}
-          <div className="p-4 rounded-lg bg-muted/20 border border-border/30">
-            <p className="text-sm text-muted-foreground">
-              This will compute ratio study statistics for all qualified sales
-              in the selected roll year, including Median Ratio, COD, PRD, and
-              PRB metrics.
+          <div className="bg-muted/20 border-border/30 rounded-lg border p-4">
+            <p className="text-muted-foreground text-sm">
+              This will compute ratio study statistics for all qualified sales in the selected roll
+              year, including Median Ratio, COD, PRD, and PRB metrics.
             </p>
           </div>
 
           {/* Actions */}
-          <div className="flex gap-3 justify-end">
-            <Button
+          <div className="flex justify-end gap-3">
+            <GlassButton
               type="button"
               variant="outline"
               onClick={onClose}
               disabled={isRunning}
-              className="glass-btn border-border/50 text-foreground bg-transparent"
+              className="border-border/50 text-foreground bg-transparent"
             >
               Cancel
-            </Button>
-            <Button
-              type="submit"
-              disabled={isRunning}
-              className="glass-btn-primary text-foreground"
-            >
+            </GlassButton>
+            <GlassButton type="submit" tone="primary" disabled={isRunning} className="text-foreground">
               {isRunning ? (
                 <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                   Starting...
                 </>
               ) : (
                 <>
-                  <Play className="w-4 h-4 mr-2" />
+                  <Play className="mr-2 h-4 w-4" />
                   Run Study
                 </>
               )}
-            </Button>
+            </GlassButton>
           </div>
         </form>
       </div>

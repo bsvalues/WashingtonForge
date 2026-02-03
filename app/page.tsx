@@ -16,14 +16,14 @@ export default function HomePage() {
   }, [router]);
 
   return (
-    <div className="min-h-screen space-bg flex items-center justify-center">
+    <div className="space-bg flex min-h-screen items-center justify-center">
       <div className="text-center">
         {/* Logo */}
-        <div className="flex items-center justify-center gap-3 mb-6">
+        <div className="mb-6 flex items-center justify-center gap-3">
           <div className="relative">
-            <Hexagon className="w-16 h-16 text-primary" strokeWidth={1.5} />
+            <Hexagon className="text-primary h-16 w-16" strokeWidth={1.5} />
             <Hexagon
-              className="w-16 h-16 text-accent absolute top-0 left-0 opacity-50"
+              className="text-accent absolute top-0 left-0 h-16 w-16 opacity-50"
               strokeWidth={1}
               style={{ transform: "rotate(30deg)" }}
             />
@@ -31,22 +31,18 @@ export default function HomePage() {
         </div>
 
         {/* Title */}
-        <h1 className="text-4xl font-bold text-foreground mb-2 tracking-tight">
-          TerraFusion
-        </h1>
-        <p className="text-lg text-muted-foreground mb-8">
-          Sovereign Valuation Operating System
-        </p>
+        <h1 className="text-foreground mb-2 text-4xl font-bold tracking-tight">TerraFusion</h1>
+        <p className="text-muted-foreground mb-8 text-lg">Sovereign Valuation Operating System</p>
 
         {/* Loading indicator */}
         <div className="flex items-center justify-center gap-2">
-          <div className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+          <div className="bg-primary h-2 w-2 animate-pulse rounded-full" />
           <div
-            className="w-2 h-2 rounded-full bg-primary animate-pulse"
+            className="bg-primary h-2 w-2 animate-pulse rounded-full"
             style={{ animationDelay: "0.2s" }}
           />
           <div
-            className="w-2 h-2 rounded-full bg-primary animate-pulse"
+            className="bg-primary h-2 w-2 animate-pulse rounded-full"
             style={{ animationDelay: "0.4s" }}
           />
         </div>

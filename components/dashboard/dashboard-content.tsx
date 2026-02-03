@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react"
+import React from "react";
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
@@ -23,12 +23,9 @@ import {
   RefreshCw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { GlassButton } from "@/components/material";
 import { cn } from "@/lib/utils";
-import {
-  evaluateCompliance,
-  getComplianceLabel,
-  getComplianceBgColor,
-} from "@/lib/compliance";
+import { evaluateCompliance, getComplianceLabel, getComplianceBgColor } from "@/lib/compliance";
 import { getAuditEvents, setAuditContext, audit } from "@/lib/audit";
 import {
   type DatasetVersion,
@@ -171,10 +168,10 @@ export function DashboardContent({ datasetVersionId }: DashboardContentProps) {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen space-bg flex items-center justify-center">
+      <div className="space-bg flex min-h-screen items-center justify-center">
         <div className="text-center">
-          <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto mb-3" />
-          <p className="text-sm text-muted-foreground">Loading dashboard...</p>
+          <Loader2 className="text-primary mx-auto mb-3 h-8 w-8 animate-spin" />
+          <p className="text-muted-foreground text-sm">Loading dashboard...</p>
         </div>
       </div>
     );
@@ -182,19 +179,15 @@ export function DashboardContent({ datasetVersionId }: DashboardContentProps) {
 
   if (error || !data) {
     return (
-      <div className="min-h-screen space-bg flex items-center justify-center">
-        <div className="text-center glass-panel rounded-xl p-8 max-w-md">
-          <XCircle className="w-12 h-12 text-destructive mx-auto mb-4" />
-          <h2 className="text-lg font-semibold text-foreground mb-2">
-            Failed to Load Dashboard
-          </h2>
-          <p className="text-sm text-muted-foreground mb-4">
-            {error || "Unknown error occurred"}
-          </p>
-          <Button onClick={loadDashboardData} className="glass-btn-primary">
-            <RefreshCw className="w-4 h-4 mr-2" />
+      <div className="space-bg flex min-h-screen items-center justify-center">
+        <div className="tf-glass max-w-md rounded-xl p-8 text-center">
+          <XCircle className="text-destructive mx-auto mb-4 h-12 w-12" />
+          <h2 className="text-foreground mb-2 text-lg font-semibold">Failed to Load Dashboard</h2>
+          <p className="text-muted-foreground mb-4 text-sm">{error || "Unknown error occurred"}</p>
+          <GlassButton onClick={loadDashboardData} tone="primary">
+            <RefreshCw className="mr-2 h-4 w-4" />
             Retry
-          </Button>
+          </GlassButton>
         </div>
       </div>
     );
@@ -210,42 +203,33 @@ export function DashboardContent({ datasetVersionId }: DashboardContentProps) {
   };
 
   return (
-    <div className="min-h-screen space-bg">
-      <div className="p-6 md:p-8 max-w-7xl mx-auto space-y-6">
+    <div className="space-bg min-h-screen">
+      <div className="mx-auto max-w-7xl space-y-6 p-6 md:p-8">
         {/* Header with Dataset Version Badge */}
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">
-              {data.county.name} Dashboard
-            </h1>
-            <div className="flex items-center gap-2 mt-1">
-              <p className="text-muted-foreground">
-                Roll Year {datasetVersion.rollYear}
-              </p>
+            <h1 className="text-foreground text-2xl font-bold">{data.county.name} Dashboard</h1>
+            <div className="mt-1 flex items-center gap-2">
+              <p className="text-muted-foreground">Roll Year {datasetVersion.rollYear}</p>
               <span className="text-muted-foreground">·</span>
-              <span className="text-xs px-2 py-0.5 rounded-full bg-primary/20 text-primary font-medium">
+              <span className="bg-primary/20 text-primary rounded-full px-2 py-0.5 text-xs font-medium">
                 v{datasetVersion.version}
               </span>
-              <span className="text-xs text-muted-foreground">
-                ({datasetVersion.id})
-              </span>
+              <span className="text-muted-foreground text-xs">({datasetVersion.id})</span>
             </div>
           </div>
           <div className="flex gap-3">
             <Link href="/ingest">
-              <Button className="glass-btn-primary border border-primary/40 text-foreground">
-                <Upload className="w-4 h-4 mr-2" />
+              <GlassButton tone="primary" className="border-primary/40 text-foreground border">
+                <Upload className="mr-2 h-4 w-4" />
                 New Ingest
-              </Button>
+              </GlassButton>
             </Link>
             <Link href="/ratio-studies">
-              <Button
-                variant="outline"
-                className="glass-btn border-border/50 text-foreground bg-transparent"
-              >
-                <BarChart3 className="w-4 h-4 mr-2" />
+              <GlassButton variant="outline" className="border-border/50 text-foreground bg-transparent">
+                <BarChart3 className="mr-2 h-4 w-4" />
                 Run Study
-              </Button>
+              </GlassButton>
             </Link>
           </div>
         </div>
@@ -253,30 +237,26 @@ export function DashboardContent({ datasetVersionId }: DashboardContentProps) {
         {/* IAAO Compliance Banner (Computed, not hardcoded) */}
         <div
           className={cn(
-            "glass-panel rounded-xl p-4 flex items-center gap-4 border",
+            "tf-glass flex items-center gap-4 rounded-xl border p-4",
             getComplianceBgColor(compliance.overall)
           )}
         >
           {compliance.overall === "compliant" ? (
-            <div className="w-10 h-10 rounded-lg bg-equity-fair/20 flex items-center justify-center">
-              <CheckCircle2 className="w-5 h-5 text-equity-fair" />
+            <div className="bg-equity-fair/20 flex h-10 w-10 items-center justify-center rounded-lg">
+              <CheckCircle2 className="text-equity-fair h-5 w-5" />
             </div>
           ) : compliance.overall === "warning" ? (
-            <div className="w-10 h-10 rounded-lg bg-yellow-400/20 flex items-center justify-center">
-              <AlertTriangle className="w-5 h-5 text-yellow-400" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-yellow-400/20">
+              <AlertTriangle className="h-5 w-5 text-yellow-400" />
             </div>
           ) : (
-            <div className="w-10 h-10 rounded-lg bg-equity-regressive/20 flex items-center justify-center">
-              <XCircle className="w-5 h-5 text-equity-regressive" />
+            <div className="bg-equity-regressive/20 flex h-10 w-10 items-center justify-center rounded-lg">
+              <XCircle className="text-equity-regressive h-5 w-5" />
             </div>
           )}
           <div className="flex-1">
-            <p className="font-medium text-foreground">
-              {getComplianceLabel(compliance.overall)}
-            </p>
-            <p className="text-sm text-muted-foreground">
-              {compliance.details[0]}
-            </p>
+            <p className="text-foreground font-medium">{getComplianceLabel(compliance.overall)}</p>
+            <p className="text-muted-foreground text-sm">{compliance.details[0]}</p>
           </div>
           <Link href="/ratio-studies">
             <Button
@@ -285,13 +265,13 @@ export function DashboardContent({ datasetVersionId }: DashboardContentProps) {
               className="text-muted-foreground hover:text-foreground"
             >
               View Details
-              <ArrowRight className="w-4 h-4 ml-1" />
+              <ArrowRight className="ml-1 h-4 w-4" />
             </Button>
           </Link>
         </div>
 
         {/* KPI Cards (Derived from DatasetVersion metrics) */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
           <KPICard
             label="Total Parcels"
             value={metrics.totalParcels.toLocaleString()}
@@ -321,11 +301,11 @@ export function DashboardContent({ datasetVersionId }: DashboardContentProps) {
         </div>
 
         {/* Main Content Grid */}
-        <div className="grid md:grid-cols-3 gap-6">
+        <div className="grid gap-6 md:grid-cols-3">
           {/* Equity Distribution + PRD/PRB */}
-          <div className="md:col-span-2 glass-panel rounded-xl p-5">
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="font-semibold text-foreground">Equity Distribution</h2>
+          <div className="tf-glass rounded-xl p-5 md:col-span-2">
+            <div className="mb-4 flex items-center justify-between">
+              <h2 className="text-foreground font-semibold">Equity Distribution</h2>
               <Link href="/cockpit">
                 <Button
                   variant="ghost"
@@ -333,7 +313,7 @@ export function DashboardContent({ datasetVersionId }: DashboardContentProps) {
                   className="text-muted-foreground hover:text-foreground"
                 >
                   View Map
-                  <ArrowRight className="w-4 h-4 ml-1" />
+                  <ArrowRight className="ml-1 h-4 w-4" />
                 </Button>
               </Link>
             </div>
@@ -356,7 +336,7 @@ export function DashboardContent({ datasetVersionId }: DashboardContentProps) {
               />
             </div>
 
-            <div className="mt-6 pt-4 border-t border-border/30 grid grid-cols-2 gap-4">
+            <div className="border-border/30 mt-6 grid grid-cols-2 gap-4 border-t pt-4">
               <MetricTile
                 label="PRD"
                 value={metrics.prd.toFixed(3)}
@@ -387,14 +367,14 @@ export function DashboardContent({ datasetVersionId }: DashboardContentProps) {
           </div>
 
           {/* Pending Tasks (Executable workflows) */}
-          <div className="glass-panel rounded-xl p-5">
-            <h2 className="font-semibold text-foreground mb-4">Pending Tasks</h2>
+          <div className="tf-glass rounded-xl p-5">
+            <h2 className="text-foreground mb-4 font-semibold">Pending Tasks</h2>
             <div className="space-y-3">
               {data.pendingTasks.map((task) => (
                 <Link key={task.id} href={task.href}>
-                  <div className="flex items-center justify-between p-3 rounded-lg bg-muted/20 hover:bg-muted/30 transition-colors cursor-pointer">
-                    <span className="text-sm text-foreground">{task.task}</span>
-                    <span className="text-xs font-medium px-2 py-1 rounded-full bg-primary/20 text-primary">
+                  <div className="bg-muted/20 hover:bg-muted/30 flex cursor-pointer items-center justify-between rounded-lg p-3 transition-colors">
+                    <span className="text-foreground text-sm">{task.task}</span>
+                    <span className="bg-primary/20 text-primary rounded-full px-2 py-1 text-xs font-medium">
                       {task.count}
                     </span>
                   </div>
@@ -405,10 +385,10 @@ export function DashboardContent({ datasetVersionId }: DashboardContentProps) {
         </div>
 
         {/* Quick Actions & Recent Activity (Backed by Audit Events) */}
-        <div className="grid md:grid-cols-2 gap-6">
+        <div className="grid gap-6 md:grid-cols-2">
           {/* Quick Actions */}
-          <div className="glass-panel rounded-xl p-5">
-            <h2 className="font-semibold text-foreground mb-4">Quick Actions</h2>
+          <div className="tf-glass rounded-xl p-5">
+            <h2 className="text-foreground mb-4 font-semibold">Quick Actions</h2>
             <div className="grid grid-cols-2 gap-3">
               <QuickActionCard
                 icon={Map}
@@ -438,34 +418,30 @@ export function DashboardContent({ datasetVersionId }: DashboardContentProps) {
           </div>
 
           {/* Recent Activity (From Audit Pipeline) */}
-          <div className="glass-panel rounded-xl p-5">
-            <h2 className="font-semibold text-foreground mb-4">Recent Activity</h2>
+          <div className="tf-glass rounded-xl p-5">
+            <h2 className="text-foreground mb-4 font-semibold">Recent Activity</h2>
             <div className="space-y-3">
               {data.recentActivity.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-4">
-                  No recent activity
-                </p>
+                <p className="text-muted-foreground py-4 text-center text-sm">No recent activity</p>
               ) : (
                 data.recentActivity.map((event) => (
                   <div key={event.id} className="flex items-start gap-3">
                     <div
                       className={cn(
-                        "w-2 h-2 rounded-full mt-2",
-                        event.action.includes("PUBLISH") ||
-                          event.action.includes("COMPLETE")
+                        "mt-2 h-2 w-2 rounded-full",
+                        event.action.includes("PUBLISH") || event.action.includes("COMPLETE")
                           ? "bg-equity-fair"
-                          : event.action.includes("LOGIN") ||
-                              event.action.includes("VIEW")
+                          : event.action.includes("LOGIN") || event.action.includes("VIEW")
                             ? "bg-primary"
                             : "bg-yellow-400"
                       )}
                     />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm text-foreground truncate">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-foreground truncate text-sm">
                         {formatAuditAction(event.action)}
                       </p>
-                      <p className="text-xs text-muted-foreground flex items-center gap-1">
-                        <Clock className="w-3 h-3" />
+                      <p className="text-muted-foreground flex items-center gap-1 text-xs">
+                        <Clock className="h-3 w-3" />
                         {formatRelativeTime(event.timestamp)}
                       </p>
                     </div>
@@ -495,11 +471,11 @@ interface KPICardProps {
 
 function KPICard({ label, value, icon: Icon, trend, status, target }: KPICardProps) {
   return (
-    <div className="glass-panel rounded-xl p-4">
-      <div className="flex items-center gap-2 mb-3">
+    <div className="tf-glass rounded-xl p-4">
+      <div className="mb-3 flex items-center gap-2">
         <div
           className={cn(
-            "w-8 h-8 rounded-lg flex items-center justify-center",
+            "flex h-8 w-8 items-center justify-center rounded-lg",
             status === "compliant"
               ? "bg-equity-fair/20 text-equity-fair"
               : status === "warning"
@@ -509,11 +485,9 @@ function KPICard({ label, value, icon: Icon, trend, status, target }: KPICardPro
                   : "bg-primary/20 text-primary"
           )}
         >
-          <Icon className="w-4 h-4" />
+          <Icon className="h-4 w-4" />
         </div>
-        <span className="text-xs text-muted-foreground uppercase tracking-wide">
-          {label}
-        </span>
+        <span className="text-muted-foreground text-xs tracking-wide uppercase">{label}</span>
       </div>
       <p
         className={cn(
@@ -530,26 +504,21 @@ function KPICard({ label, value, icon: Icon, trend, status, target }: KPICardPro
         {value}
       </p>
       {trend !== undefined && (
-        <div className="flex items-center gap-1 mt-1">
+        <div className="mt-1 flex items-center gap-1">
           {trend >= 0 ? (
-            <TrendingUp className="w-3 h-3 text-equity-fair" />
+            <TrendingUp className="text-equity-fair h-3 w-3" />
           ) : (
-            <TrendingDown className="w-3 h-3 text-equity-regressive" />
+            <TrendingDown className="text-equity-regressive h-3 w-3" />
           )}
           <span
-            className={cn(
-              "text-xs",
-              trend >= 0 ? "text-equity-fair" : "text-equity-regressive"
-            )}
+            className={cn("text-xs", trend >= 0 ? "text-equity-fair" : "text-equity-regressive")}
           >
             {trend >= 0 ? "+" : ""}
             {trend}% YoY
           </span>
         </div>
       )}
-      {target && (
-        <p className="text-xs text-muted-foreground mt-1">Target: {target}</p>
-      )}
+      {target && <p className="text-muted-foreground mt-1 text-xs">Target: {target}</p>}
     </div>
   );
 }
@@ -565,9 +534,7 @@ interface MetricTileProps {
 function MetricTile({ label, value, status, target, description }: MetricTileProps) {
   return (
     <div>
-      <p className="text-xs text-muted-foreground uppercase tracking-wide">
-        {label}
-      </p>
+      <p className="text-muted-foreground text-xs tracking-wide uppercase">{label}</p>
       <p
         className={cn(
           "text-xl font-semibold",
@@ -580,8 +547,8 @@ function MetricTile({ label, value, status, target, description }: MetricTilePro
       >
         {value}
       </p>
-      <p className="text-xs text-muted-foreground">Target: {target}</p>
-      <p className="text-xs text-muted-foreground mt-1">{description}</p>
+      <p className="text-muted-foreground text-xs">Target: {target}</p>
+      <p className="text-muted-foreground mt-1 text-xs">{description}</p>
     </div>
   );
 }
@@ -595,11 +562,11 @@ interface EquityBarProps {
 function EquityBar({ label, percentage, color }: EquityBarProps) {
   return (
     <div>
-      <div className="flex items-center justify-between mb-1.5">
-        <span className="text-sm text-foreground">{label}</span>
-        <span className="text-sm font-medium text-foreground">{percentage}%</span>
+      <div className="mb-1.5 flex items-center justify-between">
+        <span className="text-foreground text-sm">{label}</span>
+        <span className="text-foreground text-sm font-medium">{percentage}%</span>
       </div>
-      <div className="h-2 bg-muted/30 rounded-full overflow-hidden">
+      <div className="bg-muted/30 h-2 overflow-hidden rounded-full">
         <div
           className={cn("h-full rounded-full transition-all duration-500", color)}
           style={{ width: `${percentage}%` }}
@@ -616,20 +583,15 @@ interface QuickActionCardProps {
   description: string;
 }
 
-function QuickActionCard({
-  icon: Icon,
-  label,
-  href,
-  description,
-}: QuickActionCardProps) {
+function QuickActionCard({ icon: Icon, label, href, description }: QuickActionCardProps) {
   return (
     <Link href={href}>
-      <div className="p-4 rounded-lg bg-muted/20 hover:bg-muted/30 transition-colors cursor-pointer group">
-        <div className="w-10 h-10 rounded-lg bg-primary/20 flex items-center justify-center mb-3 group-hover:bg-primary/30 transition-colors">
-          <Icon className="w-5 h-5 text-primary" />
+      <div className="bg-muted/20 hover:bg-muted/30 group cursor-pointer rounded-lg p-4 transition-colors">
+        <div className="bg-primary/20 group-hover:bg-primary/30 mb-3 flex h-10 w-10 items-center justify-center rounded-lg transition-colors">
+          <Icon className="text-primary h-5 w-5" />
         </div>
-        <p className="font-medium text-foreground text-sm">{label}</p>
-        <p className="text-xs text-muted-foreground">{description}</p>
+        <p className="text-foreground text-sm font-medium">{label}</p>
+        <p className="text-muted-foreground text-xs">{description}</p>
       </div>
     </Link>
   );

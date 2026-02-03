@@ -57,6 +57,9 @@ export function getTraceFeed(): TraceEvent[] {
   return TRACE.slice().reverse();
 }
 
+// Alias for backwards compatibility
+export const getTraceEvents = getTraceFeed;
+
 export function getTraceByCorrelation(correlationId: string): TraceEvent[] {
   return TRACE.filter((e) => e.correlationId === correlationId);
 }

@@ -9,22 +9,26 @@ This document defines the invariants, constraints, and rules of engagement for A
 These rules are **non-negotiable**. Any AI-generated code must preserve them:
 
 ### 1. Tenant Boundary Isolation
+
 - **No cross-county data mixing** — `countyId` is required in all reads/writes
 - Tenant context must flow through all API calls
 - Never hardcode county IDs or assume single-tenant mode
 
 ### 2. TerraPilot Gating
+
 - RBAC + allowlist split must remain intact
 - Feature flags gate experimental tools
 - Policy checks happen at executor level, not UI level
 
 ### 3. TerraTrace Append-Only
+
 - Trace records are **immutable** once written
 - Emit `invoked`, `succeeded`, and `failed` events consistently
 - **Trace payloads must be PII-safe** — sanitize summaries before logging
 - Never delete or modify existing trace entries
 
 ### 4. Demo Mode Resilience
+
 - **Demo mode never crashes** if API endpoints are missing
 - Gracefully degrade with fixture data
 - No HTML → JSON parse errors (handle non-JSON responses)
@@ -42,17 +46,18 @@ These rules are **non-negotiable**. Any AI-generated code must preserve them:
 
 ### File Organization
 
-| Change Type | Location |
-|-------------|----------|
-| Types/interfaces | `/lib/.../types.ts` |
-| API calls | `/lib/api/...` |
-| UI components | `/components/...` |
-| Shared utilities | `/lib/utils.ts` |
-| Feature logic | `/lib/<feature>/...` |
+| Change Type      | Location             |
+| ---------------- | -------------------- |
+| Types/interfaces | `/lib/.../types.ts`  |
+| API calls        | `/lib/api/...`       |
+| UI components    | `/components/...`    |
+| Shared utilities | `/lib/utils.ts`      |
+| Feature logic    | `/lib/<feature>/...` |
 
 ### Testing Requirements
 
 Tests are **required** for any changes touching:
+
 - ✅ Tenant boundary logic
 - ✅ RBAC/gating/policy checks
 - ✅ Trace emission
@@ -72,29 +77,29 @@ Tests are **required** for any changes touching:
 ### A) Styling Task (No Logic Changes)
 
 ```
-Update only these files: X, Y, Z. 
-No logic changes. 
-Replace inline Tailwind with GlassCard/MatteCard wrappers. 
-Must preserve props/state. 
+Update only these files: X, Y, Z.
+No logic changes.
+Replace inline Tailwind with GlassCard/MatteCard wrappers.
+Must preserve props/state.
 Must respect prefers-reduced-motion.
 ```
 
 ### B) Gating/Trace Task
 
 ```
-Update only executor/tools. 
-Add tests. 
-Must keep RBAC+allowlist split. 
-Must emit invoked+succeeded/failed. 
+Update only executor/tools.
+Add tests.
+Must keep RBAC+allowlist split.
+Must emit invoked+succeeded/failed.
 Must sanitize summaries.
 ```
 
 ### C) UI Component Task
 
 ```
-Update only component file. 
-Do not add routes. 
-Do not touch API calls. 
+Update only component file.
+Do not add routes.
+Do not touch API calls.
 Keep types stable.
 ```
 
@@ -111,26 +116,26 @@ Must pass countyId in all requests.
 
 ## 🚫 Anti-Patterns to Avoid
 
-| ❌ Don't | ✅ Do Instead |
-|----------|---------------|
-| Hardcode `countyId: "benton"` | Use `useCounty()` hook or context |
-| `catch (e) { console.log(e) }` | Proper error boundary + user feedback |
-| Parse response as JSON without checking | Check `content-type` header first |
-| Add new routes without loading states | Always include `loading.tsx` |
-| Mix feature logic into UI components | Extract to `/lib/<feature>/` |
-| Delete trace records | Append new status events instead |
+| ❌ Don't                                | ✅ Do Instead                         |
+| --------------------------------------- | ------------------------------------- |
+| Hardcode `countyId: "benton"`           | Use `useCounty()` hook or context     |
+| `catch (e) { console.log(e) }`          | Proper error boundary + user feedback |
+| Parse response as JSON without checking | Check `content-type` header first     |
+| Add new routes without loading states   | Always include `loading.tsx`          |
+| Mix feature logic into UI components    | Extract to `/lib/<feature>/`          |
+| Delete trace records                    | Append new status events instead      |
 
 ---
 
 ## 📁 Branch Naming Convention
 
-| Prefix | Purpose | Example |
-|--------|---------|---------|
-| `feat/` | New feature | `feat/material-system-pass` |
-| `fix/` | Bug fix | `fix/trace-emission-gap` |
-| `chore/` | Tooling/config | `chore/add-prettier` |
-| `refactor/` | Code cleanup | `refactor/api-layer` |
-| `docs/` | Documentation | `docs/api-reference` |
+| Prefix      | Purpose        | Example                     |
+| ----------- | -------------- | --------------------------- |
+| `feat/`     | New feature    | `feat/material-system-pass` |
+| `fix/`      | Bug fix        | `fix/trace-emission-gap`    |
+| `chore/`    | Tooling/config | `chore/add-prettier`        |
+| `refactor/` | Code cleanup   | `refactor/api-layer`        |
+| `docs/`     | Documentation  | `docs/api-reference`        |
 
 ---
 
@@ -173,4 +178,4 @@ docs/                   # Documentation
 
 ---
 
-*Last updated: 2026-02-02*
+_Last updated: 2026-02-02_

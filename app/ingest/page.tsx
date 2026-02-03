@@ -23,8 +23,7 @@ const steps: { id: IngestStep; label: string }[] = [
 export default function IngestPage() {
   const [currentStep, setCurrentStep] = useState<IngestStep>("upload");
   const [dataset, setDataset] = useState<Dataset | null>(null);
-  const [validationResult, setValidationResult] =
-    useState<ValidationResult | null>(null);
+  const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
   const [fieldMappings, setFieldMappings] = useState<FieldMapping[]>([]);
 
   const handleUploadComplete = (uploadedDataset: Dataset) => {
@@ -62,15 +61,11 @@ export default function IngestPage() {
   };
 
   return (
-    <AppShell
-      user={{ name: "Jane Doe", role: "Assessor", county: "Benton County" }}
-    >
-      <div className="p-4 md:p-6 max-w-6xl mx-auto">
+    <AppShell user={{ name: "Jane Doe", role: "Assessor", county: "Benton County" }}>
+      <div className="mx-auto max-w-6xl p-4 md:p-6">
         {/* Header */}
         <div className="mb-8">
-          <h1 className="text-2xl font-semibold text-foreground mb-2">
-            Data Ingestion
-          </h1>
+          <h1 className="text-foreground mb-2 text-2xl font-semibold">Data Ingestion</h1>
           <p className="text-muted-foreground">
             Upload and validate county data files for the FusionCore pipeline
           </p>
@@ -81,22 +76,12 @@ export default function IngestPage() {
 
         {/* Step Content */}
         <div className="mt-8">
-          {currentStep === "upload" && (
-            <UploadStep onComplete={handleUploadComplete} />
-          )}
+          {currentStep === "upload" && <UploadStep onComplete={handleUploadComplete} />}
           {currentStep === "validate" && dataset && (
-            <ValidateStep
-              dataset={dataset}
-              onComplete={handleValidationComplete}
-              onBack={goBack}
-            />
+            <ValidateStep dataset={dataset} onComplete={handleValidationComplete} onBack={goBack} />
           )}
           {currentStep === "map" && dataset && validationResult && (
-            <MapFieldsStep
-              dataset={dataset}
-              onComplete={handleMappingComplete}
-              onBack={goBack}
-            />
+            <MapFieldsStep dataset={dataset} onComplete={handleMappingComplete} onBack={goBack} />
           )}
           {currentStep === "preview" && dataset && (
             <PreviewStep
@@ -107,11 +92,7 @@ export default function IngestPage() {
             />
           )}
           {currentStep === "publish" && dataset && (
-            <PublishStep
-              dataset={dataset}
-              onComplete={handlePublishComplete}
-              onBack={goBack}
-            />
+            <PublishStep dataset={dataset} onComplete={handlePublishComplete} onBack={goBack} />
           )}
         </div>
       </div>

@@ -1,5 +1,6 @@
-@import 'tailwindcss';
-@import 'tw-animate-css';
+@import "tailwindcss";
+@import "../styles/tokens.css";
+@import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -38,12 +39,12 @@
   --sidebar-accent-foreground: oklch(0.95 0.01 260);
   --sidebar-border: oklch(0.35 0.04 260 / 0.3);
   --sidebar-ring: oklch(0.7 0.15 200);
-  
+
   /* Equity Status Colors */
   --equity-fair: oklch(0.65 0.2 150);
   --equity-progressive: oklch(0.6 0.18 250);
   --equity-regressive: oklch(0.6 0.22 25);
-  
+
   /* Glass Effect */
   --glass-bg: oklch(0.15 0.02 260 / 0.4);
   --glass-border: oklch(0.4 0.04 260 / 0.2);
@@ -86,8 +87,8 @@
 }
 
 @theme inline {
-  --font-sans: 'Geist', 'Geist Fallback';
-  --font-mono: 'Geist Mono', 'Geist Mono Fallback';
+  --font-sans: "Geist", "Geist Fallback";
+  --font-mono: "Geist Mono", "Geist Mono Fallback";
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -143,45 +144,50 @@
 
 /* Deep Space Background */
 .space-bg {
-  background: 
+  background:
     radial-gradient(ellipse at 20% 30%, oklch(0.15 0.05 280 / 0.4) 0%, transparent 50%),
     radial-gradient(ellipse at 80% 70%, oklch(0.12 0.04 200 / 0.3) 0%, transparent 50%),
     radial-gradient(ellipse at 50% 50%, oklch(0.08 0.02 260) 0%, oklch(0.05 0.01 260) 100%);
   min-height: 100vh;
 }
 
-/* Glass Panel Effect */
+/* Deprecated legacy glass aliases (remove after next release) */
 .glass-panel {
-  background: oklch(0.12 0.02 260 / 0.6);
-  backdrop-filter: blur(20px);
-  border: 1px solid oklch(0.4 0.04 260 / 0.2);
-  box-shadow: 
-    0 8px 32px oklch(0 0 0 / 0.3),
-    inset 0 1px 0 oklch(0.8 0.05 260 / 0.1);
+  background: var(--glass-tint);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--r-lg);
+  box-shadow: var(--z2-shadow);
+  backdrop-filter: blur(var(--glass-blur-2));
+  -webkit-backdrop-filter: blur(var(--glass-blur-2));
 }
 
-/* Glass Button */
 .glass-btn {
-  background: oklch(0.2 0.03 260 / 0.5);
-  backdrop-filter: blur(10px);
-  border: 1px solid oklch(0.4 0.04 260 / 0.3);
-  transition: all 0.2s ease;
+  background: var(--glass-tint);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--r-md);
+  box-shadow: var(--z1-shadow);
+  backdrop-filter: blur(var(--glass-blur-1));
+  -webkit-backdrop-filter: blur(var(--glass-blur-1));
+  transition:
+    background-color var(--dur-1) var(--ease-out),
+    border-color var(--dur-1) var(--ease-out),
+    transform var(--dur-1) var(--ease-out),
+    box-shadow var(--dur-1) var(--ease-out);
 }
 
 .glass-btn:hover {
-  background: oklch(0.25 0.04 260 / 0.6);
-  border-color: oklch(0.5 0.05 260 / 0.4);
+  background: var(--glass-tint-strong);
+  border-color: var(--glass-border-strong);
 }
 
-/* Primary Glass Button */
 .glass-btn-primary {
-  background: oklch(0.7 0.15 200 / 0.2);
-  border: 1px solid oklch(0.7 0.15 200 / 0.4);
+  background: rgba(160, 220, 255, 0.18);
+  border-color: rgba(160, 220, 255, 0.36);
 }
 
 .glass-btn-primary:hover {
-  background: oklch(0.7 0.15 200 / 0.3);
-  border-color: oklch(0.7 0.15 200 / 0.6);
+  background: rgba(160, 220, 255, 0.24);
+  border-color: rgba(160, 220, 255, 0.5);
 }
 
 /* Equity Status Glow */

@@ -51,7 +51,12 @@ export interface ToolInvokeOptions {
 
 export type GuardDecision =
   | { ok: true; policy: RiskPolicy }
-  | { ok: false; blockedBy: "mode" | "rbac" | "allowlist" | "policy"; summary: string; policy?: RiskPolicy };
+  | {
+      ok: false;
+      blockedBy: "mode" | "rbac" | "allowlist" | "policy";
+      summary: string;
+      policy?: RiskPolicy;
+    };
 
 export const REASON_CODES = [
   { code: "DATA_FIX", label: "Data correction / coding drift" },
@@ -66,13 +71,33 @@ export const DEFAULT_REASON_CODES = REASON_CODES;
 export function defaultRiskPolicy(risk: ToolRisk): RiskPolicy {
   switch (risk) {
     case "read_only":
-      return { risk, requiresConfirmation: false, requiresReasonCode: false, requiresSupervisor: false };
+      return {
+        risk,
+        requiresConfirmation: false,
+        requiresReasonCode: false,
+        requiresSupervisor: false,
+      };
     case "write_low":
-      return { risk, requiresConfirmation: false, requiresReasonCode: false, requiresSupervisor: false };
+      return {
+        risk,
+        requiresConfirmation: false,
+        requiresReasonCode: false,
+        requiresSupervisor: false,
+      };
     case "write_high":
-      return { risk, requiresConfirmation: true, requiresReasonCode: true, requiresSupervisor: false };
+      return {
+        risk,
+        requiresConfirmation: true,
+        requiresReasonCode: true,
+        requiresSupervisor: false,
+      };
     case "irreversible":
-      return { risk, requiresConfirmation: true, requiresReasonCode: true, requiresSupervisor: true };
+      return {
+        risk,
+        requiresConfirmation: true,
+        requiresReasonCode: true,
+        requiresSupervisor: true,
+      };
   }
 }
 
@@ -234,13 +259,21 @@ export function guardToolExecution(
 
   // Allowlist: tool must be enabled
   if (!ctx.enabledTools.includes(tool.toolId)) {
-    return { ok: false, blockedBy: "allowlist", summary: "Blocked: tool not enabled for this county/policy." };
+    return {
+      ok: false,
+      blockedBy: "allowlist",
+      summary: "Blocked: tool not enabled for this county/policy.",
+    };
   }
 
   // RBAC claims
   const missing = tool.requiredClaims.filter((c) => !ctx.userClaims.includes(c));
   if (missing.length) {
-    return { ok: false, blockedBy: "rbac", summary: `Blocked: missing claims (${missing.join(", ")}).` };
+    return {
+      ok: false,
+      blockedBy: "rbac",
+      summary: `Blocked: missing claims (${missing.join(", ")}).`,
+    };
   }
 
   // Risk policy (county may tighten)
@@ -248,13 +281,28 @@ export function guardToolExecution(
   const tightened = { ...base, ...(countyPolicy?.[tool.risk] ?? {}) };
 
   if (tightened.requiresConfirmation && !opts.confirmed) {
-    return { ok: false, blockedBy: "policy", summary: "Blocked: confirmation required.", policy: tightened };
+    return {
+      ok: false,
+      blockedBy: "policy",
+      summary: "Blocked: confirmation required.",
+      policy: tightened,
+    };
   }
   if (tightened.requiresReasonCode && !opts.reasonCode) {
-    return { ok: false, blockedBy: "policy", summary: "Blocked: reason code required.", policy: tightened };
+    return {
+      ok: false,
+      blockedBy: "policy",
+      summary: "Blocked: reason code required.",
+      policy: tightened,
+    };
   }
   if (tightened.requiresSupervisor && !opts.supervisorApprovalRef) {
-    return { ok: false, blockedBy: "policy", summary: "Blocked: supervisor approval required.", policy: tightened };
+    return {
+      ok: false,
+      blockedBy: "policy",
+      summary: "Blocked: supervisor approval required.",
+      policy: tightened,
+    };
   }
 
   return { ok: true, policy: tightened };
@@ -301,3 +349,6 @@ export function getSuiteLabel(suite: SuiteOwner): string {
       return "TerraDossier";
   }
 }
+
+// All available claims derived from the tool registry
+export const ALL_CLAIMS = [...new Set(TOOL_REGISTRY.flatMap((t) => t.requiredClaims))] as const;

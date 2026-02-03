@@ -1,30 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-} from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import {
-  Shield,
-  Key,
-  ListChecks,
-  AlertTriangle,
-  Check,
-  X,
-} from "lucide-react";
-import {
-  TOOL_REGISTRY,
-  ALL_CLAIMS,
-  type ToolDescriptor,
-} from "@/lib/pilot/tools";
+import { DrawerShell, SignalBadge } from "@/components/material";
+import { Shield, Key, ListChecks, AlertTriangle, Check, X } from "lucide-react";
+import { TOOL_REGISTRY, ALL_CLAIMS, type ToolDescriptor } from "@/lib/pilot/tools";
 
 interface PolicyDebugDrawerProps {
   isOpen: boolean;
@@ -88,9 +73,7 @@ export function PolicyDebugDrawer({
     }
 
     // RBAC check
-    const missingClaims = tool.requiredClaims.filter(
-      (c) => !userClaims.includes(c)
-    );
+    const missingClaims = tool.requiredClaims.filter((c) => !userClaims.includes(c));
     if (missingClaims.length > 0) {
       reasons.push(`RBAC: Missing claims [${missingClaims.join(", ")}]`);
     }
@@ -110,245 +93,218 @@ export function PolicyDebugDrawer({
     <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <SheetContent
         side="right"
-        className="w-[440px] sm:w-[540px] glass-panel border-l border-border/30 overflow-y-auto"
+        className="w-[440px] overflow-hidden border-l-0 bg-transparent p-0 sm:w-[540px]"
       >
-        <SheetHeader className="pb-4">
-          <SheetTitle className="flex items-center gap-2 text-foreground">
-            <Shield className="w-5 h-5 text-primary" />
-            Pilot Policy Debug
-          </SheetTitle>
-          <p className="text-xs text-muted-foreground">
-            Toggle claims, allowlist, and policy to test gating behavior
-          </p>
-        </SheetHeader>
+        <DrawerShell
+          strength="strong"
+          className="border-border/30 h-full w-full overflow-y-auto border-l"
+        >
+          <SheetHeader className="pb-4">
+            <SheetTitle className="text-foreground flex items-center gap-2">
+              <Shield className="text-primary h-5 w-5" />
+              Pilot Policy Debug
+            </SheetTitle>
+            <p className="text-muted-foreground text-xs">
+              Toggle claims, allowlist, and policy to test gating behavior
+            </p>
+          </SheetHeader>
 
-        {/* Current Mode */}
-        <div className="mb-6 p-3 rounded-lg bg-muted/30 border border-border/30">
-          <div className="flex items-center justify-between">
-            <span className="text-sm font-medium">Current Mode</span>
-            <Badge
-              variant="outline"
-              className={
-                mode === "pilot"
-                  ? "border-primary/50 text-primary"
-                  : "border-accent/50 text-accent"
-              }
-            >
-              {mode === "pilot" ? "Pilot (Execute)" : "Muse (Explain)"}
-            </Badge>
+          {/* Current Mode */}
+          <div className="bg-muted/30 border-border/30 mb-6 rounded-lg border p-3">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium">Current Mode</span>
+              <SignalBadge state={mode === "pilot" ? "official" : "simulated"}>
+                {mode === "pilot" ? "Pilot (Execute)" : "Muse (Explain)"}
+              </SignalBadge>
+            </div>
           </div>
-        </div>
 
-        {/* RBAC Claims */}
-        <div className="mb-6">
-          <div className="flex items-center gap-2 mb-3">
-            <Key className="w-4 h-4 text-muted-foreground" />
-            <span className="text-sm font-medium">User Claims (RBAC)</span>
+          {/* RBAC Claims */}
+          <div className="mb-6">
+            <div className="mb-3 flex items-center gap-2">
+              <Key className="text-muted-foreground h-4 w-4" />
+              <span className="text-sm font-medium">User Claims (RBAC)</span>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              {ALL_CLAIMS.map((claim) => (
+                <div
+                  key={claim}
+                  className="bg-muted/20 border-border/20 flex items-center gap-2 rounded border p-2"
+                >
+                  <Switch
+                    id={`claim-${claim}`}
+                    checked={userClaims.includes(claim)}
+                    onCheckedChange={() => toggleClaim(claim)}
+                    className="scale-75"
+                  />
+                  <Label htmlFor={`claim-${claim}`} className="cursor-pointer text-xs">
+                    {claim}
+                  </Label>
+                </div>
+              ))}
+            </div>
           </div>
-          <div className="grid grid-cols-2 gap-2">
-            {ALL_CLAIMS.map((claim) => (
-              <div
-                key={claim}
-                className="flex items-center gap-2 p-2 rounded bg-muted/20 border border-border/20"
-              >
+
+          <Separator className="bg-border/30 my-4" />
+
+          {/* County Policy Overrides */}
+          <div className="mb-6">
+            <div className="mb-3 flex items-center gap-2">
+              <AlertTriangle className="text-muted-foreground h-4 w-4" />
+              <span className="text-sm font-medium">County Risk Policy</span>
+            </div>
+            <div className="space-y-3">
+              <div className="bg-muted/20 border-border/20 flex items-center justify-between rounded border p-2">
+                <Label htmlFor="confirm-write-high" className="cursor-pointer text-xs">
+                  write_high requires confirmation + reason
+                </Label>
                 <Switch
-                  id={`claim-${claim}`}
-                  checked={userClaims.includes(claim)}
-                  onCheckedChange={() => toggleClaim(claim)}
+                  id="confirm-write-high"
+                  checked={requireConfirmWriteHigh}
+                  onCheckedChange={setRequireConfirmWriteHigh}
                   className="scale-75"
                 />
-                <Label
-                  htmlFor={`claim-${claim}`}
-                  className="text-xs cursor-pointer"
-                >
-                  {claim}
-                </Label>
               </div>
-            ))}
-          </div>
-        </div>
-
-        <Separator className="my-4 bg-border/30" />
-
-        {/* County Policy Overrides */}
-        <div className="mb-6">
-          <div className="flex items-center gap-2 mb-3">
-            <AlertTriangle className="w-4 h-4 text-muted-foreground" />
-            <span className="text-sm font-medium">County Risk Policy</span>
-          </div>
-          <div className="space-y-3">
-            <div className="flex items-center justify-between p-2 rounded bg-muted/20 border border-border/20">
-              <Label
-                htmlFor="confirm-write-high"
-                className="text-xs cursor-pointer"
-              >
-                write_high requires confirmation + reason
-              </Label>
-              <Switch
-                id="confirm-write-high"
-                checked={requireConfirmWriteHigh}
-                onCheckedChange={setRequireConfirmWriteHigh}
-                className="scale-75"
-              />
-            </div>
-            <div className="flex items-center justify-between p-2 rounded bg-muted/20 border border-border/20">
-              <Label
-                htmlFor="supervisor-irreversible"
-                className="text-xs cursor-pointer"
-              >
-                irreversible requires supervisor approval
-              </Label>
-              <Switch
-                id="supervisor-irreversible"
-                checked={requireSupervisorIrreversible}
-                onCheckedChange={setRequireSupervisorIrreversible}
-                className="scale-75"
-              />
+              <div className="bg-muted/20 border-border/20 flex items-center justify-between rounded border p-2">
+                <Label htmlFor="supervisor-irreversible" className="cursor-pointer text-xs">
+                  irreversible requires supervisor approval
+                </Label>
+                <Switch
+                  id="supervisor-irreversible"
+                  checked={requireSupervisorIrreversible}
+                  onCheckedChange={setRequireSupervisorIrreversible}
+                  className="scale-75"
+                />
+              </div>
             </div>
           </div>
-        </div>
 
-        <Separator className="my-4 bg-border/30" />
+          <Separator className="bg-border/30 my-4" />
 
-        {/* Tool Allowlist + Status */}
-        <div>
-          <div className="flex items-center gap-2 mb-3">
-            <ListChecks className="w-4 h-4 text-muted-foreground" />
-            <span className="text-sm font-medium">Tool Allowlist & Status</span>
-          </div>
-          <div className="space-y-2 max-h-[300px] overflow-y-auto pr-2">
-            {TOOL_REGISTRY.map((tool) => {
-              const blockReasons = getToolBlockReasons(tool);
-              const isBlocked = blockReasons.length > 0;
-              const isEnabled = enabledTools.includes(tool.toolId);
+          {/* Tool Allowlist + Status */}
+          <div>
+            <div className="mb-3 flex items-center gap-2">
+              <ListChecks className="text-muted-foreground h-4 w-4" />
+              <span className="text-sm font-medium">Tool Allowlist & Status</span>
+            </div>
+            <div className="max-h-[300px] space-y-2 overflow-y-auto pr-2">
+              {TOOL_REGISTRY.map((tool) => {
+                const blockReasons = getToolBlockReasons(tool);
+                const isBlocked = blockReasons.length > 0;
+                const isEnabled = enabledTools.includes(tool.toolId);
 
-              return (
-                <div
-                  key={tool.toolId}
-                  className={`p-3 rounded-lg border transition-colors cursor-pointer ${
-                    selectedTool?.toolId === tool.toolId
-                      ? "border-primary/50 bg-primary/10"
-                      : "border-border/20 bg-muted/20 hover:bg-muted/30"
-                  }`}
-                  onClick={() =>
-                    setSelectedTool(
-                      selectedTool?.toolId === tool.toolId ? null : tool
-                    )
-                  }
-                >
-                  <div className="flex items-center justify-between mb-1">
-                    <div className="flex items-center gap-2">
-                      <Switch
-                        checked={isEnabled}
-                        onCheckedChange={() => toggleToolEnabled(tool.toolId)}
-                        onClick={(e) => e.stopPropagation()}
-                        className="scale-75"
-                      />
-                      <span className="text-sm font-medium">{tool.title}</span>
-                    </div>
-                    <div className="flex items-center gap-1">
-                      <Badge
-                        variant="outline"
-                        className={`text-[10px] ${
-                          tool.suiteOwner === "pilot"
-                            ? "border-primary/40 text-primary"
-                            : "border-accent/40 text-accent"
-                        }`}
-                      >
-                        {tool.suiteOwner}
-                      </Badge>
-                      <Badge
-                        variant="outline"
-                        className={`text-[10px] ${
-                          tool.risk === "read_only"
-                            ? "border-chart-1/40 text-chart-1"
-                            : tool.risk === "write_low"
-                              ? "border-chart-2/40 text-chart-2"
-                              : tool.risk === "write_high"
-                                ? "border-chart-3/40 text-chart-3"
-                                : "border-destructive/40 text-destructive"
-                        }`}
-                      >
-                        {tool.risk}
-                      </Badge>
-                      {isBlocked ? (
-                        <X className="w-4 h-4 text-destructive" />
-                      ) : (
-                        <Check className="w-4 h-4 text-chart-1" />
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Expanded detail */}
-                  {selectedTool?.toolId === tool.toolId && (
-                    <div className="mt-3 pt-3 border-t border-border/20">
-                      <p className="text-xs text-muted-foreground mb-2">
-                        {tool.description}
-                      </p>
-                      <div className="text-xs mb-2">
-                        <span className="text-muted-foreground">
-                          Required claims:{" "}
-                        </span>
-                        {tool.requiredClaims.map((c) => (
-                          <Badge
-                            key={c}
-                            variant="outline"
-                            className={`text-[9px] mx-0.5 ${
-                              userClaims.includes(c)
-                                ? "border-chart-1/40 text-chart-1"
-                                : "border-destructive/40 text-destructive"
-                            }`}
-                          >
-                            {c}
-                          </Badge>
-                        ))}
+                return (
+                  <div
+                    key={tool.toolId}
+                    className={`cursor-pointer rounded-lg border p-3 transition-colors ${
+                      selectedTool?.toolId === tool.toolId
+                        ? "border-primary/50 bg-primary/10"
+                        : "border-border/20 bg-muted/20 hover:bg-muted/30"
+                    }`}
+                    onClick={() =>
+                      setSelectedTool(selectedTool?.toolId === tool.toolId ? null : tool)
+                    }
+                  >
+                    <div className="mb-1 flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <Switch
+                          checked={isEnabled}
+                          onCheckedChange={() => toggleToolEnabled(tool.toolId)}
+                          onClick={(e) => e.stopPropagation()}
+                          className="scale-75"
+                        />
+                        <span className="text-sm font-medium">{tool.title}</span>
                       </div>
-
-                      {isBlocked && (
-                        <div className="mt-2 p-2 rounded bg-destructive/10 border border-destructive/20">
-                          <p className="text-xs font-medium text-destructive mb-1">
-                            Blocked:
-                          </p>
-                          <ul className="text-[10px] text-destructive/80 space-y-0.5">
-                            {blockReasons.map((reason, i) => (
-                              <li key={i}>• {reason}</li>
-                            ))}
-                          </ul>
-                        </div>
-                      )}
+                      <div className="flex items-center gap-1">
+                        <SignalBadge state={tool.suiteOwner === "pilot" ? "official" : "simulated"}>
+                          {tool.suiteOwner}
+                        </SignalBadge>
+                        <SignalBadge
+                          state={
+                            tool.risk === "read_only"
+                              ? "official"
+                              : tool.risk === "write_low"
+                                ? "overlay"
+                                : tool.risk === "write_high"
+                                  ? "warning"
+                                  : "blocked"
+                          }
+                        >
+                          {tool.risk}
+                        </SignalBadge>
+                        {isBlocked ? (
+                          <X className="text-destructive h-4 w-4" />
+                        ) : (
+                          <Check className="text-chart-1 h-4 w-4" />
+                        )}
+                      </div>
                     </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </div>
 
-        {/* Quick Actions */}
-        <div className="mt-6 pt-4 border-t border-border/30 flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              setUserClaims([...ALL_CLAIMS]);
-              setEnabledTools(TOOL_REGISTRY.map((t) => t.toolId));
-            }}
-            className="flex-1 text-xs"
-          >
-            Enable All
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => {
-              setUserClaims([]);
-              setEnabledTools([]);
-            }}
-            className="flex-1 text-xs"
-          >
-            Disable All
-          </Button>
-        </div>
+                    {/* Expanded detail */}
+                    {selectedTool?.toolId === tool.toolId && (
+                      <div className="border-border/20 mt-3 border-t pt-3">
+                        <p className="text-muted-foreground mb-2 text-xs">{tool.description}</p>
+                        <div className="mb-2 text-xs">
+                          <span className="text-muted-foreground">Required claims: </span>
+                          {tool.requiredClaims.map((c) => (
+                            <Badge
+                              key={c}
+                              variant="outline"
+                              className={`mx-0.5 text-[9px] ${
+                                userClaims.includes(c)
+                                  ? "border-chart-1/40 text-chart-1"
+                                  : "border-destructive/40 text-destructive"
+                              }`}
+                            >
+                              {c}
+                            </Badge>
+                          ))}
+                        </div>
+
+                        {isBlocked && (
+                          <div className="bg-destructive/10 border-destructive/20 mt-2 rounded border p-2">
+                            <p className="text-destructive mb-1 text-xs font-medium">Blocked:</p>
+                            <ul className="text-destructive/80 space-y-0.5 text-[10px]">
+                              {blockReasons.map((reason, i) => (
+                                <li key={i}>• {reason}</li>
+                              ))}
+                            </ul>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Quick Actions */}
+          <div className="border-border/30 mt-6 flex gap-2 border-t pt-4">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setUserClaims([...ALL_CLAIMS]);
+                setEnabledTools(TOOL_REGISTRY.map((t) => t.toolId));
+              }}
+              className="flex-1 text-xs"
+            >
+              Enable All
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setUserClaims([]);
+                setEnabledTools([]);
+              }}
+              className="flex-1 text-xs"
+            >
+              Disable All
+            </Button>
+          </div>
+        </DrawerShell>
       </SheetContent>
     </Sheet>
   );

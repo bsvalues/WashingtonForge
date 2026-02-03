@@ -3,19 +3,14 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { Command, Zap, Sparkles, Search, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { GlassCard, SignalBadge } from "@/components/material";
 import {
   TOOL_REGISTRY,
-  getRiskBadgeColor,
   getRiskLabel,
-  getSuiteLabel,
   defaultRiskPolicy,
   type ToolDescriptor,
 } from "@/lib/pilot/tools";
-import {
-  executeTool,
-  getDemoPilotContext,
-  generateCorrelationId,
-} from "@/lib/pilot/executor";
+import { executeTool, getDemoPilotContext, generateCorrelationId } from "@/lib/pilot/executor";
 
 interface CommandPaletteProps {
   isOpen: boolean;
@@ -24,7 +19,12 @@ interface CommandPaletteProps {
   onNeedsConfirmation: (tool: ToolDescriptor) => void;
 }
 
-export function CommandPalette({ isOpen, onClose, onOpenPanel, onNeedsConfirmation }: CommandPaletteProps) {
+export function CommandPalette({
+  isOpen,
+  onClose,
+  onOpenPanel,
+  onNeedsConfirmation,
+}: CommandPaletteProps) {
   const [query, setQuery] = useState("");
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [mode, setMode] = useState<"pilot" | "muse">("pilot");
@@ -103,14 +103,17 @@ export function CommandPalette({ isOpen, onClose, onOpenPanel, onNeedsConfirmati
   return (
     <div className="fixed inset-0 z-[100] flex items-start justify-center pt-[20vh]">
       {/* Backdrop */}
-      <div className="absolute inset-0 bg-background/80 backdrop-blur-sm" onClick={onClose} />
+      <div className="bg-background/80 absolute inset-0 backdrop-blur-sm" onClick={onClose} />
 
       {/* Palette */}
-      <div className="relative w-full max-w-lg mx-4 glass-panel border border-border/30 rounded-xl overflow-hidden shadow-2xl">
+      <GlassCard
+        strength="strong"
+        className="relative mx-4 w-full max-w-lg overflow-hidden rounded-xl shadow-2xl"
+      >
         {/* Header */}
-        <div className="flex items-center gap-3 p-4 border-b border-border/30">
-          <div className="flex items-center gap-1 text-muted-foreground">
-            <Command className="w-4 h-4" />
+        <div className="border-border/30 flex items-center gap-3 border-b p-4">
+          <div className="text-muted-foreground flex items-center gap-1">
+            <Command className="h-4 w-4" />
             <span className="text-xs">K</span>
           </div>
           <input
@@ -119,31 +122,31 @@ export function CommandPalette({ isOpen, onClose, onOpenPanel, onNeedsConfirmati
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Type a command or search..."
-            className="flex-1 bg-transparent border-none outline-none text-foreground placeholder:text-muted-foreground"
+            className="text-foreground placeholder:text-muted-foreground flex-1 border-none bg-transparent outline-none"
           />
           <div className="flex items-center gap-1">
             <button
               onClick={() => setMode("pilot")}
               className={cn(
-                "flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-colors",
+                "flex items-center gap-1 rounded px-2 py-1 text-xs font-medium transition-colors",
                 mode === "pilot"
                   ? "bg-primary/20 text-primary"
                   : "text-muted-foreground hover:text-foreground"
               )}
             >
-              <Zap className="w-3 h-3" />
+              <Zap className="h-3 w-3" />
               Pilot
             </button>
             <button
               onClick={() => setMode("muse")}
               className={cn(
-                "flex items-center gap-1 px-2 py-1 rounded text-xs font-medium transition-colors",
+                "flex items-center gap-1 rounded px-2 py-1 text-xs font-medium transition-colors",
                 mode === "muse"
                   ? "bg-accent/20 text-accent"
                   : "text-muted-foreground hover:text-foreground"
               )}
             >
-              <Sparkles className="w-3 h-3" />
+              <Sparkles className="h-3 w-3" />
               Muse
             </button>
           </div>
@@ -152,8 +155,8 @@ export function CommandPalette({ isOpen, onClose, onOpenPanel, onNeedsConfirmati
         {/* Results */}
         <div className="max-h-80 overflow-y-auto">
           {filteredTools.length === 0 ? (
-            <div className="p-8 text-center text-muted-foreground">
-              <Search className="w-8 h-8 mx-auto mb-2 opacity-50" />
+            <div className="text-muted-foreground p-8 text-center">
+              <Search className="mx-auto mb-2 h-8 w-8 opacity-50" />
               <p className="text-sm">No tools found</p>
             </div>
           ) : (
@@ -163,34 +166,41 @@ export function CommandPalette({ isOpen, onClose, onOpenPanel, onNeedsConfirmati
                   key={tool.toolId}
                   onClick={() => handleSelectTool(tool)}
                   className={cn(
-                    "w-full flex items-center gap-3 p-3 rounded-lg text-left transition-colors",
+                    "flex w-full items-center gap-3 rounded-lg p-3 text-left transition-colors",
                     index === selectedIndex
-                      ? "bg-primary/10 border border-primary/30"
+                      ? "bg-primary/10 border-primary/30 border"
                       : "hover:bg-muted/30"
                   )}
                 >
-                  <div className="w-8 h-8 rounded-lg bg-muted/30 flex items-center justify-center shrink-0">
+                  <div className="bg-muted/30 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
                     {tool.mode === "pilot" ? (
-                      <Zap className="w-4 h-4 text-primary" />
+                      <Zap className="text-primary h-4 w-4" />
                     ) : (
-                      <Sparkles className="w-4 h-4 text-accent" />
+                      <Sparkles className="text-accent h-4 w-4" />
                     )}
                   </div>
-                  <div className="flex-1 min-w-0">
+                  <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
-                      <span className="font-medium text-sm text-foreground truncate">{tool.title}</span>
-                      <span
-                        className={cn(
-                          "text-[10px] px-1.5 py-0.5 rounded border font-medium shrink-0",
-                          getRiskBadgeColor(tool.risk)
-                        )}
+                      <span className="text-foreground truncate text-sm font-medium">
+                        {tool.title}
+                      </span>
+                      <SignalBadge
+                        state={
+                          tool.risk === "read_only"
+                            ? "official"
+                            : tool.risk === "write_low"
+                              ? "overlay"
+                              : tool.risk === "write_high"
+                                ? "warning"
+                                : "blocked"
+                        }
                       >
                         {getRiskLabel(tool.risk)}
-                      </span>
+                      </SignalBadge>
                     </div>
-                    <p className="text-xs text-muted-foreground truncate">{tool.description}</p>
+                    <p className="text-muted-foreground truncate text-xs">{tool.description}</p>
                   </div>
-                  <ArrowRight className="w-4 h-4 text-muted-foreground shrink-0" />
+                  <ArrowRight className="text-muted-foreground h-4 w-4 shrink-0" />
                 </button>
               ))}
             </div>
@@ -198,15 +208,26 @@ export function CommandPalette({ isOpen, onClose, onOpenPanel, onNeedsConfirmati
         </div>
 
         {/* Footer */}
-        <div className="p-3 border-t border-border/30 flex items-center justify-between text-[10px] text-muted-foreground">
+        <div className="border-border/30 text-muted-foreground flex items-center justify-between border-t p-3 text-[10px]">
           <div className="flex items-center gap-3">
-            <span><kbd className="px-1 py-0.5 rounded bg-muted/50 border border-border/30">↑↓</kbd> Navigate</span>
-            <span><kbd className="px-1 py-0.5 rounded bg-muted/50 border border-border/30">Tab</kbd> Switch mode</span>
-            <span><kbd className="px-1 py-0.5 rounded bg-muted/50 border border-border/30">Enter</kbd> Execute</span>
+            <span>
+              <kbd className="bg-muted/50 border-border/30 rounded border px-1 py-0.5">↑↓</kbd>{" "}
+              Navigate
+            </span>
+            <span>
+              <kbd className="bg-muted/50 border-border/30 rounded border px-1 py-0.5">Tab</kbd>{" "}
+              Switch mode
+            </span>
+            <span>
+              <kbd className="bg-muted/50 border-border/30 rounded border px-1 py-0.5">Enter</kbd>{" "}
+              Execute
+            </span>
           </div>
-          <span><kbd className="px-1 py-0.5 rounded bg-muted/50 border border-border/30">Esc</kbd> Close</span>
+          <span>
+            <kbd className="bg-muted/50 border-border/30 rounded border px-1 py-0.5">Esc</kbd> Close
+          </span>
         </div>
-      </div>
+      </GlassCard>
     </div>
   );
 }

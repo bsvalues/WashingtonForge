@@ -34,17 +34,45 @@ const actionCategories: Record<string, { color: string; icon: typeof LogIn; labe
   INGEST_MAP_FIELDS: { color: "bg-blue-500/20 text-blue-400", icon: Database, label: "Map Fields" },
   INGEST_PREVIEW: { color: "bg-blue-500/20 text-blue-400", icon: Eye, label: "Preview" },
   INGEST_PUBLISH: { color: "bg-blue-500/20 text-blue-400", icon: Upload, label: "Publish" },
-  DATASET_CREATE: { color: "bg-purple-500/20 text-purple-400", icon: Database, label: "Create Dataset" },
-  DATASET_PUBLISH: { color: "bg-purple-500/20 text-purple-400", icon: Database, label: "Publish Dataset" },
-  DATASET_ARCHIVE: { color: "bg-purple-500/20 text-purple-400", icon: Database, label: "Archive Dataset" },
-  RATIO_RUN_CREATE: { color: "bg-amber-500/20 text-amber-400", icon: BarChart3, label: "Run Ratio Study" },
-  RATIO_RUN_COMPLETE: { color: "bg-amber-500/20 text-amber-400", icon: BarChart3, label: "Ratio Complete" },
+  DATASET_CREATE: {
+    color: "bg-purple-500/20 text-purple-400",
+    icon: Database,
+    label: "Create Dataset",
+  },
+  DATASET_PUBLISH: {
+    color: "bg-purple-500/20 text-purple-400",
+    icon: Database,
+    label: "Publish Dataset",
+  },
+  DATASET_ARCHIVE: {
+    color: "bg-purple-500/20 text-purple-400",
+    icon: Database,
+    label: "Archive Dataset",
+  },
+  RATIO_RUN_CREATE: {
+    color: "bg-amber-500/20 text-amber-400",
+    icon: BarChart3,
+    label: "Run Ratio Study",
+  },
+  RATIO_RUN_COMPLETE: {
+    color: "bg-amber-500/20 text-amber-400",
+    icon: BarChart3,
+    label: "Ratio Complete",
+  },
   RATIO_EXPORT: { color: "bg-amber-500/20 text-amber-400", icon: Download, label: "Export Ratio" },
   COCKPIT_VIEW: { color: "bg-cyan-500/20 text-cyan-400", icon: Map, label: "View Cockpit" },
   COCKPIT_SELECT: { color: "bg-cyan-500/20 text-cyan-400", icon: Map, label: "Select Parcels" },
   COCKPIT_FILTER: { color: "bg-cyan-500/20 text-cyan-400", icon: Filter, label: "Filter Parcels" },
-  SNAPSHOT_CREATE: { color: "bg-pink-500/20 text-pink-400", icon: Camera, label: "Create Snapshot" },
-  SNAPSHOT_PUBLISH: { color: "bg-pink-500/20 text-pink-400", icon: Camera, label: "Publish Snapshot" },
+  SNAPSHOT_CREATE: {
+    color: "bg-pink-500/20 text-pink-400",
+    icon: Camera,
+    label: "Create Snapshot",
+  },
+  SNAPSHOT_PUBLISH: {
+    color: "bg-pink-500/20 text-pink-400",
+    icon: Camera,
+    label: "Publish Snapshot",
+  },
   USER_CREATE: { color: "bg-teal-500/20 text-teal-400", icon: User, label: "Create User" },
   USER_UPDATE: { color: "bg-teal-500/20 text-teal-400", icon: User, label: "Update User" },
   ROLE_CHANGE: { color: "bg-teal-500/20 text-teal-400", icon: Sliders, label: "Change Role" },
@@ -52,11 +80,13 @@ const actionCategories: Record<string, { color: string; icon: typeof LogIn; labe
 
 // Fallback for unknown actions
 const getActionInfo = (action: AuditAction) => {
-  return actionCategories[action] || {
-    color: "bg-secondary/50 text-muted-foreground",
-    icon: FileText,
-    label: action.replace(/_/g, " "),
-  };
+  return (
+    actionCategories[action] || {
+      color: "bg-secondary/50 text-muted-foreground",
+      icon: FileText,
+      label: action.replace(/_/g, " "),
+    }
+  );
 };
 
 // Format timestamp
@@ -64,25 +94,25 @@ const formatTimestamp = (ts: string) => {
   const date = new Date(ts);
   const now = new Date();
   const diff = now.getTime() - date.getTime();
-  
+
   // Less than 1 hour
   if (diff < 3600000) {
     const mins = Math.floor(diff / 60000);
     return `${mins}m ago`;
   }
-  
+
   // Less than 24 hours
   if (diff < 86400000) {
     const hours = Math.floor(diff / 3600000);
     return `${hours}h ago`;
   }
-  
+
   // Less than 7 days
   if (diff < 604800000) {
     const days = Math.floor(diff / 86400000);
     return `${days}d ago`;
   }
-  
+
   return date.toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
@@ -135,7 +165,9 @@ export function AuditContent() {
   // Export audit log
   const handleExport = () => {
     const csv = [
-      ["Timestamp", "User", "Action", "Resource Type", "Resource ID", "County", "Details"].join(","),
+      ["Timestamp", "User", "Action", "Resource Type", "Resource ID", "County", "Details"].join(
+        ","
+      ),
       ...filteredEntries.map((e) =>
         [
           e.timestamp,
@@ -148,7 +180,7 @@ export function AuditContent() {
         ].join(",")
       ),
     ].join("\n");
-    
+
     const blob = new Blob([csv], { type: "text/csv" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
@@ -160,43 +192,47 @@ export function AuditContent() {
 
   return (
     <div className="space-bg min-h-screen p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
+      <div className="mx-auto max-w-7xl space-y-6">
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex flex-col justify-between gap-4 md:flex-row md:items-center">
           <div>
-            <h1 className="text-2xl font-semibold text-foreground">Audit Log</h1>
+            <h1 className="text-foreground text-2xl font-semibold">Audit Log</h1>
             <p className="text-muted-foreground mt-1">
               Complete audit trail of all system events and user actions
             </p>
           </div>
-          
+
           <div className="flex items-center gap-3">
-            <Button variant="outline" onClick={handleExport} className="glass-btn text-foreground bg-transparent">
-              <Download className="w-4 h-4 mr-2" />
+            <Button
+              variant="outline"
+              onClick={handleExport}
+              className="tf-glass-btn text-foreground bg-transparent"
+            >
+              <Download className="mr-2 h-4 w-4" />
               Export CSV
             </Button>
           </div>
         </div>
 
         {/* Filters */}
-        <Card className="glass-panel p-4">
-          <div className="flex flex-col md:flex-row gap-4">
+        <Card className="tf-glass p-4">
+          <div className="flex flex-col gap-4 md:flex-row">
             {/* Search */}
             <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+              <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
               <Input
                 placeholder="Search by user, action, or resource..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 bg-secondary/30 border-border/50"
+                className="bg-secondary/30 border-border/50 pl-9"
               />
             </div>
-            
+
             {/* Action Filter */}
             <select
               value={selectedAction || ""}
               onChange={(e) => setSelectedAction(e.target.value || null)}
-              className="glass-panel px-3 py-2 rounded-lg text-sm bg-transparent border-border/50 focus:outline-none focus:ring-2 focus:ring-primary/50"
+              className="tf-glass border-border/50 focus:ring-primary/50 rounded-lg bg-transparent px-3 py-2 text-sm focus:ring-2 focus:outline-none"
             >
               <option value="">All Actions</option>
               {uniqueActions.map((action) => (
@@ -205,12 +241,12 @@ export function AuditContent() {
                 </option>
               ))}
             </select>
-            
+
             {/* User Filter */}
             <select
               value={selectedUser || ""}
               onChange={(e) => setSelectedUser(e.target.value || null)}
-              className="glass-panel px-3 py-2 rounded-lg text-sm bg-transparent border-border/50 focus:outline-none focus:ring-2 focus:ring-primary/50"
+              className="tf-glass border-border/50 focus:ring-primary/50 rounded-lg bg-transparent px-3 py-2 text-sm focus:ring-2 focus:outline-none"
             >
               <option value="">All Users</option>
               {uniqueUsers.map((userId) => {
@@ -222,7 +258,7 @@ export function AuditContent() {
                 );
               })}
             </select>
-            
+
             {/* Clear Filters */}
             {(searchQuery || selectedAction || selectedUser) && (
               <Button
@@ -235,7 +271,7 @@ export function AuditContent() {
                 }}
                 className="text-muted-foreground"
               >
-                <RefreshCw className="w-4 h-4 mr-1" />
+                <RefreshCw className="mr-1 h-4 w-4" />
                 Clear
               </Button>
             )}
@@ -243,110 +279,108 @@ export function AuditContent() {
         </Card>
 
         {/* Results Summary */}
-        <div className="flex items-center justify-between text-sm text-muted-foreground">
+        <div className="text-muted-foreground flex items-center justify-between text-sm">
           <span>
             Showing {filteredEntries.length} of {entries.length} events
           </span>
           <span>
-            <Calendar className="w-4 h-4 inline mr-1" />
+            <Calendar className="mr-1 inline h-4 w-4" />
             Last 30 days
           </span>
         </div>
 
         {/* Audit Log Table */}
-        <Card className="glass-panel overflow-hidden">
+        <Card className="tf-glass overflow-hidden">
           {isLoading ? (
-            <div className="p-8 text-center text-muted-foreground">
-              <RefreshCw className="w-6 h-6 mx-auto mb-2 animate-spin" />
+            <div className="text-muted-foreground p-8 text-center">
+              <RefreshCw className="mx-auto mb-2 h-6 w-6 animate-spin" />
               Loading audit log...
             </div>
           ) : filteredEntries.length === 0 ? (
-            <div className="p-8 text-center text-muted-foreground">
+            <div className="text-muted-foreground p-8 text-center">
               No audit events found matching your filters.
             </div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="border-b border-border/50 bg-secondary/30">
-                    <th className="text-left px-4 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                  <tr className="border-border/50 bg-secondary/30 border-b">
+                    <th className="text-muted-foreground px-4 py-3 text-left text-xs font-medium tracking-wider uppercase">
                       Timestamp
                     </th>
-                    <th className="text-left px-4 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                    <th className="text-muted-foreground px-4 py-3 text-left text-xs font-medium tracking-wider uppercase">
                       User
                     </th>
-                    <th className="text-left px-4 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                    <th className="text-muted-foreground px-4 py-3 text-left text-xs font-medium tracking-wider uppercase">
                       Action
                     </th>
-                    <th className="text-left px-4 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                    <th className="text-muted-foreground px-4 py-3 text-left text-xs font-medium tracking-wider uppercase">
                       Resource
                     </th>
-                    <th className="text-left px-4 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                    <th className="text-muted-foreground px-4 py-3 text-left text-xs font-medium tracking-wider uppercase">
                       County
                     </th>
-                    <th className="text-left px-4 py-3 text-xs font-medium text-muted-foreground uppercase tracking-wider">
+                    <th className="text-muted-foreground px-4 py-3 text-left text-xs font-medium tracking-wider uppercase">
                       Details
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-border/30">
+                <tbody className="divide-border/30 divide-y">
                   {filteredEntries.map((entry) => {
                     const actionInfo = getActionInfo(entry.action);
                     const Icon = actionInfo.icon;
-                    
+
                     return (
                       <tr key={entry.id} className="hover:bg-secondary/20 transition-colors">
                         <td className="px-4 py-3 whitespace-nowrap">
-                          <div className="text-sm text-foreground font-mono">
+                          <div className="text-foreground font-mono text-sm">
                             {formatTimestamp(entry.timestamp)}
                           </div>
-                          <div className="text-xs text-muted-foreground">
+                          <div className="text-muted-foreground text-xs">
                             {new Date(entry.timestamp).toLocaleTimeString()}
                           </div>
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap">
                           <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 rounded-full bg-secondary/50 flex items-center justify-center">
-                              <User className="w-4 h-4 text-muted-foreground" />
+                            <div className="bg-secondary/50 flex h-8 w-8 items-center justify-center rounded-full">
+                              <User className="text-muted-foreground h-4 w-4" />
                             </div>
                             <div>
-                              <div className="text-sm font-medium text-foreground">
+                              <div className="text-foreground text-sm font-medium">
                                 {entry.userName}
                               </div>
-                              <div className="text-xs text-muted-foreground">
-                                {entry.userId}
-                              </div>
+                              <div className="text-muted-foreground text-xs">{entry.userId}</div>
                             </div>
                           </div>
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap">
-                          <span className={cn(
-                            "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium",
-                            actionInfo.color
-                          )}>
-                            <Icon className="w-3.5 h-3.5" />
+                          <span
+                            className={cn(
+                              "inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium",
+                              actionInfo.color
+                            )}
+                          >
+                            <Icon className="h-3.5 w-3.5" />
                             {actionInfo.label}
                           </span>
                         </td>
                         <td className="px-4 py-3 whitespace-nowrap">
-                          <div className="text-sm text-foreground">
-                            {entry.resourceType}
-                          </div>
-                          <div className="text-xs text-muted-foreground font-mono">
+                          <div className="text-foreground text-sm">{entry.resourceType}</div>
+                          <div className="text-muted-foreground font-mono text-xs">
                             {entry.resourceId}
                           </div>
                         </td>
-                        <td className="px-4 py-3 whitespace-nowrap text-sm text-muted-foreground">
+                        <td className="text-muted-foreground px-4 py-3 text-sm whitespace-nowrap">
                           {entry.countyId || "-"}
                         </td>
                         <td className="px-4 py-3">
                           {entry.details ? (
-                            <code className="text-xs text-muted-foreground bg-secondary/50 px-2 py-1 rounded">
+                            <code className="text-muted-foreground bg-secondary/50 rounded px-2 py-1 text-xs">
                               {JSON.stringify(entry.details).slice(0, 50)}
                               {JSON.stringify(entry.details).length > 50 && "..."}
                             </code>
                           ) : (
-                            <span className="text-xs text-muted-foreground">-</span>
+                            <span className="text-muted-foreground text-xs">-</span>
                           )}
                         </td>
                       </tr>

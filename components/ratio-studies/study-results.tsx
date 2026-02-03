@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react"
+import React from "react";
 
 import { useState } from "react";
 import {
@@ -57,14 +57,13 @@ export function StudyResults({ study }: StudyResultsProps) {
 
   if (!study) {
     return (
-      <div className="glass-panel rounded-xl p-12 text-center h-[600px] flex flex-col items-center justify-center">
-        <div className="w-16 h-16 rounded-xl bg-muted/30 flex items-center justify-center mb-4">
-          <FileBarChart className="w-8 h-8 text-muted-foreground" />
+      <div className="tf-glass flex h-[600px] flex-col items-center justify-center rounded-xl p-12 text-center">
+        <div className="bg-muted/30 mb-4 flex h-16 w-16 items-center justify-center rounded-xl">
+          <FileBarChart className="text-muted-foreground h-8 w-8" />
         </div>
-        <p className="text-foreground font-medium mb-1">Select a Study</p>
-        <p className="text-sm text-muted-foreground max-w-xs">
-          Choose a ratio study from the list to view detailed results and
-          statistics
+        <p className="text-foreground mb-1 font-medium">Select a Study</p>
+        <p className="text-muted-foreground max-w-xs text-sm">
+          Choose a ratio study from the list to view detailed results and statistics
         </p>
       </div>
     );
@@ -72,12 +71,12 @@ export function StudyResults({ study }: StudyResultsProps) {
 
   if (study.status === "running" || study.status === "pending") {
     return (
-      <div className="glass-panel rounded-xl p-12 text-center h-[600px] flex flex-col items-center justify-center">
-        <Loader2 className="w-12 h-12 text-primary animate-spin mb-4" />
-        <p className="text-foreground font-medium mb-1">
+      <div className="tf-glass flex h-[600px] flex-col items-center justify-center rounded-xl p-12 text-center">
+        <Loader2 className="text-primary mb-4 h-12 w-12 animate-spin" />
+        <p className="text-foreground mb-1 font-medium">
           {study.status === "running" ? "Processing..." : "Queued"}
         </p>
-        <p className="text-sm text-muted-foreground max-w-xs">
+        <p className="text-muted-foreground max-w-xs text-sm">
           {study.status === "running"
             ? "Computing ratio study metrics. This may take a few moments."
             : "This study is queued and will start processing shortly."}
@@ -88,14 +87,13 @@ export function StudyResults({ study }: StudyResultsProps) {
 
   if (study.status === "failed") {
     return (
-      <div className="glass-panel rounded-xl p-12 text-center h-[600px] flex flex-col items-center justify-center">
-        <div className="w-16 h-16 rounded-xl bg-destructive/20 flex items-center justify-center mb-4">
-          <AlertTriangle className="w-8 h-8 text-destructive" />
+      <div className="tf-glass flex h-[600px] flex-col items-center justify-center rounded-xl p-12 text-center">
+        <div className="bg-destructive/20 mb-4 flex h-16 w-16 items-center justify-center rounded-xl">
+          <AlertTriangle className="text-destructive h-8 w-8" />
         </div>
-        <p className="text-foreground font-medium mb-1">Study Failed</p>
-        <p className="text-sm text-muted-foreground max-w-xs">
-          This ratio study encountered an error during processing. Please try
-          running a new study.
+        <p className="text-foreground mb-1 font-medium">Study Failed</p>
+        <p className="text-muted-foreground max-w-xs text-sm">
+          This ratio study encountered an error during processing. Please try running a new study.
         </p>
       </div>
     );
@@ -105,14 +103,11 @@ export function StudyResults({ study }: StudyResultsProps) {
   if (!results) return null;
 
   // Determine status based on IAAO standards
-  const getMetricStatus = (
-    metric: string,
-    value: number
-  ): "good" | "warning" | "bad" => {
+  const getMetricStatus = (metric: string, value: number): "good" | "warning" | "bad" => {
     switch (metric) {
       case "ratio":
         if (value >= 0.95 && value <= 1.05) return "good";
-        if (value >= 0.90 && value <= 1.10) return "warning";
+        if (value >= 0.9 && value <= 1.1) return "warning";
         return "bad";
       case "cod":
         if (value <= 15) return "good";
@@ -124,7 +119,7 @@ export function StudyResults({ study }: StudyResultsProps) {
         return "bad";
       case "prb":
         if (Math.abs(value) <= 0.05) return "good";
-        if (Math.abs(value) <= 0.10) return "warning";
+        if (Math.abs(value) <= 0.1) return "warning";
         return "bad";
       default:
         return "good";
@@ -140,12 +135,11 @@ export function StudyResults({ study }: StudyResultsProps) {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="glass-panel rounded-xl p-4 flex items-center justify-between">
+      <div className="tf-glass flex items-center justify-between rounded-xl p-4">
         <div>
-          <h2 className="text-lg font-semibold text-foreground">{study.name}</h2>
-          <p className="text-sm text-muted-foreground">
-            Roll Year {study.rollYear} • {results.sampleSize.toLocaleString()}{" "}
-            qualified sales
+          <h2 className="text-foreground text-lg font-semibold">{study.name}</h2>
+          <p className="text-muted-foreground text-sm">
+            Roll Year {study.rollYear} • {results.sampleSize.toLocaleString()} qualified sales
           </p>
         </div>
         <div className="flex gap-2">
@@ -154,9 +148,9 @@ export function StudyResults({ study }: StudyResultsProps) {
             size="sm"
             onClick={() => handleExport("pdf")}
             disabled={isExporting}
-            className="glass-btn border-border/50 text-foreground"
+            className="tf-glass-btn border-border/50 text-foreground"
           >
-            <Download className="w-4 h-4 mr-2" />
+            <Download className="mr-2 h-4 w-4" />
             PDF
           </Button>
           <Button
@@ -164,16 +158,16 @@ export function StudyResults({ study }: StudyResultsProps) {
             size="sm"
             onClick={() => handleExport("xlsx")}
             disabled={isExporting}
-            className="glass-btn border-border/50 text-foreground"
+            className="tf-glass-btn border-border/50 text-foreground"
           >
-            <Download className="w-4 h-4 mr-2" />
+            <Download className="mr-2 h-4 w-4" />
             Excel
           </Button>
         </div>
       </div>
 
       {/* Key Metrics */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
         <MetricCard
           label="Median Ratio"
           value={results.medianRatio.toFixed(3)}
@@ -205,36 +199,28 @@ export function StudyResults({ study }: StudyResultsProps) {
       </div>
 
       {/* Additional Stats */}
-      <div className="grid md:grid-cols-3 gap-4">
-        <div className="glass-panel rounded-xl p-4">
-          <p className="text-xs text-muted-foreground uppercase tracking-wide mb-1">
-            Mean Ratio
-          </p>
-          <p className="text-xl font-semibold text-foreground">
-            {results.meanRatio.toFixed(3)}
-          </p>
+      <div className="grid gap-4 md:grid-cols-3">
+        <div className="tf-glass rounded-xl p-4">
+          <p className="text-muted-foreground mb-1 text-xs tracking-wide uppercase">Mean Ratio</p>
+          <p className="text-foreground text-xl font-semibold">{results.meanRatio.toFixed(3)}</p>
         </div>
-        <div className="glass-panel rounded-xl p-4">
-          <div className="flex items-center gap-2 mb-1">
-            <Users className="w-4 h-4 text-muted-foreground" />
-            <p className="text-xs text-muted-foreground uppercase tracking-wide">
-              Sample Size
-            </p>
+        <div className="tf-glass rounded-xl p-4">
+          <div className="mb-1 flex items-center gap-2">
+            <Users className="text-muted-foreground h-4 w-4" />
+            <p className="text-muted-foreground text-xs tracking-wide uppercase">Sample Size</p>
           </div>
-          <p className="text-xl font-semibold text-foreground">
+          <p className="text-foreground text-xl font-semibold">
             {results.sampleSize.toLocaleString()}
           </p>
         </div>
-        <div className="glass-panel rounded-xl p-4">
-          <div className="flex items-center gap-2 mb-1">
-            <AlertTriangle className="w-4 h-4 text-muted-foreground" />
-            <p className="text-xs text-muted-foreground uppercase tracking-wide">
+        <div className="tf-glass rounded-xl p-4">
+          <div className="mb-1 flex items-center gap-2">
+            <AlertTriangle className="text-muted-foreground h-4 w-4" />
+            <p className="text-muted-foreground text-xs tracking-wide uppercase">
               Outliers Excluded
             </p>
           </div>
-          <p className="text-xl font-semibold text-foreground">
-            {results.outlierCount}
-          </p>
+          <p className="text-foreground text-xl font-semibold">{results.outlierCount}</p>
         </div>
       </div>
 
@@ -242,36 +228,26 @@ export function StudyResults({ study }: StudyResultsProps) {
       <RatioCharts study={study} />
 
       {/* Breakdown Tables */}
-      <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid gap-6 md:grid-cols-2">
         {/* By Neighborhood */}
-        <div className="glass-panel rounded-xl overflow-hidden">
-          <div className="p-4 border-b border-border/50">
-            <h3 className="font-medium text-foreground">By Neighborhood</h3>
+        <div className="tf-glass overflow-hidden rounded-xl">
+          <div className="border-border/50 border-b p-4">
+            <h3 className="text-foreground font-medium">By Neighborhood</h3>
           </div>
           <div className="max-h-64 overflow-y-auto">
             <Table>
               <TableHeader>
                 <TableRow className="border-border/50">
-                  <TableHead className="text-muted-foreground">
-                    Neighborhood
-                  </TableHead>
-                  <TableHead className="text-muted-foreground text-right">
-                    Median
-                  </TableHead>
-                  <TableHead className="text-muted-foreground text-right">
-                    COD
-                  </TableHead>
-                  <TableHead className="text-muted-foreground text-right">
-                    N
-                  </TableHead>
+                  <TableHead className="text-muted-foreground">Neighborhood</TableHead>
+                  <TableHead className="text-muted-foreground text-right">Median</TableHead>
+                  <TableHead className="text-muted-foreground text-right">COD</TableHead>
+                  <TableHead className="text-muted-foreground text-right">N</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {results.byNeighborhood.map((n) => (
                   <TableRow key={n.neighborhood} className="border-border/50">
-                    <TableCell className="text-foreground">
-                      {n.neighborhood}
-                    </TableCell>
+                    <TableCell className="text-foreground">{n.neighborhood}</TableCell>
                     <TableCell
                       className={cn(
                         "text-right font-mono",
@@ -288,7 +264,7 @@ export function StudyResults({ study }: StudyResultsProps) {
                     >
                       {n.cod.toFixed(1)}%
                     </TableCell>
-                    <TableCell className="text-right text-muted-foreground">
+                    <TableCell className="text-muted-foreground text-right">
                       {n.sampleSize}
                     </TableCell>
                   </TableRow>
@@ -299,32 +275,24 @@ export function StudyResults({ study }: StudyResultsProps) {
         </div>
 
         {/* By Property Class */}
-        <div className="glass-panel rounded-xl overflow-hidden">
-          <div className="p-4 border-b border-border/50">
-            <h3 className="font-medium text-foreground">By Property Class</h3>
+        <div className="tf-glass overflow-hidden rounded-xl">
+          <div className="border-border/50 border-b p-4">
+            <h3 className="text-foreground font-medium">By Property Class</h3>
           </div>
           <div className="max-h-64 overflow-y-auto">
             <Table>
               <TableHeader>
                 <TableRow className="border-border/50">
                   <TableHead className="text-muted-foreground">Class</TableHead>
-                  <TableHead className="text-muted-foreground text-right">
-                    Median
-                  </TableHead>
-                  <TableHead className="text-muted-foreground text-right">
-                    COD
-                  </TableHead>
-                  <TableHead className="text-muted-foreground text-right">
-                    N
-                  </TableHead>
+                  <TableHead className="text-muted-foreground text-right">Median</TableHead>
+                  <TableHead className="text-muted-foreground text-right">COD</TableHead>
+                  <TableHead className="text-muted-foreground text-right">N</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {results.byPropertyClass.map((c) => (
                   <TableRow key={c.propertyClass} className="border-border/50">
-                    <TableCell className="text-foreground">
-                      {c.propertyClass}
-                    </TableCell>
+                    <TableCell className="text-foreground">{c.propertyClass}</TableCell>
                     <TableCell
                       className={cn(
                         "text-right font-mono",
@@ -341,7 +309,7 @@ export function StudyResults({ study }: StudyResultsProps) {
                     >
                       {c.cod.toFixed(1)}%
                     </TableCell>
-                    <TableCell className="text-right text-muted-foreground">
+                    <TableCell className="text-muted-foreground text-right">
                       {c.sampleSize}
                     </TableCell>
                   </TableRow>
@@ -371,19 +339,17 @@ function MetricCard({ label, value, target, icon: Icon, status }: MetricCardProp
   };
 
   return (
-    <div className="glass-panel rounded-xl p-4">
-      <div className="flex items-center gap-2 mb-3">
+    <div className="tf-glass rounded-xl p-4">
+      <div className="mb-3 flex items-center gap-2">
         <div
           className={cn(
-            "w-8 h-8 rounded-lg flex items-center justify-center border",
+            "flex h-8 w-8 items-center justify-center rounded-lg border",
             statusStyles[status]
           )}
         >
-          <Icon className="w-4 h-4" />
+          <Icon className="h-4 w-4" />
         </div>
-        <span className="text-xs text-muted-foreground uppercase tracking-wide">
-          {label}
-        </span>
+        <span className="text-muted-foreground text-xs tracking-wide uppercase">{label}</span>
       </div>
       <p
         className={cn(
@@ -397,7 +363,7 @@ function MetricCard({ label, value, target, icon: Icon, status }: MetricCardProp
       >
         {value}
       </p>
-      <p className="text-xs text-muted-foreground mt-1">Target: {target}</p>
+      <p className="text-muted-foreground mt-1 text-xs">Target: {target}</p>
     </div>
   );
 }
