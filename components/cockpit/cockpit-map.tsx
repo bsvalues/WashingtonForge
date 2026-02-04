@@ -1,8 +1,7 @@
 "use client";
 
-import React from "react";
-
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import maplibregl from "maplibre-gl";
 import { Loader2, Lasso, Square } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -12,6 +11,7 @@ import { MapControls } from "./map-controls";
 import { useSelection } from "@/lib/selection";
 import { getMapLayers, type ParcelFilter, type Parcel, type MapLayer } from "@/lib/api";
 import { cn } from "@/lib/utils";
+import { RASTER_STYLE, BENTON_COUNTY_CENTER, DEFAULT_ZOOM, logMapStyle } from "@/lib/map/styles";
 
 interface CockpitMapProps {
   filters: ParcelFilter;
@@ -19,44 +19,99 @@ interface CockpitMapProps {
   onZoomToParcel?: (parcel: Parcel) => void;
 }
 
-// Extended parcel type with position for SVG rendering
-interface ParcelWithPosition extends Parcel {
-  x: number;
-  y: number;
-  width: number;
-  height: number;
+// Generate GeoJSON features from parcels with pseudo-random positions around Benton County
+function parcelsToGeoJSON(parcels: Parcel[]): GeoJSON.FeatureCollection {
+  const [centerLng, centerLat] = BENTON_COUNTY_CENTER;
+  const spread = 0.15; // ~10 miles spread
+
+  return {
+    type: "FeatureCollection",
+    features: parcels.map((parcel, index) => {
+      // Create a grid-like distribution with some randomness
+      const gridSize = Math.ceil(Math.sqrt(parcels.length));
+      const row = Math.floor(index / gridSize);
+      const col = index % gridSize;
+
+      // Normalize to -0.5 to 0.5 range, then scale by spread
+      const baseLng = centerLng + ((col / gridSize) - 0.5) * spread * 2;
+      const baseLat = centerLat + ((row / gridSize) - 0.5) * spread * 2;
+
+      // Add small random offset
+      const lng = baseLng + (Math.random() - 0.5) * 0.01;
+      const lat = baseLat + (Math.random() - 0.5) * 0.01;
+
+      // Create a small polygon (parcel shape)
+      const size = 0.002 + Math.random() * 0.001;
+      const coordinates = [
+        [
+          [lng, lat],
+          [lng + size, lat],
+          [lng + size, lat + size * 0.8],
+          [lng, lat + size * 0.8],
+          [lng, lat],
+        ],
+      ];
+
+      return {
+        type: "Feature" as const,
+        id: parcel.id,
+        geometry: {
+          type: "Polygon" as const,
+          coordinates,
+        },
+        properties: {
+          id: parcel.id,
+          parcelNumber: parcel.parcelNumber,
+          address: parcel.address,
+          owner: parcel.owner,
+          assessedValue: parcel.assessedValue,
+          marketValue: parcel.marketValue,
+          ratio: parcel.ratio,
+          equityStatus: parcel.equityStatus,
+          propertyType: parcel.propertyType,
+          acreage: parcel.acreage,
+          yearBuilt: parcel.yearBuilt,
+          neighborhood: parcel.neighborhood,
+        },
+      };
+    }),
+  };
 }
 
-// Generate mock positions for parcels
-function generateParcelPositions(parcels: Parcel[]): ParcelWithPosition[] {
-  const gridSize = Math.ceil(Math.sqrt(parcels.length));
-  const cellWidth = 90 / gridSize;
-  const cellHeight = 90 / gridSize;
+// Get fill color based on equity status
+function getEquityColor(status: string): string {
+  switch (status) {
+    case "fair":
+      return "rgba(16, 185, 129, 0.4)"; // emerald-500
+    case "progressive":
+      return "rgba(14, 165, 233, 0.4)"; // sky-500
+    case "regressive":
+      return "rgba(245, 158, 11, 0.4)"; // amber-500
+    default:
+      return "rgba(100, 100, 100, 0.3)";
+  }
+}
 
-  return parcels.map((parcel, index) => {
-    const row = Math.floor(index / gridSize);
-    const col = index % gridSize;
-
-    // Add some randomness to make it look more natural
-    const offsetX = (Math.random() - 0.5) * (cellWidth * 0.2);
-    const offsetY = (Math.random() - 0.5) * (cellHeight * 0.2);
-
-    return {
-      ...parcel,
-      x: 5 + col * cellWidth + offsetX,
-      y: 5 + row * cellHeight + offsetY,
-      width: cellWidth * 0.85,
-      height: cellHeight * 0.85,
-    };
-  });
+function getEquityStrokeColor(status: string): string {
+  switch (status) {
+    case "fair":
+      return "rgba(16, 185, 129, 1)";
+    case "progressive":
+      return "rgba(14, 165, 233, 1)";
+    case "regressive":
+      return "rgba(245, 158, 11, 1)";
+    default:
+      return "rgba(100, 100, 100, 1)";
+  }
 }
 
 export function CockpitMap({ filters, parcels, onZoomToParcel }: CockpitMapProps) {
   const mapContainerRef = useRef<HTMLDivElement>(null);
+  const mapRef = useRef<maplibregl.Map | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [mapReady, setMapReady] = useState(false);
   const [layers, setLayers] = useState<MapLayer[]>([]);
   const [visibleLayers, setVisibleLayers] = useState<Set<string>>(new Set(["drift-hotspots"]));
-  const [zoom, setZoom] = useState(1);
   const [tooltipPosition, setTooltipPosition] = useState<{ x: number; y: number } | null>(null);
 
   // Box select state
@@ -70,111 +125,308 @@ export function CockpitMap({ filters, parcels, onZoomToParcel }: CockpitMapProps
     setHoveredParcel,
     hoveredParcelId,
     isSelected,
+    selectedParcelIds,
     selectMode,
     setSelectMode,
-    singleSelectMode,
   } = useSelection();
 
-  // Generate positioned parcels with memoization
-  const positionedParcels = useMemo(() => {
-    return generateParcelPositions(parcels);
-  }, [parcels]);
+  // Generate GeoJSON from parcels
+  const geoJSON = useMemo(() => parcelsToGeoJSON(parcels), [parcels]);
 
-  // Load map layers
+  // Load map layers metadata
   useEffect(() => {
     async function loadLayers() {
       try {
         const mapLayers = await getMapLayers();
         setLayers(mapLayers);
-      } catch (err) {
+      } catch {
         // Silently handle
       }
     }
     loadLayers();
   }, []);
 
-  // Simulate map loading
+  // Initialize MapLibre
   useEffect(() => {
-    const timer = setTimeout(() => setIsLoading(false), 800);
-    return () => clearTimeout(timer);
-  }, []);
+    if (!mapContainerRef.current || mapRef.current) return;
 
-  const handleParcelMouseEnter = useCallback(
-    (parcel: ParcelWithPosition, event: React.MouseEvent) => {
-      if (selectMode !== "none") return;
+    const map = new maplibregl.Map({
+      container: mapContainerRef.current,
+      style: RASTER_STYLE,
+      center: BENTON_COUNTY_CENTER,
+      zoom: DEFAULT_ZOOM,
+      attributionControl: false,
+    });
 
-      setHoveredParcel(parcel.id);
-      const rect = mapContainerRef.current?.getBoundingClientRect();
-      if (rect) {
-        setTooltipPosition({
-          x: event.clientX - rect.left,
-          y: event.clientY - rect.top,
-        });
+    map.addControl(new maplibregl.AttributionControl({ compact: true }), "bottom-right");
+
+    map.on("load", () => {
+      console.log("[v0] MapLibre loaded");
+      logMapStyle(map);
+
+      // Debug: Check container sizing
+      const container = mapContainerRef.current;
+      if (container) {
+        const rect = container.getBoundingClientRect();
+        console.log("[v0] Map container size:", rect.width, "x", rect.height);
+        if (rect.width === 0 || rect.height === 0) {
+          console.warn("[v0] WARNING: Map container has zero width or height!");
+        }
       }
-    },
-    [selectMode, setHoveredParcel]
-  );
 
-  const handleParcelMouseLeave = useCallback(() => {
-    setHoveredParcel(null);
-    setTooltipPosition(null);
-  }, [setHoveredParcel]);
+      // Debug: Check if tiles are loading
+      map.on("data", (e) => {
+        if (e.dataType === "source" && e.sourceId === "osm") {
+          console.log("[v0] Tile data event:", e.isSourceLoaded ? "loaded" : "loading");
+        }
+      });
 
-  // Phase 1B.0: Throttle cursor position updates to reduce rerender frequency
-  const cursorThrottleRef = useRef<number | null>(null);
-  const pendingCursorRef = useRef<{ x: number; y: number } | null>(null);
+      map.on("error", (e) => {
+        console.error("[v0] MapLibre error:", e.error?.message || e);
+      });
 
-  const handleParcelMouseMove = useCallback(
-    (event: React.MouseEvent) => {
-      if (selectMode !== "none") return;
+      // Add parcels source
+      map.addSource("parcels", {
+        type: "geojson",
+        data: geoJSON,
+        generateId: true,
+      });
 
-      const rect = mapContainerRef.current?.getBoundingClientRect();
-      if (rect) {
-        const pos = {
-          x: event.clientX - rect.left,
-          y: event.clientY - rect.top,
-        };
+      // Add fill layer for parcels
+      map.addLayer({
+        id: "parcels-fill",
+        type: "fill",
+        source: "parcels",
+        paint: {
+          "fill-color": [
+            "match",
+            ["get", "equityStatus"],
+            "fair", "rgba(16, 185, 129, 0.35)",
+            "progressive", "rgba(14, 165, 233, 0.35)",
+            "regressive", "rgba(245, 158, 11, 0.35)",
+            "rgba(100, 100, 100, 0.25)"
+          ],
+          "fill-opacity": [
+            "case",
+            ["boolean", ["feature-state", "selected"], false], 0.7,
+            ["boolean", ["feature-state", "hover"], false], 0.55,
+            0.4
+          ],
+        },
+      });
 
-        pendingCursorRef.current = pos;
+      // Add stroke layer for parcels
+      map.addLayer({
+        id: "parcels-stroke",
+        type: "line",
+        source: "parcels",
+        paint: {
+          "line-color": [
+            "match",
+            ["get", "equityStatus"],
+            "fair", "rgba(16, 185, 129, 1)",
+            "progressive", "rgba(14, 165, 233, 1)",
+            "regressive", "rgba(245, 158, 11, 1)",
+            "rgba(100, 100, 100, 1)"
+          ],
+          "line-width": [
+            "case",
+            ["boolean", ["feature-state", "selected"], false], 2.5,
+            ["boolean", ["feature-state", "hover"], false], 1.5,
+            0.8
+          ],
+          "line-opacity": [
+            "case",
+            ["boolean", ["feature-state", "selected"], false], 1,
+            ["boolean", ["feature-state", "hover"], false], 0.9,
+            0.6
+          ],
+        },
+      });
 
-        // Throttle updates to ~50ms
-        if (cursorThrottleRef.current) return;
+      // Add selection highlight layer (renders on top)
+      map.addLayer({
+        id: "parcels-selection-glow",
+        type: "line",
+        source: "parcels",
+        paint: {
+          "line-color": "rgba(59, 130, 246, 0.6)", // primary blue
+          "line-width": 4,
+          "line-blur": 3,
+          "line-opacity": [
+            "case",
+            ["boolean", ["feature-state", "selected"], false], 1,
+            0
+          ],
+        },
+      });
 
-        cursorThrottleRef.current = window.setTimeout(() => {
-          if (pendingCursorRef.current) {
-            setTooltipPosition(pendingCursorRef.current);
-          }
-          cursorThrottleRef.current = null;
-        }, 50);
-      }
-    },
-    [selectMode]
-  );
+      // Force resize to handle layout timing issues
+      requestAnimationFrame(() => map.resize());
+      setTimeout(() => map.resize(), 0);
 
-  // Cleanup throttle timer on unmount
-  useEffect(() => {
-    return () => {
-      if (cursorThrottleRef.current) window.clearTimeout(cursorThrottleRef.current);
+      setMapReady(true);
+      setIsLoading(false);
+    });
+
+    mapRef.current = map;
+
+    // Expose map instance for console debugging
+    // Usage: __tfMap?.getStyle()?.sources or __tfMap?.getStyle()?.layers?.map(l => l.id)
+    (window as any).__tfMap = map;
+
+    // Handle window resize
+    const handleResize = () => {
+      map.resize();
     };
-  }, []);
+    window.addEventListener("resize", handleResize);
 
-  const handleParcelClick = useCallback(
-    (parcel: ParcelWithPosition, event: React.MouseEvent) => {
-      event.stopPropagation();
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      map.remove();
+      mapRef.current = null;
+    };
+  }, []); // Only run once on mount
 
-      if (selectMode === "lasso") {
-        // In lasso mode, toggle selection
-        toggleParcel(parcel.id);
-      } else if (selectMode === "box") {
-        // Box mode handled separately
-        return;
-      } else {
-        // Normal click behavior
-        selectParcel(parcel.id, event.shiftKey);
+  // Update GeoJSON data when parcels change and fit bounds
+  useEffect(() => {
+    if (!mapRef.current || !mapReady) return;
+
+    const source = mapRef.current.getSource("parcels") as maplibregl.GeoJSONSource | undefined;
+    if (source) {
+      source.setData(geoJSON);
+
+      // Calculate bounds from parcels and fit map to them
+      if (geoJSON.features.length > 0) {
+        const bounds = new maplibregl.LngLatBounds();
+        for (const feature of geoJSON.features) {
+          if (feature.geometry.type === "Polygon") {
+            for (const ring of feature.geometry.coordinates) {
+              for (const coord of ring) {
+                bounds.extend(coord as [number, number]);
+              }
+            }
+          }
+        }
+        if (!bounds.isEmpty()) {
+          mapRef.current.fitBounds(bounds, { padding: 50, maxZoom: 14 });
+          console.log("[v0] Fitted map to parcel bounds:", bounds.toArray());
+        }
       }
-    },
-    [selectMode, selectParcel, toggleParcel]
-  );
+    }
+  }, [geoJSON, mapReady]);
+
+  // Update feature states for selection
+  useEffect(() => {
+    if (!mapRef.current || !mapReady) return;
+
+    const map = mapRef.current;
+
+    // Clear all selection states first
+    for (const feature of geoJSON.features) {
+      if (feature.id) {
+        map.setFeatureState(
+          { source: "parcels", id: feature.id },
+          { selected: false }
+        );
+      }
+    }
+
+    // Set selected states
+    for (const id of selectedParcelIds) {
+      const feature = geoJSON.features.find(f => f.properties?.id === id);
+      if (feature?.id) {
+        map.setFeatureState(
+          { source: "parcels", id: feature.id },
+          { selected: true }
+        );
+      }
+    }
+  }, [selectedParcelIds, geoJSON, mapReady]);
+
+  // Update feature state for hover
+  useEffect(() => {
+    if (!mapRef.current || !mapReady) return;
+
+    const map = mapRef.current;
+
+    // Clear all hover states
+    for (const feature of geoJSON.features) {
+      if (feature.id) {
+        map.setFeatureState(
+          { source: "parcels", id: feature.id },
+          { hover: false }
+        );
+      }
+    }
+
+    // Set hovered state
+    if (hoveredParcelId) {
+      const feature = geoJSON.features.find(f => f.properties?.id === hoveredParcelId);
+      if (feature?.id) {
+        map.setFeatureState(
+          { source: "parcels", id: feature.id },
+          { hover: true }
+        );
+      }
+    }
+  }, [hoveredParcelId, geoJSON, mapReady]);
+
+  // Set up map event handlers
+  useEffect(() => {
+    if (!mapRef.current || !mapReady) return;
+
+    const map = mapRef.current;
+
+    const handleMouseMove = (e: maplibregl.MapMouseEvent) => {
+      if (selectMode !== "none") return;
+
+      const features = map.queryRenderedFeatures(e.point, { layers: ["parcels-fill"] });
+
+      if (features.length > 0) {
+        map.getCanvas().style.cursor = "pointer";
+        const props = features[0].properties;
+        if (props?.id) {
+          setHoveredParcel(props.id);
+          setTooltipPosition({ x: e.point.x, y: e.point.y });
+        }
+      } else {
+        map.getCanvas().style.cursor = "";
+        setHoveredParcel(null);
+        setTooltipPosition(null);
+      }
+    };
+
+    const handleClick = (e: maplibregl.MapMouseEvent) => {
+      const features = map.queryRenderedFeatures(e.point, { layers: ["parcels-fill"] });
+
+      if (features.length > 0) {
+        const props = features[0].properties;
+        if (props?.id) {
+          if (selectMode === "lasso") {
+            toggleParcel(props.id);
+          } else if (selectMode === "none") {
+            selectParcel(props.id, e.originalEvent.shiftKey);
+          }
+        }
+      }
+    };
+
+    const handleMouseLeave = () => {
+      setHoveredParcel(null);
+      setTooltipPosition(null);
+    };
+
+    map.on("mousemove", handleMouseMove);
+    map.on("click", handleClick);
+    map.on("mouseleave", handleMouseLeave);
+
+    return () => {
+      map.off("mousemove", handleMouseMove);
+      map.off("click", handleClick);
+      map.off("mouseleave", handleMouseLeave);
+    };
+  }, [mapReady, selectMode, setHoveredParcel, selectParcel, toggleParcel]);
 
   // Box select handlers
   const handleMapMouseDown = useCallback(
@@ -209,75 +461,56 @@ export function CockpitMap({ filters, parcels, onZoomToParcel }: CockpitMapProps
   );
 
   const handleMapMouseUp = useCallback(() => {
-    if (selectMode !== "box" || !boxSelectStart || !boxSelectEnd) {
+    if (selectMode !== "box" || !boxSelectStart || !boxSelectEnd || !mapRef.current) {
       setBoxSelectStart(null);
       setBoxSelectEnd(null);
       return;
     }
 
-    // Calculate selection box in SVG coordinates
-    const container = mapContainerRef.current;
-    if (!container) return;
+    const map = mapRef.current;
 
-    const rect = container.getBoundingClientRect();
-    const svgWidth = rect.width;
-    const svgHeight = rect.height;
+    // Query features within the box
+    const minX = Math.min(boxSelectStart.x, boxSelectEnd.x);
+    const maxX = Math.max(boxSelectStart.x, boxSelectEnd.x);
+    const minY = Math.min(boxSelectStart.y, boxSelectEnd.y);
+    const maxY = Math.max(boxSelectStart.y, boxSelectEnd.y);
 
-    // Convert pixel coordinates to viewBox coordinates (0-100)
-    const minX = (Math.min(boxSelectStart.x, boxSelectEnd.x) / svgWidth) * 100;
-    const maxX = (Math.max(boxSelectStart.x, boxSelectEnd.x) / svgWidth) * 100;
-    const minY = (Math.min(boxSelectStart.y, boxSelectEnd.y) / svgHeight) * 100;
-    const maxY = (Math.max(boxSelectStart.y, boxSelectEnd.y) / svgHeight) * 100;
+    const features = map.queryRenderedFeatures(
+      [[minX, minY], [maxX, maxY]],
+      { layers: ["parcels-fill"] }
+    );
 
-    // Find parcels within the box
-    const selectedIds: string[] = [];
-    for (const parcel of positionedParcels) {
-      const parcelCenterX = parcel.x + parcel.width / 2;
-      const parcelCenterY = parcel.y + parcel.height / 2;
+    const selectedParcelIds = features
+      .map(f => f.properties?.id)
+      .filter((id): id is string => !!id);
 
-      if (
-        parcelCenterX >= minX &&
-        parcelCenterX <= maxX &&
-        parcelCenterY >= minY &&
-        parcelCenterY <= maxY
-      ) {
-        selectedIds.push(parcel.id);
-      }
-    }
-
-    if (selectedIds.length > 0) {
-      selectParcels(selectedIds);
+    if (selectedParcelIds.length > 0) {
+      selectParcels(selectedParcelIds);
     }
 
     setBoxSelectStart(null);
     setBoxSelectEnd(null);
     setSelectMode("none");
-  }, [selectMode, boxSelectStart, boxSelectEnd, positionedParcels, selectParcels, setSelectMode]);
+  }, [selectMode, boxSelectStart, boxSelectEnd, selectParcels, setSelectMode]);
 
-  // Quick lasso - select a cluster of nearby parcels
+  // Quick lasso - select parcels in view
   const handleQuickLasso = useCallback(() => {
-    // For prototype: select ~20% of parcels randomly clustered
-    const clusterSize = Math.max(5, Math.floor(positionedParcels.length * 0.2));
-    const startIndex = Math.floor(Math.random() * (positionedParcels.length - clusterSize));
-    const selectedIds = positionedParcels
-      .slice(startIndex, startIndex + clusterSize)
-      .map((p) => p.id);
+    if (!mapRef.current) return;
+
+    const map = mapRef.current;
+    const features = map.queryRenderedFeatures(undefined, { layers: ["parcels-fill"] });
+
+    // Select ~20% of visible parcels
+    const count = Math.max(5, Math.floor(features.length * 0.2));
+    const shuffled = features.sort(() => Math.random() - 0.5);
+    const selectedIds = shuffled
+      .slice(0, count)
+      .map(f => f.properties?.id)
+      .filter((id): id is string => !!id);
+
     selectParcels(selectedIds);
     setSelectMode("none");
-  }, [positionedParcels, selectParcels, setSelectMode]);
-
-  const getParcelColor = (status: Parcel["equityStatus"]) => {
-    switch (status) {
-      case "fair":
-        return { fill: "fill-emerald-500/30", stroke: "stroke-emerald-500" };
-      case "progressive":
-        return { fill: "fill-sky-500/30", stroke: "stroke-sky-500" };
-      case "regressive":
-        return { fill: "fill-amber-500/30", stroke: "stroke-amber-500" };
-      default:
-        return { fill: "fill-muted/30", stroke: "stroke-muted" };
-    }
-  };
+  }, [selectParcels, setSelectMode]);
 
   const toggleLayer = (layerId: string) => {
     setVisibleLayers((prev) => {
@@ -291,9 +524,10 @@ export function CockpitMap({ filters, parcels, onZoomToParcel }: CockpitMapProps
     });
   };
 
+  // Find hovered parcel for tooltip
   const hoveredParcel = useMemo(() => {
-    return positionedParcels.find((p) => p.id === hoveredParcelId) || null;
-  }, [positionedParcels, hoveredParcelId]);
+    return parcels.find((p) => p.id === hoveredParcelId) || null;
+  }, [parcels, hoveredParcelId]);
 
   // Selection box dimensions
   const selectionBox = useMemo(() => {
@@ -306,23 +540,32 @@ export function CockpitMap({ filters, parcels, onZoomToParcel }: CockpitMapProps
     };
   }, [boxSelectStart, boxSelectEnd]);
 
+  // Zoom controls
+  const handleZoomIn = useCallback(() => {
+    mapRef.current?.zoomIn();
+  }, []);
+
+  const handleZoomOut = useCallback(() => {
+    mapRef.current?.zoomOut();
+  }, []);
+
+  const handleResetView = useCallback(() => {
+    mapRef.current?.flyTo({
+      center: BENTON_COUNTY_CENTER,
+      zoom: DEFAULT_ZOOM,
+    });
+  }, []);
+
   return (
     <TooltipProvider>
-      <div className="relative h-full w-full overflow-hidden">
-        {/* Map Container */}
+      <div className="tf-glass relative h-full min-h-[560px] w-full overflow-hidden rounded-2xl">
+        {/* MapLibre Container - explicit z-[1] ensures it sits above glass pseudo-elements */}
         <div
           ref={mapContainerRef}
           className={cn(
-            "absolute inset-0",
+            "tf-map-canvas absolute inset-0 z-[1]",
             (selectMode === "box" || selectMode === "lasso") && "cursor-crosshair"
           )}
-          style={{
-            background: `
-              radial-gradient(ellipse at 30% 40%, oklch(0.12 0.03 220 / 0.4) 0%, transparent 50%),
-              radial-gradient(ellipse at 70% 60%, oklch(0.10 0.02 260 / 0.3) 0%, transparent 50%),
-              linear-gradient(to bottom, oklch(0.06 0.015 250) 0%, oklch(0.04 0.01 250) 100%)
-            `,
-          }}
           onMouseDown={handleMapMouseDown}
           onMouseMove={handleMapMouseMove}
           onMouseUp={handleMapMouseUp}
@@ -330,157 +573,53 @@ export function CockpitMap({ filters, parcels, onZoomToParcel }: CockpitMapProps
             setBoxSelectStart(null);
             setBoxSelectEnd(null);
           }}
-        >
-          {/* Loading State */}
-          {isLoading && (
-            <div className="bg-background/80 absolute inset-0 z-10 flex items-center justify-center backdrop-blur-sm">
-              <div className="text-center">
-                <Loader2 className="text-primary mx-auto mb-3 h-8 w-8 animate-spin" />
-                <p className="text-muted-foreground text-sm">Loading parcels...</p>
-              </div>
+        />
+
+        {/* Loading State */}
+        {isLoading && (
+          <div className="bg-background/80 absolute inset-0 z-10 flex items-center justify-center backdrop-blur-sm">
+            <div className="text-center">
+              <Loader2 className="text-primary mx-auto mb-3 h-8 w-8 animate-spin" />
+              <p className="text-muted-foreground text-sm">Loading map...</p>
             </div>
-          )}
+          </div>
+        )}
 
-          {/* Interactive Map */}
-          {!isLoading && (
-            <div className="absolute inset-0">
-              {/* Grid overlay */}
-              <div
-                className="absolute inset-0 opacity-5"
-                style={{
-                  backgroundImage: `
-                    linear-gradient(to right, oklch(0.5 0.05 260) 1px, transparent 1px),
-                    linear-gradient(to bottom, oklch(0.5 0.05 260) 1px, transparent 1px)
-                  `,
-                  backgroundSize: "60px 60px",
-                }}
-              />
-
-              {/* SVG Parcels */}
-              <svg
-                className="absolute inset-0 h-full w-full"
-                viewBox="0 0 100 100"
-                preserveAspectRatio="xMidYMid meet"
-                style={{ transform: `scale(${zoom})`, transformOrigin: "center" }}
-              >
-                {positionedParcels.map((parcel) => {
-                  const colors = getParcelColor(parcel.equityStatus);
-                  const selected = isSelected(parcel.id);
-                  const hovered = hoveredParcelId === parcel.id;
-
-                  return (
-                    <g key={parcel.id}>
-                      {/* Phase 1B.1B-1: Magnetic selection ring with outer glow */}
-                      {selected && (
-                        <>
-                          {/* Outer glow (subtle) */}
-                          <rect
-                            x={parcel.x - 0.8}
-                            y={parcel.y - 0.8}
-                            width={parcel.width + 1.6}
-                            height={parcel.height + 1.6}
-                            className="fill-primary/10 stroke-primary/40 stroke-[0.6] blur-[0.3px]"
-                            rx={0.6}
-                          />
-                          {/* Crisp rim */}
-                          <rect
-                            x={parcel.x - 0.4}
-                            y={parcel.y - 0.4}
-                            width={parcel.width + 0.8}
-                            height={parcel.height + 0.8}
-                            className="stroke-primary fill-none stroke-[0.5]"
-                            rx={0.5}
-                          />
-                        </>
-                      )}
-
-                      {/* Phase 1B.1B-1: Hover ring (dimmer, only when not selected) */}
-                      {hovered && !selected && (
-                        <rect
-                          x={parcel.x - 0.3}
-                          y={parcel.y - 0.3}
-                          width={parcel.width + 0.6}
-                          height={parcel.height + 0.6}
-                          className="stroke-primary/60 fill-none stroke-[0.4]"
-                          rx={0.4}
-                        />
-                      )}
-
-                      {/* Parcel polygon */}
-                      <rect
-                        x={parcel.x}
-                        y={parcel.y}
-                        width={parcel.width}
-                        height={parcel.height}
-                        className={cn(
-                          "transition-all duration-100",
-                          selectMode === "none" && "cursor-pointer",
-                          colors.fill,
-                          colors.stroke,
-                          "stroke-[0.3]",
-                          hovered && !selected && "brightness-110",
-                          selected && "brightness-105"
-                        )}
-                        rx={0.3}
-                        onMouseEnter={(e) => handleParcelMouseEnter(parcel, e)}
-                        onMouseLeave={handleParcelMouseLeave}
-                        onMouseMove={handleParcelMouseMove}
-                        onClick={(e) => handleParcelClick(parcel, e)}
-                      />
-
-                      {/* Ratio label on hover/select */}
-                      {(hovered || selected) && (
-                        <text
-                          x={parcel.x + parcel.width / 2}
-                          y={parcel.y + parcel.height / 2}
-                          textAnchor="middle"
-                          dominantBaseline="middle"
-                          className="fill-foreground pointer-events-none text-[1.8px] font-semibold"
-                        >
-                          {parcel.ratio?.toFixed(2) || "—"}
-                        </text>
-                      )}
-                    </g>
-                  );
-                })}
-              </svg>
-
-              {/* Box Selection Overlay */}
-              {selectionBox && (
-                <div
-                  className="border-primary bg-primary/10 pointer-events-none absolute z-20 border-2 border-dashed"
-                  style={{
-                    left: selectionBox.x,
-                    top: selectionBox.y,
-                    width: selectionBox.width,
-                    height: selectionBox.height,
-                  }}
-                />
-              )}
-            </div>
-          )}
-        </div>
+        {/* Box Selection Overlay */}
+        {selectionBox && (
+          <div
+            className="border-primary bg-primary/10 pointer-events-none absolute z-20 border-2 border-dashed"
+            style={{
+              left: selectionBox.x,
+              top: selectionBox.y,
+              width: selectionBox.width,
+              height: selectionBox.height,
+            }}
+          />
+        )}
 
         {/* Hover Tooltip */}
-        <HoverTooltip
-          parcel={hoveredParcel}
-          position={tooltipPosition}
-          containerRef={mapContainerRef}
-        />
+        <div className="tf-map-tooltip">
+          <HoverTooltip
+            parcel={hoveredParcel}
+            position={tooltipPosition}
+            containerRef={mapContainerRef}
+          />
+        </div>
 
         {/* Map Controls */}
         <MapControls
-          zoom={zoom}
-          onZoomIn={() => setZoom((z) => Math.min(z + 0.25, 2))}
-          onZoomOut={() => setZoom((z) => Math.max(z - 0.25, 0.5))}
-          onResetView={() => setZoom(1)}
+          zoom={mapRef.current?.getZoom() ?? DEFAULT_ZOOM}
+          onZoomIn={handleZoomIn}
+          onZoomOut={handleZoomOut}
+          onResetView={handleResetView}
           layers={layers}
           visibleLayers={visibleLayers}
           onToggleLayer={toggleLayer}
         />
 
         {/* Legend */}
-        <GlassCard className="absolute bottom-4 left-4 z-10 rounded-lg p-3">
+        <GlassCard className="tf-map-ui bottom-4 left-4 rounded-lg p-3">
           <p className="text-foreground mb-2 text-xs font-semibold">Equity Status</p>
           <div className="space-y-1.5">
             <div className="flex items-center gap-2">
@@ -498,14 +637,14 @@ export function CockpitMap({ filters, parcels, onZoomToParcel }: CockpitMapProps
           </div>
           <div className="border-border/30 mt-3 border-t pt-2">
             <p className="text-muted-foreground text-xs">
-              {positionedParcels.length} parcels shown
+              {parcels.length} parcels loaded
             </p>
           </div>
         </GlassCard>
 
         {/* Select Mode Indicator */}
         {selectMode !== "none" && (
-          <GlassCard className="absolute top-4 left-1/2 z-20 flex -translate-x-1/2 items-center gap-3 rounded-lg px-4 py-2">
+          <GlassCard className="tf-map-ui top-4 left-1/2 flex -translate-x-1/2 items-center gap-3 rounded-lg px-4 py-2">
             {selectMode === "lasso" && (
               <>
                 <Lasso className="text-primary h-4 w-4" />
