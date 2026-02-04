@@ -161,6 +161,7 @@ export default function CountyPage() {
                   <button
                     key={county.id}
                     type="button"
+                    suppressHydrationWarning
                     onClick={() => setSelectedCounty(county.id)}
                     className={cn(
                       "w-full rounded-lg p-4 text-left transition-all",
@@ -201,6 +202,7 @@ export default function CountyPage() {
                   <button
                     key={role.value}
                     type="button"
+                    suppressHydrationWarning
                     onClick={() => setSelectedRole(role.value)}
                     className={cn(
                       "w-full rounded-lg p-4 text-left transition-all",
