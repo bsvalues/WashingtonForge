@@ -8,7 +8,6 @@ import {
   XAxis,
   YAxis,
   CartesianGrid,
-  ResponsiveContainer,
   ReferenceLine,
   Cell,
   Scatter,
@@ -120,8 +119,7 @@ export function RatioCharts({
             }}
             className="h-64"
           >
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart
+            <BarChart
                 data={neighborhoodData}
                 layout="vertical"
                 margin={{ top: 5, right: 30, left: 80, bottom: 5 }}
@@ -185,7 +183,6 @@ export function RatioCharts({
                   ))}
                 </Bar>
               </BarChart>
-            </ResponsiveContainer>
           </ChartContainer>
         </div>
       )}
@@ -205,9 +202,8 @@ export function RatioCharts({
             }}
             className="h-64"
           >
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={propertyClassData}
+            <BarChart
+              data={propertyClassData}
                 margin={{ top: 5, right: 30, left: 20, bottom: 40 }}
               >
                 <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.3 0.02 260 / 0.3)" />
@@ -262,7 +258,6 @@ export function RatioCharts({
                   ))}
                 </Bar>
               </BarChart>
-            </ResponsiveContainer>
           </ChartContainer>
         </div>
       )}
@@ -280,8 +275,7 @@ export function RatioCharts({
           }}
           className="h-64"
         >
-          <ResponsiveContainer width="100%" height="100%">
-            <ComposedChart data={trendData} margin={{ top: 5, right: 50, left: 20, bottom: 5 }}>
+          <ComposedChart data={trendData} margin={{ top: 5, right: 50, left: 20, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.3 0.02 260 / 0.3)" />
               <XAxis
                 dataKey="year"
@@ -369,7 +363,6 @@ export function RatioCharts({
                 name="COD"
               />
             </ComposedChart>
-          </ResponsiveContainer>
         </ChartContainer>
         <div className="mt-3 flex justify-center gap-6 text-xs">
           <div className="flex items-center gap-2">
@@ -404,8 +397,7 @@ export function RatioCharts({
           }}
           className="h-64"
         >
-          <ResponsiveContainer width="100%" height="100%">
-            <ScatterChart margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+          <ScatterChart margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.3 0.02 260 / 0.3)" />
               <XAxis
                 type="number"
@@ -475,7 +467,6 @@ export function RatioCharts({
                 ))}
               </Scatter>
             </ScatterChart>
-          </ResponsiveContainer>
         </ChartContainer>
         <div className="mt-3 flex justify-center gap-4 text-xs">
           <div className="flex items-center gap-1">
