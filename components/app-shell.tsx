@@ -22,6 +22,7 @@ import {
   Shield,
   Settings2,
   Rocket,
+  Layers,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AuditLogModal } from "@/components/audit-log-modal";
@@ -51,7 +52,7 @@ interface AppShellProps {
 
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/onboarding", label: "Onboarding", icon: Rocket },
+  { href: "/data-suite", label: "Data Suite", icon: Layers },
   { href: "/cockpit", label: "Cockpit", icon: Map },
   { href: "/ingest", label: "Ingest", icon: Upload },
   { href: "/ratio-studies", label: "Ratio Studies", icon: BarChart3 },
