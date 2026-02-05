@@ -402,6 +402,8 @@ export {
   getDatasetErrors,
   downloadErrorCsv,
   saveFieldMapping,
+  // Map layers
+  getMapLayers,
   // Ratio studies
   getRatioStudies,
   runRatioStudy,
