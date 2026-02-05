@@ -98,6 +98,55 @@ class DataSuiteEventBus {
   clear(): void {
     this.eventLog = [];
   }
+
+  // ============================================
+  // OBSERVABILITY HELPERS (for monitoring/alerting)
+  // ============================================
+
+  /**
+   * Get deprecated API call events (for alerting)
+   */
+  getDeprecatedCalls(limit = 100): DataSuiteEvent[] {
+    return this.getEventsByType("deprecated.api_call", limit);
+  }
+
+  /**
+   * Get count of deprecated calls since a timestamp
+   */
+  getDeprecatedCallCountSince(since: Date): number {
+    return this.eventLog.filter(
+      (e) => e.type === "deprecated.api_call" && new Date(e.timestamp) >= since
+    ).length;
+  }
+
+  /**
+   * Get summary for alerting (returns null if no deprecated calls)
+   */
+  getDeprecatedCallSummary(): {
+    totalCalls: number;
+    uniqueFunctions: Set<string>;
+    mutatorCalls: number;
+    lastCall: string | null;
+  } | null {
+    const deprecatedEvents = this.getDeprecatedCalls();
+    if (deprecatedEvents.length === 0) return null;
+
+    const uniqueFunctions = new Set<string>();
+    let mutatorCalls = 0;
+
+    for (const event of deprecatedEvents) {
+      const fnName = event.payload.functionName as string;
+      uniqueFunctions.add(fnName);
+      if (event.payload.isMutator) mutatorCalls++;
+    }
+
+    return {
+      totalCalls: deprecatedEvents.length,
+      uniqueFunctions,
+      mutatorCalls,
+      lastCall: deprecatedEvents[0]?.timestamp || null,
+    };
+  }
 }
 
 // Singleton instance

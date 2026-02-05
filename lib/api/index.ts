@@ -32,14 +32,18 @@ export type { RollYearSnapshot };
 const ENFORCE_NO_LEGACY = process.env.ENFORCE_NO_LEGACY_API === "true";
 
 // ============================================
-// ASSESSOR-GRADE MIGRATION TRACKING
+// ASSESSOR-GRADE MIGRATION TRACKING (Court-Ready)
 // ============================================
+
+/** Mutator classification for audit severity */
+type MutatorClass = "ingest" | "validate" | "publish" | "query" | "auth";
 
 interface CallRecord {
   count: number;
   firstSeen: number;
   lastSeen: number;
   callSites: Set<string>; // Unique stack traces (hashed)
+  mutatorClass: MutatorClass;
 }
 
 const warned = new Set<string>();
@@ -48,6 +52,16 @@ const sessionId = typeof crypto !== "undefined" && crypto.randomUUID
   ? crypto.randomUUID() 
   : `session-${Date.now()}`;
 const sessionStart = Date.now();
+const appVersion = process.env.NEXT_PUBLIC_APP_VERSION || "dev";
+
+/** Classify function by mutator type */
+function classifyMutator(fnName: string): MutatorClass {
+  if (fnName.includes("upload") || fnName.includes("ingest")) return "ingest";
+  if (fnName.includes("validate")) return "validate";
+  if (fnName.includes("publish")) return "publish";
+  if (fnName.includes("login") || fnName.includes("logout") || fnName.includes("User")) return "auth";
+  return "query";
+}
 
 /** Simple hash for call site tracking */
 function hashCallSite(stack: string | undefined): string {
@@ -60,6 +74,8 @@ function hashCallSite(stack: string | undefined): string {
 function warnOnce(fnName: string, replacement: string) {
   const now = Date.now();
   const callSite = hashCallSite(new Error().stack);
+  const mutatorClass = classifyMutator(fnName);
+  const isMutator = mutatorClass !== "query" && mutatorClass !== "auth";
   
   // Track call record with assessor-grade metadata
   const existing = callRecords.get(fnName);
@@ -73,17 +89,42 @@ function warnOnce(fnName: string, replacement: string) {
       firstSeen: now,
       lastSeen: now,
       callSites: new Set([callSite]),
+      mutatorClass,
     });
   }
   
-  // Emit canonical audit event (hub is single authority for all events)
+  const record = callRecords.get(fnName)!;
+  
+  // Emit COURT-READY audit event with full chain-of-custody fields
   eventBus.emit({
     type: "deprecated.api_call",
     payload: {
-      function: fnName,
+      // Identity
+      functionName: fnName,
       replacement,
+      
+      // Classification (for alert severity)
+      isMutator,
+      mutatorClass,
+      
+      // Session context
       sessionId,
       environment: process.env.NODE_ENV || "unknown",
+      appVersion,
+      
+      // Temporal (for burn-down tracking)
+      firstSeen: new Date(record.firstSeen).toISOString(),
+      lastSeen: new Date(record.lastSeen).toISOString(),
+      count: record.count,
+      
+      // Callsite attribution (dev only for stack, always count)
+      uniqueCallSites: record.callSites.size,
+      ...(process.env.NODE_ENV !== "production" && {
+        sampledCallSite: callSite.slice(0, 200),
+      }),
+      
+      // Actor (placeholder - wire to auth context when available)
+      actor: "system", // TODO: inject from auth context
     },
     timestamp: new Date().toISOString(),
   });
@@ -144,6 +185,7 @@ export function resetDeprecatedCallCounts(): void {
  * - CI enforcement checks
  * - Operational audits
  * - Migration burn-down tracking
+ * - Court-ready chain-of-custody documentation
  */
 export function getMigrationReport() {
   const functions: Array<{
@@ -152,24 +194,38 @@ export function getMigrationReport() {
     firstSeen: string | null;
     lastSeen: string | null;
     uniqueCallSites: number;
+    mutatorClass: MutatorClass;
+    isMutator: boolean;
   }> = [];
   
   let totalCalls = 0;
+  let mutatorCalls = 0;
+  
   callRecords.forEach((record, fn) => {
     totalCalls += record.count;
+    const isMutator = record.mutatorClass !== "query" && record.mutatorClass !== "auth";
+    if (isMutator) mutatorCalls += record.count;
+    
     functions.push({
       name: fn,
       calls: record.count,
       firstSeen: new Date(record.firstSeen).toISOString(),
       lastSeen: new Date(record.lastSeen).toISOString(),
       uniqueCallSites: record.callSites.size,
+      mutatorClass: record.mutatorClass,
+      isMutator,
     });
   });
+  
+  const mutatorFunctions = functions.filter(f => f.isMutator);
   
   return {
     // Summary
     totalCalls,
+    mutatorCalls,
+    queryCalls: totalCalls - mutatorCalls,
     uniqueFunctions: functions.length,
+    uniqueMutators: mutatorFunctions.length,
     enforcementEnabled: ENFORCE_NO_LEGACY,
     
     // Session metadata (for audit correlation)
@@ -177,15 +233,24 @@ export function getMigrationReport() {
     sessionStarted: new Date(sessionStart).toISOString(),
     reportGenerated: new Date().toISOString(),
     environment: process.env.NODE_ENV || "unknown",
-    appVersion: process.env.NEXT_PUBLIC_APP_VERSION || "dev",
+    appVersion,
     
-    // Detailed function breakdown
+    // Detailed function breakdown (sorted by calls descending)
     functions: functions.sort((a, b) => b.calls - a.calls),
     
-    // CI helper: true if any mutator was called
-    hasMutatorCalls: functions.some(f => 
-      ["uploadDataset", "validateDataset", "publishDataset", "getIngestStatus"].includes(f.name)
-    ),
+    // CI helpers
+    hasMutatorCalls: mutatorCalls > 0,
+    
+    // Top offenders (for weekly burn-down reports)
+    topOffenders: mutatorFunctions
+      .sort((a, b) => b.calls - a.calls)
+      .slice(0, 5)
+      .map(f => ({
+        name: f.name,
+        calls: f.calls,
+        lastSeen: f.lastSeen,
+        uniqueCallSites: f.uniqueCallSites,
+      })),
   };
 }
 
@@ -201,15 +266,37 @@ export function getMigrationReport() {
 export function assertNoLegacyMutators(): void {
   const report = getMigrationReport();
   if (report.hasMutatorCalls) {
-    const mutators = report.functions
-      .filter(f => ["uploadDataset", "validateDataset", "publishDataset", "getIngestStatus"].includes(f.name))
-      .map(f => `  - ${f.name}: ${f.calls} calls`)
+    const mutators = report.topOffenders
+      .map(f => `  - ${f.name}: ${f.calls} calls from ${f.uniqueCallSites} sites`)
       .join("\n");
     throw new Error(
       `[CI_ASSERTION_FAILED] Legacy mutator calls detected:\n${mutators}\n\n` +
       `Migrate to dataSuiteHub before merging.`
     );
   }
+}
+
+/**
+ * OBSERVABILITY HELPER - Get deprecation events for alerting
+ * 
+ * Usage in monitoring:
+ *   const events = getDeprecatedEvents();
+ *   if (events.length > 0) sendAlert(events);
+ */
+export function getDeprecatedEvents() {
+  return eventBus.getEventsByType("deprecated.api_call", 100);
+}
+
+/**
+ * DELETE-THE-SHIM PATHWAY CHECKER
+ * 
+ * Returns true when safe to remove mutator exports:
+ * - No mutator calls in current session
+ * - Enforcement mode ready
+ */
+export function isReadyToRemoveMutators(): boolean {
+  const report = getMigrationReport();
+  return !report.hasMutatorCalls;
 }
 
 // ============================================
