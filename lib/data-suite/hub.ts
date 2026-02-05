@@ -321,11 +321,17 @@ export const dataSuiteHub = {
 
   /**
    * Route published data to module subscribers
+   * 
+   * THIS IS THE CRITICAL DELIVERY CONTRACT:
+   * 1. Persist RouteRecord FIRST (receipt before ACK)
+   * 2. Set ActiveDatasetPointer (what subscriber will read)
+   * 3. THEN emit event (ACK-gated UI can now show success)
    */
   async routeToSubscribers(
     countyFips: WACountyFips,
     product: DataProductType,
-    versionId: string
+    versionId: string,
+    deliveredBy: string = "system"
   ): Promise<RoutingResult[]> {
     const results: RoutingResult[] = [];
 
@@ -339,33 +345,132 @@ export const dataSuiteHub = {
 
     const subscribers = routingMap[product] || [];
 
-    for (const subscriber of subscribers) {
-      try {
-        // In production: call subscriber's update endpoint
-        // For demo: simulate success
-        await new Promise((r) => setTimeout(r, 100));
+    // Get row count from version (for audit)
+    const version = await repository.getCurrentVersion(countyFips, product);
+    const rowCount = version?.row_count || 0;
 
+    for (const subscriber of subscribers) {
+      const routeRecordId = `rr-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+      
+      try {
+        // STEP 1: Persist RouteRecord BEFORE anything else (receipt-first)
+        await repository.createRouteRecord({
+          id: routeRecordId,
+          subscriber,
+          county_fips: countyFips,
+          product_type: product,
+          version_id: versionId,
+          delivered_at: new Date().toISOString(),
+          delivered_by: deliveredBy,
+          status: "delivered",
+          row_count: rowCount,
+        });
+
+        // STEP 2: Set ActiveDatasetPointer (this is what Cockpit reads!)
+        await repository.setActiveDataset(
+          subscriber,
+          countyFips,
+          product,
+          versionId,
+          deliveredBy
+        );
+
+        // STEP 3: Only NOW emit success event (ACK-gated)
         results.push({
           subscriber,
           success: true,
           updatedAt: new Date().toISOString(),
+          versionId,
+          rowCount,
         });
 
         eventBus.emit({
           type: "routing.completed",
-          payload: { countyFips, product, versionId, subscriber },
+          payload: { 
+            countyFips, 
+            product, 
+            versionId, 
+            subscriber,
+            routeRecordId,
+            rowCount,
+          },
           timestamp: new Date().toISOString(),
         });
       } catch (error) {
+        // Persist failed route record
+        await repository.createRouteRecord({
+          id: routeRecordId,
+          subscriber,
+          county_fips: countyFips,
+          product_type: product,
+          version_id: versionId,
+          delivered_at: new Date().toISOString(),
+          delivered_by: deliveredBy,
+          status: "failed",
+          row_count: 0,
+          error_message: error instanceof Error ? error.message : "Unknown error",
+        });
+
         results.push({
           subscriber,
           success: false,
           error: error instanceof Error ? error.message : "Unknown error",
         });
+
+        eventBus.emit({
+          type: "routing.failed",
+          payload: { countyFips, product, versionId, subscriber, error: results[results.length - 1].error },
+          timestamp: new Date().toISOString(),
+        });
       }
     }
 
     return results;
+  },
+
+  // ----------------------------------------
+  // SUBSCRIBER DATA ACCESS (what Cockpit reads)
+  // ----------------------------------------
+
+  /**
+   * Get active dataset for a subscriber
+   * 
+   * THIS IS THE READ PATH FOR COCKPIT (and other subscribers).
+   * Returns null if no data has been delivered yet.
+   */
+  async getActiveDatasetForSubscriber(
+    subscriber: string,
+    countyFips: WACountyFips,
+    product: DataProductType
+  ): Promise<{
+    versionId: string;
+    activatedAt: string;
+    activatedBy: string;
+    rowCount: number;
+  } | null> {
+    const pointer = await repository.getActiveDataset(subscriber, countyFips, product);
+    if (!pointer?.active_version_id) return null;
+
+    const version = await repository.getCurrentVersion(countyFips, product);
+    
+    return {
+      versionId: pointer.active_version_id,
+      activatedAt: pointer.activated_at || new Date().toISOString(),
+      activatedBy: pointer.activated_by || "unknown",
+      rowCount: version?.row_count || 0,
+    };
+  },
+
+  /**
+   * Get route history for a subscriber (for audit)
+   */
+  async getRouteHistory(
+    subscriber: string,
+    countyFips: WACountyFips,
+    product: DataProductType,
+    limit = 10
+  ) {
+    return repository.getRouteRecords(subscriber, countyFips, product, limit);
   },
 
   // ----------------------------------------
@@ -549,6 +654,8 @@ export interface RoutingResult {
   subscriber: string;
   success: boolean;
   updatedAt?: string;
+  versionId?: string;
+  rowCount?: number;
   error?: string;
 }
 

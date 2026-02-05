@@ -216,3 +216,41 @@ export interface RoutingLogEntry {
     error?: string;
   }>;
 }
+
+// ============================================
+// ROUTE RECORD - The Delivery Receipt
+// ============================================
+
+/**
+ * RouteRecord is the persisted proof that data was delivered.
+ * This is what Cockpit (and other subscribers) read to know what data to load.
+ * 
+ * Without a RouteRecord, "Deliver" is just a UI claim with no backing state.
+ */
+export interface RouteRecord {
+  id: string;
+  subscriber: string;           // "cockpit-map", "ratio-studies", etc.
+  county_fips: WACountyFips;
+  product_type: DataProductType;
+  version_id: string;
+  delivered_at: string;
+  delivered_by: string;
+  status: "delivered" | "failed" | "rolled_back";
+  row_count: number;
+  error_message?: string;
+}
+
+/**
+ * ActiveDatasetPointer - What version a subscriber should read
+ * 
+ * This is the canonical pointer. When Cockpit loads, it reads this pointer
+ * to know which version to display. Set by delivery, cleared by rollback.
+ */
+export interface ActiveDatasetPointer {
+  subscriber: string;
+  county_fips: WACountyFips;
+  product_type: DataProductType;
+  active_version_id: string | null;  // null = no data delivered yet
+  activated_at: string | null;
+  activated_by: string | null;
+}

@@ -16,6 +16,8 @@ import type {
   IngestRun,
   CountyDataStatus,
   LineageEvent,
+  RouteRecord,
+  ActiveDatasetPointer,
 } from "./types";
 import type { ProductVersion } from "./hub";
 
@@ -42,6 +44,15 @@ export interface IDataSuiteRepository {
   // Lineage Events
   createLineageEvent(event: LineageEvent): Promise<LineageEvent>;
   getLineageEvents(countyFips: WACountyFips, product?: DataProductType, limit?: number): Promise<LineageEvent[]>;
+
+  // Route Records (delivery receipts)
+  createRouteRecord(record: RouteRecord): Promise<RouteRecord>;
+  getRouteRecords(subscriber: string, countyFips: WACountyFips, product: DataProductType, limit?: number): Promise<RouteRecord[]>;
+  
+  // Active Dataset Pointers (what subscribers should read)
+  setActiveDataset(subscriber: string, countyFips: WACountyFips, product: DataProductType, versionId: string | null, activatedBy: string): Promise<ActiveDatasetPointer>;
+  getActiveDataset(subscriber: string, countyFips: WACountyFips, product: DataProductType): Promise<ActiveDatasetPointer | null>;
+  getAllActiveDatasets(countyFips: WACountyFips): Promise<ActiveDatasetPointer[]>;
 }
 
 // ============================================
@@ -53,6 +64,8 @@ class DemoRepository implements IDataSuiteRepository {
   private countyStatuses = new Map<WACountyFips, CountyDataStatus>();
   private versions = new Map<string, ProductVersion[]>(); // key: `${countyFips}:${product}`
   private lineageEvents = new Map<string, LineageEvent[]>(); // key: countyFips
+  private routeRecords = new Map<string, RouteRecord[]>(); // key: `${subscriber}:${countyFips}:${product}`
+  private activePointers = new Map<string, ActiveDatasetPointer>(); // key: `${subscriber}:${countyFips}:${product}`
 
   // ----------------------------------------
   // Ingest Runs
@@ -201,6 +214,71 @@ class DemoRepository implements IDataSuiteRepository {
   }
 
   // ----------------------------------------
+  // Route Records (delivery receipts)
+  // ----------------------------------------
+
+  async createRouteRecord(record: RouteRecord): Promise<RouteRecord> {
+    const key = `${record.subscriber}:${record.county_fips}:${record.product_type}`;
+    const existing = this.routeRecords.get(key) || [];
+    existing.unshift(record);
+    this.routeRecords.set(key, existing);
+    return record;
+  }
+
+  async getRouteRecords(
+    subscriber: string,
+    countyFips: WACountyFips,
+    product: DataProductType,
+    limit = 10
+  ): Promise<RouteRecord[]> {
+    const key = `${subscriber}:${countyFips}:${product}`;
+    return (this.routeRecords.get(key) || []).slice(0, limit);
+  }
+
+  // ----------------------------------------
+  // Active Dataset Pointers
+  // ----------------------------------------
+
+  async setActiveDataset(
+    subscriber: string,
+    countyFips: WACountyFips,
+    product: DataProductType,
+    versionId: string | null,
+    activatedBy: string
+  ): Promise<ActiveDatasetPointer> {
+    const key = `${subscriber}:${countyFips}:${product}`;
+    const pointer: ActiveDatasetPointer = {
+      subscriber,
+      county_fips: countyFips,
+      product_type: product,
+      active_version_id: versionId,
+      activated_at: versionId ? new Date().toISOString() : null,
+      activated_by: versionId ? activatedBy : null,
+    };
+    this.activePointers.set(key, pointer);
+    return pointer;
+  }
+
+  async getActiveDataset(
+    subscriber: string,
+    countyFips: WACountyFips,
+    product: DataProductType
+  ): Promise<ActiveDatasetPointer | null> {
+    const key = `${subscriber}:${countyFips}:${product}`;
+    return this.activePointers.get(key) || null;
+  }
+
+  async getAllActiveDatasets(countyFips: WACountyFips): Promise<ActiveDatasetPointer[]> {
+    const results: ActiveDatasetPointer[] = [];
+    for (const [key, pointer] of this.activePointers) {
+      if (key.includes(`:${countyFips}:`)) {
+        results.push(pointer);
+      }
+    }
+    return results;
+  }
+
+  // ----------------------------------------
   // Demo Helpers
   // ----------------------------------------
 
@@ -299,6 +377,35 @@ class DemoRepository implements IDataSuiteRepository {
       timestamp: new Date().toISOString(),
       details: { versionLabel: "2026 Certified v2" },
     });
+
+    // CRITICAL: Set up route records and active pointers for subscribers
+    // This is what makes Cockpit actually have data to show
+    const currentVersionId = `v-${Date.now()}`;
+    const subscribers = ["cockpit-map", "comps-engine", "ratio-studies", "calibration", "appeals"];
+    
+    for (const subscriber of subscribers) {
+      // Create route record (delivery receipt)
+      await this.createRouteRecord({
+        id: `rr-demo-${subscriber}-${Date.now()}`,
+        subscriber,
+        county_fips: countyFips,
+        product_type: "COUNTY_ROLL",
+        version_id: currentVersionId,
+        delivered_at: new Date().toISOString(),
+        delivered_by: "jane.assessor@county.gov",
+        status: "delivered",
+        row_count: 42800,
+      });
+
+      // Set active dataset pointer (what subscriber reads)
+      await this.setActiveDataset(
+        subscriber,
+        countyFips,
+        "COUNTY_ROLL",
+        currentVersionId,
+        "jane.assessor@county.gov"
+      );
+    }
   }
 
   /**
@@ -309,6 +416,8 @@ class DemoRepository implements IDataSuiteRepository {
     this.countyStatuses.clear();
     this.versions.clear();
     this.lineageEvents.clear();
+    this.routeRecords.clear();
+    this.activePointers.clear();
   }
 }
 
