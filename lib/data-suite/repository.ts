@@ -56,16 +56,51 @@ export interface IDataSuiteRepository {
 }
 
 // ============================================
-// Demo In-Memory Implementation
+// Demo Implementation with localStorage Persistence
 // ============================================
 
+import { saveToStorage, loadFromStorage, clearStorage, hasStorageData } from "./storage";
+
 class DemoRepository implements IDataSuiteRepository {
-  private ingestRuns = new Map<string, IngestRun>();
-  private countyStatuses = new Map<WACountyFips, CountyDataStatus>();
-  private versions = new Map<string, ProductVersion[]>(); // key: `${countyFips}:${product}`
-  private lineageEvents = new Map<string, LineageEvent[]>(); // key: countyFips
-  private routeRecords = new Map<string, RouteRecord[]>(); // key: `${subscriber}:${countyFips}:${product}`
-  private activePointers = new Map<string, ActiveDatasetPointer>(); // key: `${subscriber}:${countyFips}:${product}`
+  private ingestRuns: Map<string, IngestRun>;
+  private countyStatuses: Map<WACountyFips, CountyDataStatus>;
+  private versions: Map<string, ProductVersion[]>; // key: `${countyFips}:${product}`
+  private lineageEvents: Map<string, LineageEvent[]>; // key: countyFips
+  private routeRecords: Map<string, RouteRecord[]>; // key: `${subscriber}:${countyFips}:${product}`
+  private activePointers: Map<string, ActiveDatasetPointer>; // key: `${subscriber}:${countyFips}:${product}`
+  
+  private _initialized = false;
+
+  constructor() {
+    // Initialize from localStorage if available
+    this.ingestRuns = loadFromStorage("ingestRuns", new Map<string, IngestRun>());
+    this.countyStatuses = loadFromStorage("countyStatuses", new Map<WACountyFips, CountyDataStatus>());
+    this.versions = loadFromStorage("versions", new Map<string, ProductVersion[]>());
+    this.lineageEvents = loadFromStorage("lineageEvents", new Map<string, LineageEvent[]>());
+    this.routeRecords = loadFromStorage("routeRecords", new Map<string, RouteRecord[]>());
+    this.activePointers = loadFromStorage("activePointers", new Map<string, ActiveDatasetPointer>());
+    this._initialized = hasStorageData();
+  }
+
+  /**
+   * Persist all data to localStorage
+   * Called after every write operation
+   */
+  private persist(): void {
+    saveToStorage("ingestRuns", this.ingestRuns);
+    saveToStorage("countyStatuses", this.countyStatuses);
+    saveToStorage("versions", this.versions);
+    saveToStorage("lineageEvents", this.lineageEvents);
+    saveToStorage("routeRecords", this.routeRecords);
+    saveToStorage("activePointers", this.activePointers);
+  }
+
+  /**
+   * Check if repository has been initialized with demo data
+   */
+  isInitialized(): boolean {
+    return this._initialized || this.countyStatuses.size > 0;
+  }
 
   // ----------------------------------------
   // Ingest Runs
@@ -83,6 +118,7 @@ class DemoRepository implements IDataSuiteRepository {
       row_counts_by_stage: data.row_counts_by_stage || { raw: 0, valid: 0, published: 0 },
     };
     this.ingestRuns.set(id, run);
+    this.persist();
     return run;
   }
 
@@ -92,6 +128,7 @@ class DemoRepository implements IDataSuiteRepository {
 
     const updated = { ...existing, ...data };
     this.ingestRuns.set(id, updated);
+    this.persist();
     return updated;
   }
 
@@ -145,6 +182,7 @@ class DemoRepository implements IDataSuiteRepository {
     };
 
     this.countyStatuses.set(countyFips, updated);
+    this.persist();
     return updated;
   }
 
@@ -168,6 +206,7 @@ class DemoRepository implements IDataSuiteRepository {
     version.is_current = true;
     existing.unshift(version);
     this.versions.set(key, existing);
+    this.persist();
 
     return version;
   }
@@ -198,6 +237,7 @@ class DemoRepository implements IDataSuiteRepository {
     const existing = this.lineageEvents.get(event.county_fips) || [];
     existing.unshift(event);
     this.lineageEvents.set(event.county_fips, existing);
+    this.persist();
     return event;
   }
 
@@ -222,6 +262,7 @@ class DemoRepository implements IDataSuiteRepository {
     const existing = this.routeRecords.get(key) || [];
     existing.unshift(record);
     this.routeRecords.set(key, existing);
+    this.persist();
     return record;
   }
 
@@ -256,6 +297,7 @@ class DemoRepository implements IDataSuiteRepository {
       activated_by: versionId ? activatedBy : null,
     };
     this.activePointers.set(key, pointer);
+    this.persist();
     return pointer;
   }
 
@@ -410,6 +452,7 @@ class DemoRepository implements IDataSuiteRepository {
 
   /**
    * Clear all data (for testing)
+   * Also clears localStorage
    */
   clear(): void {
     this.ingestRuns.clear();
@@ -418,6 +461,25 @@ class DemoRepository implements IDataSuiteRepository {
     this.lineageEvents.clear();
     this.routeRecords.clear();
     this.activePointers.clear();
+    this._initialized = false;
+    clearStorage();
+  }
+
+  /**
+   * Get storage stats (for debugging)
+   */
+  getStats(): {
+    initialized: boolean;
+    countyCount: number;
+    routeRecordCount: number;
+    activePointerCount: number;
+  } {
+    return {
+      initialized: this._initialized,
+      countyCount: this.countyStatuses.size,
+      routeRecordCount: Array.from(this.routeRecords.values()).flat().length,
+      activePointerCount: this.activePointers.size,
+    };
   }
 }
 

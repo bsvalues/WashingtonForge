@@ -22,6 +22,8 @@ export type { DataSuiteEvent, DataSuiteEventType } from "./event-bus";
 export { repository } from "./repository";
 export type { IDataSuiteRepository } from "./repository";
 
+export { clearStorage, hasStorageData, getStorageStats } from "./storage";
+
 export {
   DataSuiteProvider,
   useDataSuite,

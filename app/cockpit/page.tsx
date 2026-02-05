@@ -10,6 +10,7 @@ import { dataSuiteHub, repository, WA_COUNTIES } from "@/lib/data-suite";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2, Database, ArrowRight, AlertCircle, RefreshCw } from "lucide-react";
+import { DataPlaneStatus } from "@/components/data-suite/data-plane-status";
 import type { ParcelFilter, Parcel } from "@/lib/api";
 
 // ============================================
@@ -49,12 +50,20 @@ export default function CockpitPage() {
   // Load data from DataSuiteHub - THE CANONICAL READ PATH
   const loadCockpitData = useCallback(async () => {
     setDataState(prev => ({ ...prev, status: "loading", error: null }));
+    console.log("[v0] Cockpit: Starting data load for", DEFAULT_COUNTY);
 
     try {
+      // Check repository stats
+      const stats = repository.getStats();
+      console.log("[v0] Cockpit: Repository stats:", stats);
+
       // Ensure demo data is initialized (this runs once per session)
       const countyStatus = await dataSuiteHub.getStatus(DEFAULT_COUNTY);
+      console.log("[v0] Cockpit: County status exists:", !!countyStatus);
+      
       if (!countyStatus) {
         const countyInfo = WA_COUNTIES[DEFAULT_COUNTY];
+        console.log("[v0] Cockpit: Initializing demo for", countyInfo?.name);
         await repository.initializeDemoCounty(DEFAULT_COUNTY, countyInfo?.name || "Benton County");
       }
 
@@ -64,9 +73,11 @@ export default function CockpitPage() {
         DEFAULT_COUNTY,
         "COUNTY_ROLL"
       );
+      console.log("[v0] Cockpit: Active dataset:", activeDataset);
 
       if (!activeDataset) {
         // No data delivered yet - show empty state
+        console.log("[v0] Cockpit: No active dataset - showing empty state");
         setDataState({
           status: "no_data",
           versionId: null,
@@ -208,6 +219,17 @@ export default function CockpitPage() {
             <p className="text-muted-foreground mt-6 text-xs">
               After publishing data in the Data Suite, it will be automatically routed to the Cockpit.
             </p>
+
+            {/* Data Plane Status (Dev Debug) */}
+            {process.env.NODE_ENV !== "production" && (
+              <div className="mt-6">
+                <DataPlaneStatus
+                  countyFips={DEFAULT_COUNTY}
+                  subscriber="cockpit-map"
+                  product="COUNTY_ROLL"
+                />
+              </div>
+            )}
           </Card>
         </div>
       </AppShell>
@@ -265,6 +287,17 @@ export default function CockpitPage() {
               filters={filters}
               onZoomToParcel={handleZoomToParcel}
             />
+
+            {/* Data Plane Status (Dev Debug) */}
+            {process.env.NODE_ENV !== "production" && (
+              <div className="absolute bottom-4 right-4 z-20 w-64">
+                <DataPlaneStatus
+                  countyFips={DEFAULT_COUNTY}
+                  subscriber="cockpit-map"
+                  product="COUNTY_ROLL"
+                />
+              </div>
+            )}
           </div>
         </div>
       </AppShell>
