@@ -55,7 +55,7 @@ export interface Dataset {
   countyId?: string; // Tenant boundary - optional during initial upload
 }
 
-export type DatasetType = "parcel" | "sales" | "building" | "assessment";
+export type DatasetType = "parcel" | "sales" | "building" | "assessment" | "bulk_package" | "geodatabase";
 export type DatasetStatus =
   | "uploading"
   | "validating"
