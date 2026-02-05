@@ -11,12 +11,21 @@
  * 
  * This shim:
  * 1. Warns once per function (dev only)
- * 2. Forwards to DataSuiteHub (not api-internal)
- * 3. Preserves types for compile compatibility
+ * 2. Can throw in CI/dev when ENFORCE_NO_LEGACY_API=true
+ * 3. Forwards mutators to DataSuiteHub (sovereign model)
+ * 4. Preserves types for compile compatibility
+ * 
+ * For read-only queries, prefer: import { ... } from "@/lib/api/query"
  */
 
 import { dataSuiteHub } from "@/lib/data-suite/hub";
 import type { DatasetType } from "@/lib/api-internal/types";
+
+// ============================================
+// KILL SWITCH - flip to "throw" when migration is complete
+// ============================================
+
+const ENFORCE_NO_LEGACY = process.env.ENFORCE_NO_LEGACY_API === "true";
 
 // ============================================
 // warnOnce utility - prevents console spam
@@ -24,10 +33,21 @@ import type { DatasetType } from "@/lib/api-internal/types";
 
 const warned = new Set<string>();
 const callCounts = new Map<string, number>();
+const lastCallTimes = new Map<string, number>();
 
 function warnOnce(fnName: string, replacement: string) {
-  // Track call count for migration metrics
+  // Track call count and time for migration metrics
   callCounts.set(fnName, (callCounts.get(fnName) || 0) + 1);
+  lastCallTimes.set(fnName, Date.now());
+  
+  // Kill switch: throw in CI/dev when enforcement is enabled
+  if (ENFORCE_NO_LEGACY) {
+    throw new Error(
+      `[LEGACY_API_BLOCKED] "${fnName}" is blocked.\n` +
+      `Use: ${replacement}\n` +
+      `Set ENFORCE_NO_LEGACY_API=false to allow deprecated calls.`
+    );
+  }
   
   // Only warn in development, and only once per function
   if (process.env.NODE_ENV === "production") return;
@@ -41,9 +61,42 @@ function warnOnce(fnName: string, replacement: string) {
   );
 }
 
+// ============================================
+// MIGRATION METRICS API
+// ============================================
+
 /** Get migration metrics (for audit/telemetry) */
 export function getDeprecatedCallCounts(): Record<string, number> {
   return Object.fromEntries(callCounts);
+}
+
+/** Get last call times for each deprecated function */
+export function getDeprecatedLastCalls(): Record<string, number> {
+  return Object.fromEntries(lastCallTimes);
+}
+
+/** Reset counters (for deterministic tests) */
+export function resetDeprecatedCallCounts(): void {
+  callCounts.clear();
+  lastCallTimes.clear();
+  warned.clear();
+}
+
+/** Get full migration report */
+export function getMigrationReport() {
+  const counts = getDeprecatedCallCounts();
+  const lastCalls = getDeprecatedLastCalls();
+  
+  return {
+    totalCalls: Object.values(counts).reduce((a, b) => a + b, 0),
+    uniqueFunctions: Object.keys(counts).length,
+    functions: Object.keys(counts).map(fn => ({
+      name: fn,
+      calls: counts[fn],
+      lastCall: lastCalls[fn] ? new Date(lastCalls[fn]).toISOString() : null,
+    })),
+    enforcementEnabled: ENFORCE_NO_LEGACY,
+  };
 }
 
 // ============================================
@@ -69,7 +122,7 @@ export type {
 export * from "@/lib/api-internal/types";
 
 // ============================================
-// DEPRECATED FUNCTION EXPORTS → Forward to Hub
+// DEPRECATED MUTATORS → Forward to Hub
 // ============================================
 
 /**
@@ -131,14 +184,13 @@ export async function publishDataset(datasetId: string) {
  */
 export async function getIngestStatus(runId: string) {
   warnOnce("getIngestStatus", "dataSuiteHub.getStatus(runId)");
-  // Forward to hub's status method
   const status = await dataSuiteHub.getStatus(runId as `53${string}`);
   return status;
 }
 
 // ============================================
-// READ-ONLY OPERATIONS (safe to use directly)
-// These don't mutate data, so hub routing is optional
+// READ-ONLY PASSTHROUGHS
+// For explicit intent, prefer: import from "@/lib/api/query"
 // ============================================
 
 export {

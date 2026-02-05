@@ -20,17 +20,18 @@ import {
   GitBranch,
   Route,
   ScrollText,
-  RefreshCw,
-  AlertCircle,
+  ChevronRight,
+  Activity,
   CheckCircle2,
   Clock,
-  Zap,
-  ChevronRight,
+  AlertCircle,
+  XCircle,
+  RefreshCw,
   FileText,
+  Zap,
   BarChart3,
-  Map,
   Target,
-  Scale,
+  AlertTriangle,
 } from "lucide-react";
 import {
   dataSuiteHub,
@@ -890,11 +891,25 @@ function AuditPanel({ countyFips }: { countyFips: WACountyFips | null }) {
       details?: Record<string, unknown>;
     }>
   >([]);
+  const [migrationReport, setMigrationReport] = useState<{
+    totalCalls: number;
+    uniqueFunctions: number;
+    functions: Array<{ name: string; calls: number; lastCall: string | null }>;
+    enforcementEnabled: boolean;
+  } | null>(null);
 
   useEffect(() => {
     if (!countyFips) return;
     repository.getLineageEvents(countyFips, undefined, 20).then(setLineage);
   }, [countyFips]);
+
+  // Load migration metrics (dev only)
+  useEffect(() => {
+    if (process.env.NODE_ENV === "production") return;
+    import("@/lib/api").then((mod) => {
+      setMigrationReport(mod.getMigrationReport());
+    });
+  }, []);
 
   if (!countyFips) {
     return (
@@ -907,6 +922,47 @@ function AuditPanel({ countyFips }: { countyFips: WACountyFips | null }) {
 
   return (
     <div className="space-y-6">
+      {/* Migration Metrics (Dev Only) */}
+      {migrationReport && process.env.NODE_ENV !== "production" && (
+        <Card className="tf-glass border-amber-400/30 bg-amber-400/5 p-5">
+          <div className="mb-3 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="h-4 w-4 text-amber-400" />
+              <h3 className="font-medium text-amber-400">Legacy API Migration</h3>
+            </div>
+            <span className={cn(
+              "rounded px-2 py-0.5 text-xs font-medium",
+              migrationReport.enforcementEnabled 
+                ? "bg-red-400/20 text-red-400"
+                : "bg-amber-400/20 text-amber-400"
+            )}>
+              {migrationReport.enforcementEnabled ? "ENFORCING" : "WARNING"}
+            </span>
+          </div>
+          <div className="grid grid-cols-3 gap-4">
+            <div>
+              <p className="text-muted-foreground text-xs">Total Calls</p>
+              <p className="text-foreground text-xl font-semibold">{migrationReport.totalCalls}</p>
+            </div>
+            <div>
+              <p className="text-muted-foreground text-xs">Unique Functions</p>
+              <p className="text-foreground text-xl font-semibold">{migrationReport.uniqueFunctions}</p>
+            </div>
+            <div>
+              <p className="text-muted-foreground text-xs">Since Page Load</p>
+              <p className="text-foreground text-sm font-mono">
+                {migrationReport.functions.slice(0, 3).map(f => f.name).join(", ") || "None"}
+              </p>
+            </div>
+          </div>
+          {migrationReport.totalCalls > 0 && (
+            <p className="text-muted-foreground mt-3 text-xs">
+              Tip: Set ENFORCE_NO_LEGACY_API=true to block deprecated calls in CI
+            </p>
+          )}
+        </Card>
+      )}
+
       {/* Export Options */}
       <Card className="tf-glass p-5">
         <div className="flex items-center justify-between">
