@@ -404,6 +404,9 @@ export {
   saveFieldMapping,
   // Map layers
   getMapLayers,
+  // Filter panel lookups
+  getNeighborhoods,
+  getPropertyClasses,
   // Ratio studies
   getRatioStudies,
   runRatioStudy,
