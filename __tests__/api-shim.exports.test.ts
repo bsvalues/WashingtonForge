@@ -210,4 +210,56 @@ describe("@/lib/api/query exports", () => {
     expect((query as Record<string, unknown>).login).toBeUndefined();
     expect((query as Record<string, unknown>).logout).toBeUndefined();
   });
+
+  // Comprehensive mutator guard - prevents ANY new mutator from sneaking in
+  it("does NOT export any function matching mutator patterns", () => {
+    const mutatorPatterns = [
+      /^upload/i,
+      /^create/i,
+      /^save/i,
+      /^delete/i,
+      /^update/i,
+      /^publish/i,
+      /^route/i,
+      /^setActive/i,
+      /^import/i,
+      /^export/i,
+      /^login$/i,
+      /^logout$/i,
+    ];
+
+    const queryExports = Object.keys(query);
+    const violators = queryExports.filter((name) =>
+      mutatorPatterns.some((pattern) => pattern.test(name))
+    );
+
+    if (violators.length > 0) {
+      throw new Error(
+        `Query surface contains mutator-like exports: ${violators.join(", ")}.\n` +
+        `Mutators must go through dataSuiteHub, not lib/api/query.`
+      );
+    }
+  });
+});
+
+// ============================================
+// SURFACE INTEGRITY
+// ============================================
+
+describe("API surface integrity", () => {
+  it("api/query exports are read-only subset (no hub, no deprecated tracking)", () => {
+    // These symbols should NEVER appear on the query surface
+    const forbiddenOnQuery = [
+      "dataSuiteHub",
+      "getDeprecatedCallCounts",
+      "getMigrationReport",
+      "assertNoLegacyMutators",
+      "resetDeprecatedCallCounts",
+    ];
+
+    const queryExports = Object.keys(query);
+    const violations = forbiddenOnQuery.filter((name) => queryExports.includes(name));
+
+    expect(violations).toEqual([]);
+  });
 });

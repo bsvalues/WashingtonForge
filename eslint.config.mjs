@@ -51,5 +51,27 @@ export default [
       ],
     },
   },
+  // ============================================
+  // API SHIM IMPORT DISCIPLINE (PERMANENT)
+  // ============================================
+  // lib/api must ONLY import from the api-internal barrel, not deep paths.
+  // This prevents import drift and ensures the adapter controls exports.
+  // ============================================
+  {
+    files: ["lib/api/**/*.ts"],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["@/lib/api-internal/demo-client", "@/lib/api-internal/demo-client/*", "../api-internal/demo-client", "../api-internal/demo-client/*"],
+              message: "Import from @/lib/api-internal (barrel) not demo-client directly. Prevents export drift.",
+            },
+          ],
+        },
+      ],
+    },
+  },
   eslintConfigPrettier,
 ];
