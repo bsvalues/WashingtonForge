@@ -5,13 +5,15 @@ import { useRouter } from "next/navigation";
 import { AppShell } from "@/components/app-shell";
 import { CountyOnboardingWizard } from "@/components/onboarding/county-onboarding-wizard";
 import { DataStatusDashboard } from "@/components/onboarding/data-status-dashboard";
+import { JoinQualityDashboard } from "@/components/onboarding/join-quality-dashboard";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { WACountyFips, OnboardingPath, CountyDataStatus } from "@/lib/wa-data/types";
 import { getCountyDataStatus, initializeDemoCounties } from "@/lib/wa-data/client";
+import { WA_COUNTIES } from "@/lib/wa-data/types";
 
 export default function OnboardingPage() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<"wizard" | "status">("wizard");
+  const [activeTab, setActiveTab] = useState<"wizard" | "status" | "quality">("wizard");
   const [countyStatus, setCountyStatus] = useState<CountyDataStatus | null>(null);
   const [selectedFips, setSelectedFips] = useState<WACountyFips | null>(null);
 
@@ -81,11 +83,14 @@ export default function OnboardingPage() {
         </div>
 
         {/* Tabs */}
-        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "wizard" | "status")}>
+        <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "wizard" | "status" | "quality")}>
           <TabsList className="tf-glass mb-6">
             <TabsTrigger value="wizard">Onboarding Wizard</TabsTrigger>
             <TabsTrigger value="status" disabled={!countyStatus}>
               Data Status
+            </TabsTrigger>
+            <TabsTrigger value="quality" disabled={!countyStatus || countyStatus.county_roll.status !== "active"}>
+              Join Quality
             </TabsTrigger>
           </TabsList>
 
@@ -99,6 +104,19 @@ export default function OnboardingPage() {
                 status={countyStatus}
                 onRefresh={handleRefresh}
                 onNavigate={handleNavigate}
+              />
+            )}
+          </TabsContent>
+
+          <TabsContent value="quality">
+            {countyStatus && selectedFips && (
+              <JoinQualityDashboard
+                countyFips={selectedFips}
+                countyName={WA_COUNTIES[selectedFips]?.name || countyStatus.county_name}
+                onExportMismatches={() => {
+                  // In production: trigger CSV download
+                  alert("Exporting mismatches CSV...");
+                }}
               />
             )}
           </TabsContent>

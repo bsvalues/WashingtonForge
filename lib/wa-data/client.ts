@@ -3,6 +3,11 @@
  * 
  * Demo client for Washington State data operations.
  * In production, this would connect to PostgreSQL + PostGIS.
+ * 
+ * PRODUCTION NOTES:
+ * - Use crypto.randomUUID() for IDs (not Date.now())
+ * - Add per-county locks for concurrent updates
+ * - Capabilities are computed, not stored (to prevent drift)
  */
 
 import {
@@ -14,10 +19,18 @@ import {
   type DataLayerStatus,
   type RollVersion,
   type ConnectedFeed,
+  type CountyExportFingerprint,
+  normalizeParcelId,
 } from "./types";
 
 // Simulated delay for demo
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+// Generate a proper UUID (crypto.randomUUID in modern runtimes)
+function generateId(prefix: string): string {
+  // In production: return `${prefix}-${crypto.randomUUID()}`;
+  return `${prefix}-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+}
 
 // ============================================
 // County Data Status
@@ -26,11 +39,33 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 // In-memory store for demo (would be PostgreSQL in production)
 const countyStatusStore = new Map<WACountyFips, CountyDataStatus>();
 
+/**
+ * Compute capabilities from layer status (not stored to prevent drift)
+ */
+function computeCapabilities(status: Partial<CountyDataStatus>): CountyDataStatus["capabilities"] {
+  const fabricActive = status.parcel_fabric?.status === "active";
+  const rollActive = status.county_roll?.status === "active";
+  const salesActive = status.sales_stream?.status === "active";
+  
+  return {
+    cockpit_map: fabricActive,
+    ratio_studies: rollActive && salesActive,
+    comps_selection: salesActive,
+    model_calibration: fabricActive && rollActive && salesActive,
+    appeals_support: fabricActive && rollActive && salesActive,
+  };
+}
+
 export async function getCountyDataStatus(fips: WACountyFips): Promise<CountyDataStatus> {
   await delay(100);
   
   if (countyStatusStore.has(fips)) {
-    return countyStatusStore.get(fips)!;
+    const stored = countyStatusStore.get(fips)!;
+    // Always recompute capabilities to prevent drift
+    return {
+      ...stored,
+      capabilities: computeCapabilities(stored),
+    };
   }
   
   // Default status for new county
@@ -66,20 +101,23 @@ export async function getAllCountyStatuses(): Promise<CountyDataStatus[]> {
   const statuses: CountyDataStatus[] = [];
   
   for (const [fips, county] of Object.entries(WA_COUNTIES)) {
-    const status = countyStatusStore.get(fips as WACountyFips) || {
-      county_fips: fips as WACountyFips,
-      county_name: county.name,
-      parcel_fabric: { status: "not_configured" as DataLayerStatus, source: "none" as const },
-      county_roll: { status: "not_configured" as DataLayerStatus },
-      sales_stream: { status: "not_configured" as DataLayerStatus },
-      capabilities: {
-        cockpit_map: false,
-        ratio_studies: false,
-        comps_selection: false,
-        model_calibration: false,
-        appeals_support: false,
-      },
-    };
+    const stored = countyStatusStore.get(fips as WACountyFips);
+    const status: CountyDataStatus = stored 
+      ? { ...stored, capabilities: computeCapabilities(stored) }
+      : {
+          county_fips: fips as WACountyFips,
+          county_name: county.name,
+          parcel_fabric: { status: "not_configured" as DataLayerStatus, source: "none" as const },
+          county_roll: { status: "not_configured" as DataLayerStatus },
+          sales_stream: { status: "not_configured" as DataLayerStatus },
+          capabilities: {
+            cockpit_map: false,
+            ratio_studies: false,
+            comps_selection: false,
+            model_calibration: false,
+            appeals_support: false,
+          },
+        };
     statuses.push(status);
   }
   
@@ -111,12 +149,13 @@ export async function loadWAParcelFabric(fips: WACountyFips): Promise<{
       source: "wa_statewide",
       parcel_count: parcelCount,
       last_updated: new Date().toISOString(),
+      next_refresh_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days
       coverage_pct: 98.5,
     },
-    capabilities: {
-      ...currentStatus.capabilities,
-      cockpit_map: true,
-    },
+    capabilities: computeCapabilities({
+      ...currentStatus,
+      parcel_fabric: { status: "active", source: "wa_statewide" },
+    }),
   };
   
   countyStatusStore.set(fips, updatedStatus);
@@ -174,7 +213,7 @@ export async function attachCountyRoll(
   fips: WACountyFips,
   rollYear: number,
   recordCount: number,
-  mappingConfidence: number
+  mappingConfidencePct: number // 0-100
 ): Promise<IngestRun> {
   await delay(800);
   
@@ -187,21 +226,23 @@ export async function attachCountyRoll(
       roll_year: rollYear,
       record_count: recordCount,
       last_updated: new Date().toISOString(),
-      mapping_confidence: mappingConfidence,
+      next_refresh_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30 days
+      mapping_confidence_pct: mappingConfidencePct, // Already 0-100
     },
-    capabilities: {
-      ...currentStatus.capabilities,
-      cockpit_map: true,
-      comps_selection: true,
-    },
+    capabilities: computeCapabilities({
+      ...currentStatus,
+      county_roll: { status: "active" },
+    }),
   };
   
   countyStatusStore.set(fips, updatedStatus);
   
   return {
-    id: `ingest-${Date.now()}`,
+    id: generateId("ingest"),
     county_fips: fips,
     source: "county_file_upload",
+    source_fingerprint: `sha256:${Math.random().toString(36).substring(2)}`,
+    transform_version: "mapping-template-v1",
     status: "completed",
     started_at: new Date(Date.now() - 5000).toISOString(),
     completed_at: new Date().toISOString(),
@@ -210,6 +251,12 @@ export async function attachCountyRoll(
     rows_updated: 0,
     rows_skipped: 0,
     rows_errored: 0,
+    row_counts_by_stage: {
+      raw: recordCount,
+      mapped: recordCount,
+      validated: recordCount,
+      published: recordCount,
+    },
     initiated_by: "demo_user",
     can_rollback: true,
   };
@@ -235,22 +282,23 @@ export async function attachSalesStream(
       record_count: recordCount,
       date_range: dateRange,
       last_updated: new Date().toISOString(),
+      next_refresh_at: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), // 7 days
       arms_length_pct: 85,
     },
-    capabilities: {
-      ...currentStatus.capabilities,
-      ratio_studies: true,
-      comps_selection: true,
-      model_calibration: currentStatus.county_roll.status === "active",
-    },
+    capabilities: computeCapabilities({
+      ...currentStatus,
+      sales_stream: { status: "active" },
+    }),
   };
   
   countyStatusStore.set(fips, updatedStatus);
   
   return {
-    id: `ingest-${Date.now()}`,
+    id: generateId("ingest"),
     county_fips: fips,
     source: "county_file_upload",
+    source_fingerprint: `sha256:${Math.random().toString(36).substring(2)}`,
+    transform_version: "sales-mapping-v1",
     status: "completed",
     started_at: new Date(Date.now() - 3000).toISOString(),
     completed_at: new Date().toISOString(),
@@ -259,6 +307,12 @@ export async function attachSalesStream(
     rows_updated: 0,
     rows_skipped: 0,
     rows_errored: 0,
+    row_counts_by_stage: {
+      raw: recordCount,
+      mapped: recordCount,
+      validated: Math.floor(recordCount * 0.97), // 3% validation issues
+      published: Math.floor(recordCount * 0.97),
+    },
     initiated_by: "demo_user",
     can_rollback: true,
   };
@@ -274,7 +328,7 @@ export async function getRollVersions(fips: WACountyFips): Promise<RollVersion[]
   // Demo data - would come from PostgreSQL in production
   return [
     {
-      id: "rv-001",
+      id: generateId("rv"),
       county_fips: fips,
       roll_year: 2026,
       version_type: "certified",
@@ -286,7 +340,7 @@ export async function getRollVersions(fips: WACountyFips): Promise<RollVersion[]
       certification_authority: "County Assessor",
     },
     {
-      id: "rv-002",
+      id: generateId("rv"),
       county_fips: fips,
       roll_year: 2025,
       version_type: "certified",
@@ -322,8 +376,59 @@ export async function createConnectedFeed(feed: Omit<ConnectedFeed, "id">): Prom
   
   return {
     ...feed,
-    id: `feed-${Date.now()}`,
+    id: generateId("feed"),
   };
+}
+
+// ============================================
+// Export Fingerprint Detection (AI Power Feature)
+// ============================================
+
+const knownFingerprints: CountyExportFingerprint[] = [
+  {
+    id: "fp-tyler-standard",
+    vendor: "Tyler",
+    signature: {
+      columns: ["PARID", "OWNER", "SITUS", "LEGAL", "LAND_VAL", "IMP_VAL", "TOTAL_VAL"],
+      key_fields_present: ["PARID", "LAND_VAL", "TOTAL_VAL"],
+    },
+    recommended_template_id: "template-tyler-v3",
+    confidence_pct: 95,
+    created_at: "2025-01-01T00:00:00Z",
+    updated_at: "2025-01-01T00:00:00Z",
+  },
+  {
+    id: "fp-schneider-wa",
+    vendor: "Schneider",
+    signature: {
+      columns: ["Parcel_ID", "Owner_Name", "Site_Address", "Legal_Desc", "Land_Value", "Impr_Value", "Total_Value"],
+      key_fields_present: ["Parcel_ID", "Land_Value"],
+    },
+    recommended_template_id: "template-schneider-v2",
+    confidence_pct: 92,
+    created_at: "2025-01-01T00:00:00Z",
+    updated_at: "2025-01-01T00:00:00Z",
+  },
+];
+
+export async function detectExportFingerprint(
+  columns: string[]
+): Promise<CountyExportFingerprint | null> {
+  await delay(300);
+  
+  const normalizedColumns = columns.map(c => c.toUpperCase().replace(/[^A-Z0-9]/g, ""));
+  
+  for (const fp of knownFingerprints) {
+    const fpColumns = fp.signature.columns.map(c => c.toUpperCase().replace(/[^A-Z0-9]/g, ""));
+    const matchCount = fpColumns.filter(c => normalizedColumns.includes(c)).length;
+    const matchPct = matchCount / fpColumns.length;
+    
+    if (matchPct >= 0.7) {
+      return { ...fp, confidence_pct: Math.round(matchPct * 100) };
+    }
+  }
+  
+  return null;
 }
 
 // ============================================
@@ -381,6 +486,12 @@ export function checkCapabilities(status: CountyDataStatus): {
 }
 
 // ============================================
+// Parcel ID Normalization Helper (re-export)
+// ============================================
+
+export { normalizeParcelId };
+
+// ============================================
 // Demo: Initialize Some Counties
 // ============================================
 
@@ -394,6 +505,7 @@ export async function initializeDemoCounties(): Promise<void> {
       source: "wa_statewide",
       parcel_count: 84000,
       last_updated: "2025-09-15T00:00:00Z",
+      next_refresh_at: "2026-02-15T00:00:00Z",
       coverage_pct: 99.2,
     },
     county_roll: {
@@ -401,13 +513,15 @@ export async function initializeDemoCounties(): Promise<void> {
       roll_year: 2026,
       record_count: 84000,
       last_updated: "2026-01-15T00:00:00Z",
-      mapping_confidence: 98,
+      next_refresh_at: "2026-04-15T00:00:00Z",
+      mapping_confidence_pct: 98, // 0-100 normalized
     },
     sales_stream: {
       status: "active",
       record_count: 12500,
       date_range: { from: "2023-01-01", to: "2025-12-31" },
       last_updated: "2026-01-20T00:00:00Z",
+      next_refresh_at: "2026-01-27T00:00:00Z",
       arms_length_pct: 87,
     },
     onboarding_path: "file_drop",
@@ -423,7 +537,7 @@ export async function initializeDemoCounties(): Promise<void> {
   
   countyStatusStore.set("53005", bentonStatus);
   
-  // King County - partial (only fabric)
+  // King County - partial (only fabric), with stale reason
   const kingStatus: CountyDataStatus = {
     county_fips: "53033",
     county_name: "King",
@@ -432,13 +546,16 @@ export async function initializeDemoCounties(): Promise<void> {
       source: "wa_statewide",
       parcel_count: 920000,
       last_updated: "2025-09-15T00:00:00Z",
+      next_refresh_at: "2026-02-15T00:00:00Z",
       coverage_pct: 97.8,
     },
     county_roll: {
       status: "not_configured",
+      stale_reason: "County roll data not yet uploaded",
     },
     sales_stream: {
       status: "not_configured",
+      stale_reason: "Sales stream not connected",
     },
     onboarding_path: "public_quickstart",
     capabilities: {

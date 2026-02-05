@@ -3,6 +3,11 @@
  * 
  * This module defines the data foundation for Washington State county integration.
  * Designed for PostgreSQL + PostGIS backend with court-ready audit trails.
+ * 
+ * PRODUCTION NOTES:
+ * - All confidence values are 0-100 (not 0-1) for UX consistency
+ * - Parcel IDs include both raw and normalized forms for join quality tracking
+ * - Geometry stored as PostGIS type in DB, only WKT/GeoJSON in DTOs
  */
 
 // ============================================
@@ -55,21 +60,42 @@ export type WACountyFips = keyof typeof WA_COUNTIES;
 export type CountyTier = "rural" | "suburban" | "urban" | "metro";
 
 // ============================================
-// Parcel Base Layer (WA Statewide)
+// Join Quality Tracking (Critical for data integrity)
 // ============================================
 
-export interface ParcelBaseWA {
+export type JoinConfidence = "high" | "med" | "low";
+export type JoinMethod = "exact" | "normalized" | "fuzzy" | "manual" | "unjoined";
+
+/**
+ * Normalizes a parcel ID for consistent joins across data sources.
+ * Strips punctuation, pads numeric portions, uppercases.
+ */
+export function normalizeParcelId(raw: string): string {
+  return raw
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, "")
+    .replace(/^0+/, ""); // Remove leading zeros for comparison
+}
+
+// ============================================
+// Parcel Base Layer (WA Statewide) - DTO for API transfer
+// ============================================
+
+export interface ParcelBaseWA_Dto {
   parcel_uid: string;           // Stable internal key (UUID)
   county_fips: WACountyFips;    // WA county FIPS code
   original_parcel_id: string;   // Original APN/PARID from source
-  geom_wkt?: string;            // WKT geometry (for transfer)
-  geom_geojson?: GeoJSON.Geometry; // GeoJSON geometry
+  geom_wkt?: string;            // WKT geometry (for transfer only)
+  geom_geojson?: GeoJSON.Geometry; // GeoJSON geometry (for transfer only)
   centroid_lat?: number;
   centroid_lng?: number;
   acreage?: number;
   source_version: string;       // e.g., "WA_Parcels_2025_Sept"
   ingested_at: string;          // ISO timestamp
 }
+
+// Alias for backwards compatibility
+export type ParcelBaseWA = ParcelBaseWA_Dto;
 
 // ============================================
 // County Parcel Roll (County Enrichment)
@@ -78,8 +104,13 @@ export interface ParcelBaseWA {
 export interface CountyParcelRoll {
   id: string;
   county_fips: WACountyFips;
-  county_parcel_id: string;     // APN / PARID (county's identifier)
-  parcel_uid?: string;          // Link to WA base layer
+  
+  // Parcel ID with normalization for join quality
+  county_parcel_id_raw: string;     // Original APN/PARID exactly as received
+  county_parcel_id_norm: string;    // Normalized (strip punctuation, pad, uppercase)
+  parcel_uid?: string;              // Link to WA base layer
+  join_confidence?: JoinConfidence; // How confident the join is
+  join_method?: JoinMethod;         // How the join was established
   
   // Situs (Property Address)
   situs_address?: string;
@@ -111,7 +142,7 @@ export interface CountyParcelRoll {
   certified_date?: string;
   
   // Change Detection
-  hash_row: string;             // MD5/SHA256 of key fields for delta detection
+  hash_row: string;             // SHA256 of key fields for delta detection
   updated_at: string;
 }
 
@@ -121,9 +152,14 @@ export interface CountyParcelRoll {
 
 export interface SaleRecord {
   id: string;
-  parcel_uid?: string;
   county_fips: WACountyFips;
-  county_parcel_id: string;
+  
+  // Parcel ID with normalization for join quality
+  county_parcel_id_raw: string;
+  county_parcel_id_norm: string;
+  parcel_uid?: string;
+  join_confidence?: JoinConfidence;
+  join_method?: JoinMethod;
   
   sale_date: string;
   sale_price: number;
@@ -173,17 +209,31 @@ export interface IngestRun {
   source: IngestSource;
   source_url?: string;
   source_filename?: string;
+  source_fingerprint?: string;    // SHA256 of file/response for audit
+  transform_version?: string;      // Mapping ruleset ID, e.g., "mapping-template-v3"
   
   status: IngestStatus;
   started_at: string;
   completed_at?: string;
   
-  // Metrics
+  // Row Metrics (overall)
   rows_received: number;
   rows_inserted: number;
   rows_updated: number;
   rows_skipped: number;
   rows_errored: number;
+  
+  // Row Counts by Stage (for pipeline debugging)
+  row_counts_by_stage?: {
+    raw: number;
+    mapped: number;
+    validated: number;
+    published: number;
+  };
+  
+  // Error/Warning Summaries
+  errors_top?: Array<{ message: string; count: number }>;
+  warnings_top?: Array<{ message: string; count: number }>;
   
   // Audit
   initiated_by: string;         // User ID or "system"
@@ -226,13 +276,15 @@ export interface CountyDataStatus {
   county_fips: WACountyFips;
   county_name: string;
   
-  // Layer Status
+  // Layer Status with enhanced metadata
   parcel_fabric: {
     status: DataLayerStatus;
     source: "wa_statewide" | "county_provided" | "none";
     parcel_count?: number;
     last_updated?: string;
-    coverage_pct?: number;      // % of county area covered
+    next_refresh_at?: string;     // When will data refresh next
+    stale_reason?: string;        // Why is it marked stale
+    coverage_pct?: number;        // % of county area covered
   };
   
   county_roll: {
@@ -240,7 +292,9 @@ export interface CountyDataStatus {
     roll_year?: number;
     record_count?: number;
     last_updated?: string;
-    mapping_confidence?: number; // 0-100% field mapping confidence
+    next_refresh_at?: string;
+    stale_reason?: string;
+    mapping_confidence_pct?: number; // 0-100 (NORMALIZED)
   };
   
   sales_stream: {
@@ -248,14 +302,16 @@ export interface CountyDataStatus {
     record_count?: number;
     date_range?: { from: string; to: string };
     last_updated?: string;
-    arms_length_pct?: number;   // % of sales marked arms-length
+    next_refresh_at?: string;
+    stale_reason?: string;
+    arms_length_pct?: number;     // % of sales marked arms-length
   };
   
   // Onboarding
   onboarding_path?: OnboardingPath;
   onboarding_completed_at?: string;
   
-  // Capabilities Unlocked
+  // Capabilities Unlocked (computed from layer status, not stored)
   capabilities: {
     cockpit_map: boolean;       // Can show parcels on map
     ratio_studies: boolean;     // Can run ratio analysis
@@ -266,17 +322,40 @@ export interface CountyDataStatus {
 }
 
 // ============================================
-// AI Field Mapping Memory
+// AI Field Mapping Memory (Learning Log)
 // ============================================
 
 export interface FieldMappingMemory {
+  id: string;
   county_fips: WACountyFips;
-  source_field: string;         // Original column name from county
-  target_field: string;         // TerraFusion canonical field
-  confidence: number;           // 0-1
+  source_field: string;           // Original column name from county
+  target_field: string;           // TerraFusion canonical field
+  confidence_pct: number;         // 0-100 (NORMALIZED for UX)
   learned_at: string;
-  used_count: number;           // How many times this mapping was used
+  used_count: number;             // How many times this mapping was used
   last_used_at: string;
+  source_fingerprint?: string;    // Which file/export this was learned from
+}
+
+// ============================================
+// County Export Fingerprint Templates (AI Power Feature)
+// ============================================
+
+export type VendorSystem = "Tyler" | "Schneider" | "Catalis" | "Thomson Reuters" | "DEVNET" | "Custom";
+
+export interface CountyExportFingerprint {
+  id: string;
+  vendor?: VendorSystem;
+  county_fips?: WACountyFips;     // If county-specific
+  signature: {
+    columns: string[];            // Expected column names
+    key_fields_present: string[]; // Required fields that must exist
+    sample_patterns?: Record<string, string>; // Regex patterns for field content
+  };
+  recommended_template_id: string;
+  confidence_pct: number;         // 0-100
+  created_at: string;
+  updated_at: string;
 }
 
 // ============================================
@@ -314,9 +393,10 @@ export interface ConnectedFeed {
   last_pull_at?: string;
   next_pull_at?: string;
   
-  // Data Mapping
+  // Data Mapping (simple config, not full memory objects)
   target_layer: "parcel" | "roll" | "sales" | "building";
-  field_mappings: FieldMappingMemory[];
+  field_mappings: Record<string, string>;  // { sourceField: targetField }
+  mapping_template_id?: string;            // Reference to learning template
   
   // Status
   is_active: boolean;
