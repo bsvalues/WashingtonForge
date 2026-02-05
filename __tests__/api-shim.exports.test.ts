@@ -192,40 +192,99 @@ describe("@/lib/api shim exports", () => {
 });
 
 describe("@/lib/api/query exports", () => {
-  it("exports read-only query functions", () => {
-    expect(typeof query.getParcels).toBe("function");
-    expect(typeof query.getParcelById).toBe("function");
-    expect(typeof query.getRatioStudies).toBe("function");
-    expect(typeof query.getSnapshots).toBe("function");
-    expect(typeof query.getAuditLog).toBe("function");
-    expect(typeof query.getCurrentUser).toBe("function");
+  // ============================================
+  // ALLOWLIST-FIRST GUARD (PRIMARY)
+  // ============================================
+  // This is the strongest protection: query surface can ONLY export
+  // symbols on this explicit allowlist. New additions require test update.
+  const ALLOWED_QUERY_EXPORTS = [
+    // Dataset queries
+    "getParcels",
+    "getParcelById",
+    "getSourceFields",
+    "previewDataset",
+    "getDatasetErrors",
+    // Ratio studies
+    "getRatioStudies",
+    "runRatioStudy",
+    // Snapshots (read-only)
+    "getSnapshots",
+    // Audit
+    "getAuditLog",
+    // Data sources
+    "getDataSources",
+    // Auth (read-only)
+    "getCurrentUser",
+  ];
+
+  it("exports ONLY allowed read-only functions (allowlist guard)", () => {
+    const queryExports = Object.keys(query).filter(
+      (k) => typeof (query as Record<string, unknown>)[k] === "function"
+    );
+    
+    const unexpectedExports = queryExports.filter(
+      (name) => !ALLOWED_QUERY_EXPORTS.includes(name)
+    );
+
+    if (unexpectedExports.length > 0) {
+      throw new Error(
+        `Query surface has unexpected exports: ${unexpectedExports.join(", ")}.\n` +
+        `If these are legitimate read-only functions, add them to ALLOWED_QUERY_EXPORTS.\n` +
+        `If they are mutators, they must go through dataSuiteHub.`
+      );
+    }
   });
 
-  it("does NOT export mutator functions", () => {
-    // Query surface should not expose mutators
-    expect((query as Record<string, unknown>).uploadDataset).toBeUndefined();
-    expect((query as Record<string, unknown>).validateDataset).toBeUndefined();
-    expect((query as Record<string, unknown>).publishDataset).toBeUndefined();
-    expect((query as Record<string, unknown>).createSnapshot).toBeUndefined();
-    expect((query as Record<string, unknown>).login).toBeUndefined();
-    expect((query as Record<string, unknown>).logout).toBeUndefined();
+  it("exports all allowed query functions", () => {
+    for (const name of ALLOWED_QUERY_EXPORTS) {
+      expect(typeof (query as Record<string, unknown>)[name]).toBe("function");
+    }
   });
 
-  // Comprehensive mutator guard - prevents ANY new mutator from sneaking in
-  it("does NOT export any function matching mutator patterns", () => {
+  // ============================================
+  // EXPLICIT BLACKLIST GUARD (SECONDARY)
+  // ============================================
+  it("does NOT export known mutator functions", () => {
+    const knownMutators = [
+      "uploadDataset",
+      "validateDataset",
+      "publishDataset",
+      "createSnapshot",
+      "createRollYearSnapshot",
+      "saveFieldMapping",
+      "login",
+      "logout",
+      "routeToSubscribers",
+      "setActiveDataset",
+    ];
+
+    for (const name of knownMutators) {
+      expect((query as Record<string, unknown>)[name]).toBeUndefined();
+    }
+  });
+
+  // ============================================
+  // REGEX BACKSTOP (TERTIARY)
+  // ============================================
+  // Catches new mutators that might slip through naming conventions.
+  // Tuned to avoid false positives (removed "export" which is ambiguous).
+  it("does NOT export any function matching mutator verb patterns", () => {
     const mutatorPatterns = [
       /^upload/i,
       /^create/i,
       /^save/i,
       /^delete/i,
+      /^remove/i,
       /^update/i,
       /^publish/i,
       /^route/i,
       /^setActive/i,
-      /^import/i,
-      /^export/i,
+      /^import(?!.*from)/i, // "import" but not "importFrom" style naming
+      /^write/i,
+      /^insert/i,
       /^login$/i,
       /^logout$/i,
+      /^reset(?!Deprecated)/i, // "reset" but not "resetDeprecated" (observability)
     ];
 
     const queryExports = Object.keys(query);

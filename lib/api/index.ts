@@ -20,6 +20,7 @@
 
 import { dataSuiteHub } from "@/lib/data-suite/hub";
 import { eventBus } from "@/lib/data-suite/event-bus";
+// Types imported from barrel to comply with barrel-only import rule
 import type { 
   DatasetType, 
   RollYearSnapshot, 
@@ -27,7 +28,7 @@ import type {
   ParcelFilter,
   Parcel,
   EquityStatus,
-} from "@/lib/api-internal/types";
+} from "@/lib/api-internal";
 
 // Re-export types for backwards compatibility
 export type { RollYearSnapshot, MapLayer, ParcelFilter, Parcel, EquityStatus };

@@ -70,6 +70,7 @@ export {
 
 // ============================================
 // TYPE EXPORTS (for convenience)
+// Re-exported from barrel to comply with barrel-only import rule
 // ============================================
 
 export type {
@@ -84,4 +85,4 @@ export type {
   Parcel,
   ParcelFilter,
   MapLayer,
-} from "@/lib/api-internal/types";
+} from "@/lib/api-internal";

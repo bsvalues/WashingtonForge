@@ -56,6 +56,7 @@ export default [
   // ============================================
   // lib/api must ONLY import from the api-internal barrel, not deep paths.
   // This prevents import drift and ensures the adapter controls exports.
+  // Block ALL deep paths: demo-client, types, adapter, etc.
   // ============================================
   {
     files: ["lib/api/**/*.ts"],
@@ -65,8 +66,13 @@ export default [
         {
           patterns: [
             {
-              group: ["@/lib/api-internal/demo-client", "@/lib/api-internal/demo-client/*", "../api-internal/demo-client", "../api-internal/demo-client/*"],
-              message: "Import from @/lib/api-internal (barrel) not demo-client directly. Prevents export drift.",
+              // Block all deep imports into api-internal (barrel only)
+              group: [
+                "@/lib/api-internal/*",
+                "../api-internal/*",
+                "../../api-internal/*",
+              ],
+              message: "Import from @/lib/api-internal (barrel) not deep paths. Barrel controls the public surface.",
             },
           ],
         },
