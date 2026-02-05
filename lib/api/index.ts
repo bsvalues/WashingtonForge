@@ -20,7 +20,10 @@
 
 import { dataSuiteHub } from "@/lib/data-suite/hub";
 import { eventBus } from "@/lib/data-suite/event-bus";
-import type { DatasetType } from "@/lib/api-internal/types";
+import type { DatasetType, RollYearSnapshot } from "@/lib/api-internal/types";
+
+// Re-export types for backwards compatibility
+export type { RollYearSnapshot };
 
 // ============================================
 // KILL SWITCH - flip to "throw" when migration is complete
@@ -313,7 +316,10 @@ export {
   // Ratio studies
   getRatioStudies,
   runRatioStudy,
-  // Snapshots
+  // Snapshots - export both original names AND aliases for compatibility
+  getRollYearSnapshots,
+  createRollYearSnapshot,
+  publishSnapshot,
   getRollYearSnapshots as getSnapshots,
   createRollYearSnapshot as createSnapshot,
   // Audit
