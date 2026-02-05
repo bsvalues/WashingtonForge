@@ -29,7 +29,9 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { uploadDataset, type Dataset, type DatasetType } from "@/lib/api";
+import { dataSuiteHub } from "@/lib/data-suite";
+import type { Dataset, DatasetType } from "@/lib/api";
+import type { DataProductType } from "@/lib/data-suite/types";
 import { cn } from "@/lib/utils";
 
 interface SmartUploadStepProps {
@@ -256,7 +258,36 @@ export function SmartUploadStep({ onComplete }: SmartUploadStepProps) {
     setError(null);
 
     try {
-      const dataset = await uploadDataset(file, datasetType);
+      // Route ALL uploads through DataSuiteHub - the single entry point
+      const productTypeMap: Record<DatasetType, DataProductType> = {
+        parcel: "PARCEL_FABRIC",
+        sales: "SALES_STREAM",
+        building: "BUILDINGS",
+        assessment: "COUNTY_ROLL",
+        bulk_package: "COUNTY_ROLL",
+        geodatabase: "PARCEL_FABRIC",
+      };
+
+      const ingestRun = await dataSuiteHub.ingest({
+        countyFips: "53005", // TODO: Get from county context
+        product: productTypeMap[datasetType],
+        source: "file",
+        file,
+      });
+
+      // Convert IngestRun to Dataset format for downstream components
+      const dataset: Dataset = {
+        id: ingestRun.id,
+        name: file.name,
+        type: datasetType,
+        status: ingestRun.status === "ready" ? "ready" : "validating",
+        rowCount: ingestRun.row_counts_by_stage?.raw || 0,
+        errorCount: ingestRun.row_counts_by_stage?.raw 
+          ? ingestRun.row_counts_by_stage.raw - (ingestRun.row_counts_by_stage.valid || 0) 
+          : 0,
+        createdAt: ingestRun.started_at,
+      };
+
       onComplete(dataset);
     } catch (err) {
       console.error("Upload error:", err);

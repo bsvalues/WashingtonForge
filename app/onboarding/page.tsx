@@ -10,6 +10,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import type { WACountyFips, OnboardingPath, CountyDataStatus } from "@/lib/wa-data/types";
 import { getCountyDataStatus, initializeDemoCounties } from "@/lib/wa-data/client";
 import { WA_COUNTIES } from "@/lib/wa-data/types";
+import { dataSuiteHub } from "@/lib/data-suite";
+import { AlertCircle, ArrowRight } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 
 export default function OnboardingPage() {
   const router = useRouter();
@@ -31,14 +35,21 @@ export default function OnboardingPage() {
 
   const handleOnboardingComplete = async (fips: WACountyFips, path: OnboardingPath) => {
     setSelectedFips(fips);
-    const status = await getCountyDataStatus(fips);
+    
+    // Route through DataSuiteHub for status - the single source of truth
+    const status = await dataSuiteHub.getStatus(fips) || await getCountyDataStatus(fips);
     setCountyStatus(status);
     
     if (path === "public_quickstart") {
-      // Show status dashboard after quick start
+      // Trigger parcel fabric load through hub
+      await dataSuiteHub.ingest({
+        countyFips: fips,
+        product: "PARCEL_FABRIC",
+        source: "wa-fabric",
+      });
       setActiveTab("status");
     } else if (path === "file_drop") {
-      // Navigate to ingest page
+      // Navigate to ingest page (which also routes through hub)
       router.push("/ingest");
     } else {
       // Navigate to data sources for connected feed setup
@@ -72,6 +83,23 @@ export default function OnboardingPage() {
   return (
     <AppShell user={{ name: "Demo User", role: "Assessor", county: "Washington State" }}>
       <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
+        {/* Redirect Notice to Data Suite */}
+        <Alert className="mb-6 border-blue-400/30 bg-blue-400/10">
+          <AlertCircle className="h-4 w-4 text-blue-400" />
+          <AlertTitle className="text-blue-400">Data Suite Available</AlertTitle>
+          <AlertDescription className="flex items-center justify-between">
+            <span className="text-muted-foreground">
+              The unified Data Suite combines Onboarding, Ingest, Quality, Versions, and Routing in one place.
+            </span>
+            <Button asChild size="sm" variant="outline" className="ml-4">
+              <a href="/data-suite?tab=onboarding">
+                Open Data Suite
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </a>
+            </Button>
+          </AlertDescription>
+        </Alert>
+
         {/* Header */}
         <div className="mb-8">
           <h1 className="text-foreground text-3xl font-bold tracking-tight">

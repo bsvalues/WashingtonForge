@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useState, useCallback } from "react";
 import { AppShell } from "@/components/app-shell";
 import { EnhancedIngestStepper } from "@/components/ingest/enhanced-ingest-stepper";
@@ -9,6 +11,9 @@ import { ValidateStep } from "@/components/ingest/validate-step";
 import { PreviewStep } from "@/components/ingest/preview-step";
 import { PublishStep } from "@/components/ingest/publish-step";
 import { IngestQuickStart } from "@/components/ingest/ingest-quick-start";
+import { AlertCircle, ArrowRight } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Button } from "@/components/ui/button";
 import type { Dataset, ValidationResult, FieldMapping } from "@/lib/api";
 
 // FIXED: Correct step order is Upload → Map → Validate → Preview → Publish
@@ -74,6 +79,23 @@ export default function IngestPage() {
             Import property data into TerraFusion with guided validation and field mapping
           </p>
         </div>
+
+        {/* Redirect Notice to Data Suite */}
+        <Alert className="mb-6 border-blue-400/30 bg-blue-400/10">
+          <AlertCircle className="h-4 w-4 text-blue-400" />
+          <AlertTitle className="text-blue-400">Data Suite Available</AlertTitle>
+          <AlertDescription className="flex items-center justify-between">
+            <span className="text-muted-foreground">
+              The unified Data Suite combines Ingest, Quality, Versions, and Routing in one place.
+            </span>
+            <Button asChild size="sm" variant="outline" className="ml-4">
+              <a href="/data-suite?tab=ingest">
+                Open Data Suite
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </a>
+            </Button>
+          </AlertDescription>
+        </Alert>
 
         {/* Quick Start Guide - shows on upload step only */}
         {currentStep === "upload" && <IngestQuickStart />}

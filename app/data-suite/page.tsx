@@ -42,16 +42,26 @@ import {
   DATA_PRODUCTS,
   WA_COUNTIES,
 } from "@/lib/data-suite";
+import { SmartUploadStep } from "@/components/ingest/smart-upload-step";
+import { SmartMapFieldsStep } from "@/components/ingest/smart-map-fields-step";
+import { ValidateStep } from "@/components/ingest/validate-step";
+import { PreviewStep } from "@/components/ingest/preview-step";
+import { PublishStep } from "@/components/ingest/publish-step";
+import { EnhancedIngestStepper } from "@/components/ingest/enhanced-ingest-stepper";
+import { JoinQualityDashboard } from "@/components/onboarding/join-quality-dashboard";
+import { CountyOnboardingWizard } from "@/components/onboarding/county-onboarding-wizard";
+import type { Dataset, ValidationResult, FieldMapping } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
 // ============================================
 // IDS Dashboard - The "Data Command Center"
 // ============================================
 
-type IDSTab = "inventory" | "ingest" | "quality" | "versions" | "routing" | "audit";
+type IDSTab = "inventory" | "onboarding" | "ingest" | "quality" | "versions" | "routing" | "audit";
 
 const tabs: { id: IDSTab; label: string; icon: typeof Database }[] = [
   { id: "inventory", label: "Inventory", icon: Database },
+  { id: "onboarding", label: "Onboarding", icon: Zap },
   { id: "ingest", label: "Ingest", icon: Upload },
   { id: "quality", label: "Quality", icon: Shield },
   { id: "versions", label: "Versions", icon: GitBranch },
@@ -222,6 +232,18 @@ export default function DataSuitePage() {
           {/* Inventory Tab */}
           <TabsContent value="inventory">
             <InventoryPanel status={status} onRefresh={loadStatus} />
+          </TabsContent>
+
+          {/* Onboarding Tab */}
+          <TabsContent value="onboarding">
+            <OnboardingPanel 
+              countyFips={selectedCounty} 
+              onComplete={(fips) => {
+                setSelectedCounty(fips);
+                loadStatus();
+                setActiveTab("inventory");
+              }} 
+            />
           </TabsContent>
 
           {/* Ingest Tab */}
@@ -440,8 +462,46 @@ function InventoryPanel({
 }
 
 // ============================================
-// Ingest Panel (Simplified - links to /ingest)
+// Onboarding Panel - EMBEDDED county wizard
 // ============================================
+
+function OnboardingPanel({
+  countyFips,
+  onComplete,
+}: {
+  countyFips: WACountyFips | null;
+  onComplete: (fips: WACountyFips) => void;
+}) {
+  return (
+    <CountyOnboardingWizard 
+      onComplete={async (fips, path) => {
+        // Route through DataSuiteHub
+        if (path === "public_quickstart") {
+          await dataSuiteHub.ingest({
+            countyFips: fips,
+            product: "PARCEL_FABRIC",
+            source: "wa-fabric",
+          });
+        }
+        onComplete(fips);
+      }} 
+    />
+  );
+}
+
+// ============================================
+// Ingest Panel - EMBEDDED full ingest flow
+// ============================================
+
+type IngestStep = "upload" | "map" | "validate" | "preview" | "publish";
+
+const ingestSteps: { id: IngestStep; label: string; description: string }[] = [
+  { id: "upload", label: "Upload", description: "Select your data file" },
+  { id: "map", label: "Map Fields", description: "Connect columns to schema" },
+  { id: "validate", label: "Validate", description: "Check data quality" },
+  { id: "preview", label: "Preview", description: "Review mapped data" },
+  { id: "publish", label: "Publish", description: "Make it official" },
+];
 
 function IngestPanel({
   countyFips,
@@ -450,32 +510,91 @@ function IngestPanel({
   countyFips: WACountyFips | null;
   onComplete: () => void;
 }) {
+  const [currentStep, setCurrentStep] = useState<IngestStep>("upload");
+  const [dataset, setDataset] = useState<Dataset | null>(null);
+  const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
+  const [fieldMappings, setFieldMappings] = useState<FieldMapping[]>([]);
+
+  const handleUploadComplete = useCallback((uploadedDataset: Dataset) => {
+    setDataset(uploadedDataset);
+    setCurrentStep("map");
+  }, []);
+
+  const handleMappingComplete = useCallback((mappings: FieldMapping[]) => {
+    setFieldMappings(mappings);
+    setCurrentStep("validate");
+  }, []);
+
+  const handleValidationComplete = useCallback((result: ValidationResult) => {
+    setValidationResult(result);
+    setCurrentStep("preview");
+  }, []);
+
+  const handlePreviewComplete = useCallback(() => {
+    setCurrentStep("publish");
+  }, []);
+
+  const handlePublishComplete = useCallback(() => {
+    // Reset for next upload and trigger refresh
+    setDataset(null);
+    setValidationResult(null);
+    setFieldMappings([]);
+    setCurrentStep("upload");
+    onComplete();
+  }, [onComplete]);
+
+  const goBack = useCallback(() => {
+    const stepIndex = ingestSteps.findIndex((s) => s.id === currentStep);
+    if (stepIndex > 0) {
+      setCurrentStep(ingestSteps[stepIndex - 1].id);
+    }
+  }, [currentStep]);
+
   return (
-    <Card className="tf-glass p-8">
-      <div className="mx-auto max-w-md text-center">
-        <Upload className="text-primary mx-auto mb-4 h-12 w-12" />
-        <h3 className="text-foreground mb-2 text-xl font-semibold">Start New Ingest</h3>
-        <p className="text-muted-foreground mb-6">
-          Upload files, connect feeds, or pull from WA Geo Portal with guided validation and
-          field mapping.
-        </p>
-        <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
-          <Button asChild className="tf-glass-btn tf-glass-btn--primary">
-            <a href="/ingest">
-              <Upload className="mr-2 h-4 w-4" />
-              Go to Ingest Wizard
-              <ChevronRight className="ml-2 h-4 w-4" />
-            </a>
-          </Button>
-          <Button asChild variant="outline" className="tf-glass-btn">
-            <a href="/onboarding">
-              <Zap className="mr-2 h-4 w-4" />
-              Quick Start
-            </a>
-          </Button>
-        </div>
+    <div className="space-y-6">
+      {/* Stepper */}
+      <EnhancedIngestStepper steps={ingestSteps} currentStep={currentStep} />
+
+      {/* Step Content */}
+      <div className="min-h-[400px]">
+        {currentStep === "upload" && (
+          <SmartUploadStep onComplete={handleUploadComplete} />
+        )}
+        
+        {currentStep === "map" && dataset && (
+          <SmartMapFieldsStep
+            dataset={dataset}
+            onComplete={handleMappingComplete}
+            onBack={goBack}
+          />
+        )}
+        
+        {currentStep === "validate" && dataset && (
+          <ValidateStep
+            dataset={dataset}
+            onComplete={handleValidationComplete}
+            onBack={goBack}
+          />
+        )}
+        
+        {currentStep === "preview" && dataset && (
+          <PreviewStep
+            dataset={dataset}
+            fieldMappings={fieldMappings}
+            onComplete={handlePreviewComplete}
+            onBack={goBack}
+          />
+        )}
+        
+        {currentStep === "publish" && dataset && (
+          <PublishStep
+            dataset={dataset}
+            onComplete={handlePublishComplete}
+            onBack={goBack}
+          />
+        )}
       </div>
-    </Card>
+    </div>
   );
 }
 
@@ -550,23 +669,14 @@ function QualityPanel({
         </Card>
       </div>
 
-      {/* Link to detailed quality */}
-      <Card className="tf-glass p-5">
-        <div className="flex items-center justify-between">
-          <div>
-            <h4 className="text-foreground font-medium">Detailed Quality Analysis</h4>
-            <p className="text-muted-foreground text-sm">
-              View join mismatches, validation exceptions, and suggested fixes
-            </p>
-          </div>
-          <Button asChild variant="outline" className="tf-glass-btn">
-            <a href="/onboarding?tab=quality">
-              View Details
-              <ChevronRight className="ml-2 h-4 w-4" />
-            </a>
-          </Button>
-        </div>
-      </Card>
+      {/* Embedded Join Quality Dashboard */}
+      <JoinQualityDashboard
+        countyFips={countyFips}
+        countyName={WA_COUNTIES[countyFips]?.name || status.county_name}
+        onExportMismatches={() => {
+          alert("Exporting mismatches CSV...");
+        }}
+      />
     </div>
   );
 }
