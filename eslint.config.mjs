@@ -28,38 +28,28 @@ export default [
     },
   },
   // ============================================
-  // DATA SUITE BOUNDARY RULES
+  // DATA SUITE BOUNDARY RULES (PERMANENT - DO NOT DISABLE)
   // ============================================
   // The Data Suite is the SINGLE AUTHORITY for all data operations.
-  // UI components should NEVER import directly from:
-  //   - @/lib/api (legacy direct uploads)
-  //   - @/lib/wa-data/client (bypasses hub)
-  // 
-  // Instead, import from @/lib/data-suite which routes through the hub.
-  // 
-  // To enforce at compile time, add eslint-plugin-import-access:
-  //   npm install eslint-plugin-import-access
-  // Then uncomment the rules below.
+  // This rule ensures "zero cycles forever" - the architectural guardrail
+  // that keeps data operations sovereign and auditable.
   // ============================================
-  // {
-  //   files: ["app/**/*.tsx", "components/**/*.tsx"],
-  //   rules: {
-  //     "no-restricted-imports": [
-  //       "error",
-  //       {
-  //         patterns: [
-  //           {
-  //             group: ["@/lib/api", "@/lib/api/*"],
-  //             message: "Use @/lib/data-suite instead. Direct API imports bypass the DataSuiteHub.",
-  //           },
-  //           {
-  //             group: ["@/lib/wa-data/client"],
-  //             message: "Use @/lib/data-suite instead. Direct wa-data imports bypass the DataSuiteHub.",
-  //           },
-  //         ],
-  //       },
-  //     ],
-  //   },
-  // },
+  {
+    files: ["lib/data-suite/**/*.ts", "lib/data-suite/**/*.tsx"],
+    rules: {
+      // data-suite MUST NEVER import from lib/api (would create cycle)
+      "no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: ["@/lib/api", "@/lib/api/*", "../api", "../api/*"],
+              message: "data-suite cannot import from lib/api. This would create a circular dependency.",
+            },
+          ],
+        },
+      ],
+    },
+  },
   eslintConfigPrettier,
 ];

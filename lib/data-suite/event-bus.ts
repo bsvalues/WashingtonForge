@@ -27,7 +27,8 @@ export type DataSuiteEventType =
   | "routing.failed"
   | "quality.changed"
   | "quality.degraded"
-  | "audit.updated";
+  | "audit.updated"
+  | "deprecated.api_call"; // Emitted when legacy API shim is used
 
 export interface DataSuiteEvent {
   type: DataSuiteEventType;

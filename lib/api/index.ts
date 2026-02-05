@@ -19,6 +19,7 @@
  */
 
 import { dataSuiteHub } from "@/lib/data-suite/hub";
+import { eventBus } from "@/lib/data-suite/event-bus";
 import type { DatasetType } from "@/lib/api-internal/types";
 
 // ============================================
@@ -28,17 +29,61 @@ import type { DatasetType } from "@/lib/api-internal/types";
 const ENFORCE_NO_LEGACY = process.env.ENFORCE_NO_LEGACY_API === "true";
 
 // ============================================
-// warnOnce utility - prevents console spam
+// ASSESSOR-GRADE MIGRATION TRACKING
 // ============================================
 
+interface CallRecord {
+  count: number;
+  firstSeen: number;
+  lastSeen: number;
+  callSites: Set<string>; // Unique stack traces (hashed)
+}
+
 const warned = new Set<string>();
-const callCounts = new Map<string, number>();
-const lastCallTimes = new Map<string, number>();
+const callRecords = new Map<string, CallRecord>();
+const sessionId = typeof crypto !== "undefined" && crypto.randomUUID 
+  ? crypto.randomUUID() 
+  : `session-${Date.now()}`;
+const sessionStart = Date.now();
+
+/** Simple hash for call site tracking */
+function hashCallSite(stack: string | undefined): string {
+  if (!stack) return "unknown";
+  // Extract first 3 non-library frames
+  const frames = stack.split("\n").slice(2, 5).join("|");
+  return frames.slice(0, 100);
+}
 
 function warnOnce(fnName: string, replacement: string) {
-  // Track call count and time for migration metrics
-  callCounts.set(fnName, (callCounts.get(fnName) || 0) + 1);
-  lastCallTimes.set(fnName, Date.now());
+  const now = Date.now();
+  const callSite = hashCallSite(new Error().stack);
+  
+  // Track call record with assessor-grade metadata
+  const existing = callRecords.get(fnName);
+  if (existing) {
+    existing.count++;
+    existing.lastSeen = now;
+    existing.callSites.add(callSite);
+  } else {
+    callRecords.set(fnName, {
+      count: 1,
+      firstSeen: now,
+      lastSeen: now,
+      callSites: new Set([callSite]),
+    });
+  }
+  
+  // Emit canonical audit event (hub is single authority for all events)
+  eventBus.emit({
+    type: "deprecated.api_call",
+    payload: {
+      function: fnName,
+      replacement,
+      sessionId,
+      environment: process.env.NODE_ENV || "unknown",
+    },
+    timestamp: new Date().toISOString(),
+  });
   
   // Kill switch: throw in CI/dev when enforcement is enabled
   if (ENFORCE_NO_LEGACY) {
@@ -62,41 +107,106 @@ function warnOnce(fnName: string, replacement: string) {
 }
 
 // ============================================
-// MIGRATION METRICS API
+// MIGRATION METRICS API (Assessor-Grade)
 // ============================================
 
-/** Get migration metrics (for audit/telemetry) */
+/** Simple call counts (backwards compat) */
 export function getDeprecatedCallCounts(): Record<string, number> {
-  return Object.fromEntries(callCounts);
+  const result: Record<string, number> = {};
+  callRecords.forEach((record, fn) => {
+    result[fn] = record.count;
+  });
+  return result;
 }
 
 /** Get last call times for each deprecated function */
 export function getDeprecatedLastCalls(): Record<string, number> {
-  return Object.fromEntries(lastCallTimes);
+  const result: Record<string, number> = {};
+  callRecords.forEach((record, fn) => {
+    result[fn] = record.lastSeen;
+  });
+  return result;
 }
 
 /** Reset counters (for deterministic tests) */
 export function resetDeprecatedCallCounts(): void {
-  callCounts.clear();
-  lastCallTimes.clear();
+  callRecords.clear();
   warned.clear();
 }
 
-/** Get full migration report */
+/** 
+ * Get full migration report - ASSESSOR-GRADE AUDIT MATERIAL
+ * 
+ * This report is suitable for:
+ * - CI enforcement checks
+ * - Operational audits
+ * - Migration burn-down tracking
+ */
 export function getMigrationReport() {
-  const counts = getDeprecatedCallCounts();
-  const lastCalls = getDeprecatedLastCalls();
+  const functions: Array<{
+    name: string;
+    calls: number;
+    firstSeen: string | null;
+    lastSeen: string | null;
+    uniqueCallSites: number;
+  }> = [];
+  
+  let totalCalls = 0;
+  callRecords.forEach((record, fn) => {
+    totalCalls += record.count;
+    functions.push({
+      name: fn,
+      calls: record.count,
+      firstSeen: new Date(record.firstSeen).toISOString(),
+      lastSeen: new Date(record.lastSeen).toISOString(),
+      uniqueCallSites: record.callSites.size,
+    });
+  });
   
   return {
-    totalCalls: Object.values(counts).reduce((a, b) => a + b, 0),
-    uniqueFunctions: Object.keys(counts).length,
-    functions: Object.keys(counts).map(fn => ({
-      name: fn,
-      calls: counts[fn],
-      lastCall: lastCalls[fn] ? new Date(lastCalls[fn]).toISOString() : null,
-    })),
+    // Summary
+    totalCalls,
+    uniqueFunctions: functions.length,
     enforcementEnabled: ENFORCE_NO_LEGACY,
+    
+    // Session metadata (for audit correlation)
+    sessionId,
+    sessionStarted: new Date(sessionStart).toISOString(),
+    reportGenerated: new Date().toISOString(),
+    environment: process.env.NODE_ENV || "unknown",
+    appVersion: process.env.NEXT_PUBLIC_APP_VERSION || "dev",
+    
+    // Detailed function breakdown
+    functions: functions.sort((a, b) => b.calls - a.calls),
+    
+    // CI helper: true if any mutator was called
+    hasMutatorCalls: functions.some(f => 
+      ["uploadDataset", "validateDataset", "publishDataset", "getIngestStatus"].includes(f.name)
+    ),
   };
+}
+
+/**
+ * CI ASSERTION HELPER
+ * 
+ * Usage in E2E tests:
+ *   import { assertNoLegacyMutators } from "@/lib/api";
+ *   afterAll(() => assertNoLegacyMutators());
+ * 
+ * Throws if any deprecated mutator was called during the test.
+ */
+export function assertNoLegacyMutators(): void {
+  const report = getMigrationReport();
+  if (report.hasMutatorCalls) {
+    const mutators = report.functions
+      .filter(f => ["uploadDataset", "validateDataset", "publishDataset", "getIngestStatus"].includes(f.name))
+      .map(f => `  - ${f.name}: ${f.calls} calls`)
+      .join("\n");
+    throw new Error(
+      `[CI_ASSERTION_FAILED] Legacy mutator calls detected:\n${mutators}\n\n` +
+      `Migrate to dataSuiteHub before merging.`
+    );
+  }
 }
 
 // ============================================
