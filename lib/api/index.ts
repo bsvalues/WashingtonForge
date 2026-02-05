@@ -194,29 +194,37 @@ export async function getIngestStatus(runId: string) {
 // ============================================
 
 export {
-  // Dataset queries
-  getDatasets,
+  // Dataset queries (that actually exist in demo-client)
   getParcels,
   getParcelById,
   getSourceFields,
   previewDataset,
   getDatasetErrors,
-  getFieldMappings,
   // Ratio studies
   getRatioStudies,
   runRatioStudy,
   // Snapshots
-  getSnapshots,
-  createSnapshot,
+  getRollYearSnapshots as getSnapshots,
+  createRollYearSnapshot as createSnapshot,
   // Audit
   getAuditLog,
-  // Data sources
-  getDataSources,
+  // Data freshness
+  loadCountyDataFreshness as getDataSources,
   // Auth (until migrated)
   login,
   logout,
   getCurrentUser,
 } from "@/lib/api-internal/demo-client";
+
+// Stub for getDatasets - returns empty array (not implemented in demo-client)
+export async function getDatasets() {
+  return [];
+}
+
+// Stub for getFieldMappings - returns empty array (not implemented in demo-client)
+export async function getFieldMappings(_datasetId: string) {
+  return [];
+}
 
 // ============================================
 // DEMO MODE FLAG
