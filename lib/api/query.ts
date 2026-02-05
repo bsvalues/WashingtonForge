@@ -18,14 +18,12 @@
 // ============================================
 
 export {
-  getDatasets,
   getParcels,
   getParcelById,
   getSourceFields,
   previewDataset,
   getDatasetErrors,
-  getFieldMappings,
-} from "@/lib/api-internal/demo-client";
+} from "@/lib/api-internal";
 
 // ============================================
 // RATIO STUDIES (pure compute + fetch)
@@ -34,16 +32,16 @@ export {
 export {
   getRatioStudies,
   runRatioStudy, // Note: computes but doesn't persist
-} from "@/lib/api-internal/demo-client";
+} from "@/lib/api-internal";
 
 // ============================================
 // SNAPSHOTS (fetch only - createSnapshot routes through hub)
 // ============================================
 
 export {
-  getSnapshots,
+  getRollYearSnapshots as getSnapshots,
   // createSnapshot is intentionally NOT here - it mutates
-} from "@/lib/api-internal/demo-client";
+} from "@/lib/api-internal";
 
 // ============================================
 // AUDIT LOG (pure fetch)
@@ -51,15 +49,15 @@ export {
 
 export {
   getAuditLog,
-} from "@/lib/api-internal/demo-client";
+} from "@/lib/api-internal";
 
 // ============================================
 // DATA SOURCES (pure fetch)
 // ============================================
 
 export {
-  getDataSources,
-} from "@/lib/api-internal/demo-client";
+  loadCountyDataFreshness as getDataSources,
+} from "@/lib/api-internal";
 
 // ============================================
 // AUTH (pure session read)
@@ -68,7 +66,7 @@ export {
 export {
   getCurrentUser,
   // login/logout are NOT here - they mutate session state
-} from "@/lib/api-internal/demo-client";
+} from "@/lib/api-internal";
 
 // ============================================
 // TYPE EXPORTS (for convenience)
@@ -82,8 +80,8 @@ export type {
   ValidationResult,
   RatioStudy,
   RatioStudyResult,
-  Snapshot,
   AuditLogEntry,
-  DataSource,
   Parcel,
+  ParcelFilter,
+  MapLayer,
 } from "@/lib/api-internal/types";
