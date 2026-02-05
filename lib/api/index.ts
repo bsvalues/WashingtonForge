@@ -30,8 +30,7 @@ import type {
   EquityStatus,
 } from "@/lib/api-internal";
 
-// Re-export types for backwards compatibility
-export type { RollYearSnapshot, MapLayer, ParcelFilter, Parcel, EquityStatus };
+// Types come through `export * from "@/lib/api-internal"` below
 
 // ============================================
 // KILL SWITCH - flip to "throw" when migration is complete
@@ -308,25 +307,10 @@ export function isReadyToRemoveMutators(): boolean {
 }
 
 // ============================================
-// TYPE EXPORTS (safe, no deprecation)
+// UNIFIED RE-EXPORT (types + functions via barrel)
 // ============================================
-
-export type {
-  Dataset,
-  DatasetType,
-  DatasetStatus,
-  FieldMapping,
-  ValidationResult,
-  ValidationError,
-  RatioStudy,
-  RatioStudyResult,
-  EquityMetrics,
-  Snapshot,
-  AuditLogEntry,
-  DataSource,
-} from "@/lib/api-internal";
-
-// Re-export all types from internal module (via barrel)
+// This single export brings in ALL types and functions from api-internal.
+// Do NOT add explicit exports for symbols already in the barrel - causes conflicts.
 export * from "@/lib/api-internal";
 
 // ============================================
@@ -398,44 +382,15 @@ export async function getIngestStatus(runId: string) {
 
 // ============================================
 // READ-ONLY PASSTHROUGHS
-// For explicit intent, prefer: import from "@/lib/api/query"
+// NOTE: Most functions come through `export * from "@/lib/api-internal"` above.
+// Only aliases need explicit exports here.
 // ============================================
 
-export {
-  // Dataset queries
-  getParcels,
-  getParcelById,
-  getSourceFields,
-  previewDataset,
-  getDatasetErrors,
-  downloadErrorCsv,
-  saveFieldMapping,
-  // Map layers
-  getMapLayers,
-  // Filter panel lookups
-  getNeighborhoods,
-  getPropertyClasses,
-  // Ratio studies
-  getRatioStudies,
-  runRatioStudy,
-  // Snapshots - export both original names AND aliases for compatibility
-  getRollYearSnapshots,
-  createRollYearSnapshot,
-  publishSnapshot,
+// Aliases for backwards compatibility (original names already exported via *)
+export { 
   getRollYearSnapshots as getSnapshots,
   createRollYearSnapshot as createSnapshot,
-  // Audit
-  getAuditLog,
-  // Data freshness
   loadCountyDataFreshness as getDataSources,
-  // Auth (until migrated)
-  login,
-  logout,
-  getCurrentUser,
-  // Additional map/parcel functions
-  getParcelGeoJson,
-  selectParcelsInPolygon,
-  getAggregateStats,
 } from "@/lib/api-internal";
 
 // Stub for getDatasets - returns empty array (not implemented in demo-client)
@@ -448,8 +403,4 @@ export async function getFieldMappings(_datasetId: string) {
   return [];
 }
 
-// ============================================
-// DEMO MODE FLAG
-// ============================================
-
-export { DEMO_MODE } from "@/lib/api-internal";
+// DEMO_MODE comes through `export * from "@/lib/api-internal"` above
