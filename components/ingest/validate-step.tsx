@@ -448,7 +448,7 @@ export function ValidateStep({ dataset, onComplete, onBack }: ValidateStepProps)
           Back
         </Button>
         <Button onClick={handleContinue} className="tf-glass-btn tf-glass-btn--primary text-foreground font-medium">
-          Continue to Field Mapping
+          Continue to Preview
           <ArrowRight className="ml-2 h-4 w-4" />
         </Button>
       </div>

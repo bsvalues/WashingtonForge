@@ -67,36 +67,27 @@ export function UploadStep({ onComplete }: UploadStepProps) {
   }, []);
 
   const validateAndSetFile = (f: File) => {
-    console.log("[v0] validateAndSetFile:", f.name, "size:", f.size);
     const validExtensions = [".csv", ".geojson", ".json", ".zip"];
     const ext = f.name.toLowerCase().slice(f.name.lastIndexOf("."));
-    console.log("[v0] File extension:", ext);
     if (!validExtensions.includes(ext)) {
-      console.log("[v0] Invalid extension");
       setError("Invalid file type. Please upload CSV, GeoJSON, or ZIP files.");
       return;
     }
     setError(null);
     setFile(f);
-    console.log("[v0] File set successfully");
   };
 
   const handleUpload = async () => {
-    if (!file) {
-      console.log("[v0] handleUpload: No file selected");
-      return;
-    }
+    if (!file) return;
 
-    console.log("[v0] handleUpload: Starting upload for", file.name, "type:", datasetType);
     setIsUploading(true);
     setError(null);
 
     try {
       const dataset = await uploadDataset(file, datasetType);
-      console.log("[v0] handleUpload: Upload success, dataset:", dataset);
       onComplete(dataset);
     } catch (err) {
-      console.error("[v0] Upload error:", err);
+      console.error("Upload error:", err);
       setError("Failed to upload file. Please try again.");
     } finally {
       setIsUploading(false);

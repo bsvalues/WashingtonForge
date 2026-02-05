@@ -52,7 +52,7 @@ export interface Dataset {
   errorCount: number;
   createdAt: string;
   publishedAt?: string;
-  countyId: string; // Tenant boundary
+  countyId?: string; // Tenant boundary - optional during initial upload
 }
 
 export type DatasetType = "parcel" | "sales" | "building" | "assessment";
