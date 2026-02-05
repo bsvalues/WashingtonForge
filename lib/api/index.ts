@@ -324,10 +324,10 @@ export type {
   Snapshot,
   AuditLogEntry,
   DataSource,
-} from "@/lib/api-internal/types";
+} from "@/lib/api-internal";
 
-// Re-export all types from internal module
-export * from "@/lib/api-internal/types";
+// Re-export all types from internal module (via barrel)
+export * from "@/lib/api-internal";
 
 // ============================================
 // DEPRECATED MUTATORS → Forward to Hub
@@ -452,4 +452,4 @@ export async function getFieldMappings(_datasetId: string) {
 // DEMO MODE FLAG
 // ============================================
 
-export { DEMO_MODE } from "@/lib/api-internal/index";
+export { DEMO_MODE } from "@/lib/api-internal";

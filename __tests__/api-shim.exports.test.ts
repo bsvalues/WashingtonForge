@@ -217,28 +217,46 @@ describe("@/lib/api/query exports", () => {
     "getCurrentUser",
   ];
 
-  it("exports ONLY allowed read-only functions (allowlist guard)", () => {
+  it("exports EXACTLY the allowed functions (strict set equality)", () => {
     const queryExports = Object.keys(query).filter(
       (k) => typeof (query as Record<string, unknown>)[k] === "function"
     );
     
+    // Check for unexpected exports (leakage)
     const unexpectedExports = queryExports.filter(
       (name) => !ALLOWED_QUERY_EXPORTS.includes(name)
     );
 
+    // Check for missing exports (breakage)
+    const missingExports = ALLOWED_QUERY_EXPORTS.filter(
+      (name) => !queryExports.includes(name)
+    );
+
+    const errors: string[] = [];
+
     if (unexpectedExports.length > 0) {
-      throw new Error(
-        `Query surface has unexpected exports: ${unexpectedExports.join(", ")}.\n` +
-        `If these are legitimate read-only functions, add them to ALLOWED_QUERY_EXPORTS.\n` +
-        `If they are mutators, they must go through dataSuiteHub.`
+      errors.push(
+        `LEAKAGE: Query surface has unexpected exports: ${unexpectedExports.join(", ")}.\n` +
+        `  → If legitimate read-only, add to ALLOWED_QUERY_EXPORTS.\n` +
+        `  → If mutators, route through dataSuiteHub instead.`
       );
     }
-  });
 
-  it("exports all allowed query functions", () => {
-    for (const name of ALLOWED_QUERY_EXPORTS) {
-      expect(typeof (query as Record<string, unknown>)[name]).toBe("function");
+    if (missingExports.length > 0) {
+      errors.push(
+        `BREAKAGE: Query surface is missing expected exports: ${missingExports.join(", ")}.\n` +
+        `  → Restore these exports or update ALLOWED_QUERY_EXPORTS.`
+      );
     }
+
+    if (errors.length > 0) {
+      throw new Error(
+        `Query surface integrity check failed:\n\n${errors.join("\n\n")}`
+      );
+    }
+
+    // Exact equality assertion for clarity
+    expect(new Set(queryExports)).toEqual(new Set(ALLOWED_QUERY_EXPORTS));
   });
 
   // ============================================
