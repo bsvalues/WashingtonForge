@@ -32,6 +32,7 @@ import {
   BarChart3,
   Target,
   AlertTriangle,
+  Scale,
 } from "lucide-react";
 import {
   dataSuiteHub,
