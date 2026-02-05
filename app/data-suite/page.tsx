@@ -33,6 +33,7 @@ import {
   Target,
   AlertTriangle,
   Scale,
+  Map,
 } from "lucide-react";
 import {
   dataSuiteHub,
