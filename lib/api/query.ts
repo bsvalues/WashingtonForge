@@ -69,14 +69,6 @@ export {
 } from "@/lib/api-internal";
 
 // ============================================
-// TRIPWIRE DRILL - DELETE AFTER CONFIRMING FAILURE
-// ============================================
-// This fake export should trigger test failure via:
-// 1. Not in ALLOWED_QUERY_EXPORTS (leakage detection)
-// 2. Matches /^update/i regex (mutator verb detection)
-export const updateFoo = () => { throw new Error("TRIPWIRE"); };
-
-// ============================================
 // TYPE EXPORTS (for convenience)
 // Re-exported from barrel to comply with barrel-only import rule
 // ============================================
