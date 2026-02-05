@@ -451,27 +451,34 @@ function InventoryPanel({
       {/* Capabilities Unlocked */}
       <Card className="tf-glass p-5">
         <h3 className="text-foreground mb-4 font-medium">Capabilities Unlocked</h3>
+        <p className="text-muted-foreground mb-4 text-sm">
+          Click any unlocked capability to go there.
+        </p>
         <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
           {[
-            { id: "cockpit_map", name: "Cockpit Map", icon: Map },
-            { id: "ratio_studies", name: "Ratio Studies", icon: BarChart3 },
-            { id: "comps_selection", name: "Comps Selection", icon: Target },
-            { id: "model_calibration", name: "Model Calibration", icon: Zap },
-            { id: "appeals_support", name: "Appeals Support", icon: Scale },
+            { id: "cockpit_map", name: "Cockpit Map", icon: Map, href: "/cockpit" },
+            { id: "ratio_studies", name: "Ratio Studies", icon: BarChart3, href: "/ratio-studies" },
+            { id: "comps_selection", name: "Comps Selection", icon: Target, href: "/calibration" },
+            { id: "model_calibration", name: "Model Calibration", icon: Zap, href: "/calibration" },
+            { id: "appeals_support", name: "Appeals Support", icon: Scale, href: "/audit" },
           ].map((cap) => {
             const isUnlocked = status.capabilities_unlocked.includes(cap.id);
+            const Wrapper = isUnlocked ? "a" : "div";
             return (
-              <div
+              <Wrapper
                 key={cap.id}
+                {...(isUnlocked ? { href: cap.href } : {})}
                 className={cn(
-                  "flex items-center gap-2 rounded-lg p-3 text-sm",
-                  isUnlocked ? "bg-emerald-400/10 text-emerald-400" : "bg-muted/20 text-muted-foreground"
+                  "flex items-center gap-2 rounded-lg p-3 text-sm transition-colors",
+                  isUnlocked 
+                    ? "bg-emerald-400/10 text-emerald-400 hover:bg-emerald-400/20 cursor-pointer" 
+                    : "bg-muted/20 text-muted-foreground cursor-not-allowed"
                 )}
               >
                 <cap.icon className="h-4 w-4" />
                 <span className="font-medium">{cap.name}</span>
-                {isUnlocked && <CheckCircle2 className="ml-auto h-4 w-4" />}
-              </div>
+                {isUnlocked && <ChevronRight className="ml-auto h-4 w-4" />}
+              </Wrapper>
             );
           })}
         </div>
@@ -812,11 +819,25 @@ function RoutingPanel({
     (e) => e.type === "routing.completed" || e.type === "product.published"
   );
 
+  // Map routing targets to actual routes
+  const targetRouteMap: Record<string, string> = {
+    "Cockpit": "/cockpit",
+    "Ratio Studies": "/ratio-studies",
+    "Comps Engine": "/calibration",
+    "Calibration": "/calibration",
+    "Appeals": "/audit",
+    "Audit": "/audit",
+    "Reports": "/snapshots",
+  };
+
   return (
     <div className="space-y-6">
       {/* Routing Map */}
       <Card className="tf-glass p-5">
         <h3 className="text-foreground mb-4 font-medium">Data Routing Map</h3>
+        <p className="text-muted-foreground mb-4 text-sm">
+          Click any destination to navigate there with your data ready.
+        </p>
         <div className="grid gap-4 md:grid-cols-3">
           {(["PARCEL_FABRIC", "COUNTY_ROLL", "SALES_STREAM"] as DataProductType[]).map((product) => {
             const targets = DATA_PRODUCTS[product].routingTargets;
@@ -827,14 +848,28 @@ function RoutingPanel({
                   {DATA_PRODUCTS[product].displayName}
                 </div>
                 <div className="flex flex-wrap gap-1.5">
-                  {targets.map((target) => (
-                    <span
-                      key={target}
-                      className="bg-muted/30 text-muted-foreground rounded-full px-2 py-1 text-xs"
-                    >
-                      {target}
-                    </span>
-                  ))}
+                  {targets.map((target) => {
+                    const route = targetRouteMap[target];
+                    if (route) {
+                      return (
+                        <a
+                          key={target}
+                          href={route}
+                          className="bg-primary/10 text-primary hover:bg-primary/20 rounded-full px-2 py-1 text-xs font-medium transition-colors"
+                        >
+                          {target} →
+                        </a>
+                      );
+                    }
+                    return (
+                      <span
+                        key={target}
+                        className="bg-muted/30 text-muted-foreground rounded-full px-2 py-1 text-xs"
+                      >
+                        {target}
+                      </span>
+                    );
+                  })}
                 </div>
               </div>
             );
