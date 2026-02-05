@@ -313,6 +313,7 @@ export {
   getSourceFields,
   previewDataset,
   getDatasetErrors,
+  downloadErrorCsv,
   // Ratio studies
   getRatioStudies,
   runRatioStudy,
