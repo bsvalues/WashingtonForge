@@ -314,6 +314,7 @@ export {
   previewDataset,
   getDatasetErrors,
   downloadErrorCsv,
+  saveFieldMapping,
   // Ratio studies
   getRatioStudies,
   runRatioStudy,
