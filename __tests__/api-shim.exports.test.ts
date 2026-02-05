@@ -62,6 +62,25 @@ describe("@/lib/api shim exports", () => {
       const _typeCheck: api.EquityStatus | null = null;
       expect(_typeCheck).toBeNull();
     });
+
+    it("exports ComplianceResult type", () => {
+      const _typeCheck: api.ComplianceResult | null = null;
+      expect(_typeCheck).toBeNull();
+    });
+
+    it("exports AuditLogEntry type", () => {
+      const _typeCheck: api.AuditLogEntry | null = null;
+      expect(_typeCheck).toBeNull();
+    });
+  });
+
+  describe("Constant exports (runtime)", () => {
+    it("exports IAAO_RESIDENTIAL_THRESHOLDS constant", () => {
+      expect(api.IAAO_RESIDENTIAL_THRESHOLDS).toBeDefined();
+      expect(typeof api.IAAO_RESIDENTIAL_THRESHOLDS).toBe("object");
+      expect(api.IAAO_RESIDENTIAL_THRESHOLDS.ratioMin).toBe(0.9);
+      expect(api.IAAO_RESIDENTIAL_THRESHOLDS.ratioMax).toBe(1.1);
+    });
   });
 
   describe("Function exports (runtime)", () => {

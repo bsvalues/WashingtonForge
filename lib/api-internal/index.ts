@@ -1,9 +1,6 @@
 // TerraFusion API Adapter
 // Single entry point - swaps between demo and real backend via env flag
-// Usage: import { client } from "@/lib/api"
-
-import * as demoClient from "./demo-client";
-import * as apiClient from "./api-client";
+// Usage: import { getParcels, getMapLayers } from "@/lib/api"
 
 // Re-export types for convenience
 export * from "./types";
@@ -21,82 +18,72 @@ export * from "./types";
 export const DEMO_MODE = true;
 
 // ============================================
-// Client Adapter
+// Direct Re-exports from Demo Client
 // ============================================
+// Using direct re-exports instead of client.* pattern for static analysis.
+// When switching to production, change these to re-export from api-client.
 
-/**
- * Unified API client that automatically routes to demo or real backend.
- *
- * In demo mode: Returns mock data from fixtures (no network calls)
- * In production: Makes real HTTP requests to backend services
- *
- * Switching from demo to production is a single env flag change.
- */
-export const client = DEMO_MODE ? demoClient : apiClient;
-
-// ============================================
-// Named Exports (for convenience)
-// ============================================
-
-// Authentication
-export const login = client.login;
-export const logout = client.logout;
-export const getCurrentUser = client.getCurrentUser;
-
-// Counties
-export const getCounties = client.getCounties;
-export const selectCounty = client.selectCounty;
-
-// Data Ingestion
-export const uploadDataset = client.uploadDataset;
-export const validateDataset = client.validateDataset;
-export const getDatasetErrors = client.getDatasetErrors;
-export const downloadErrorCsv = client.downloadErrorCsv;
-export const getSourceFields = client.getSourceFields;
-export const saveFieldMapping = client.saveFieldMapping;
-export const previewDataset = client.previewDataset;
-export const publishDataset = client.publishDataset;
-
-// Parcels & Map
-export const getParcels = client.getParcels;
-export const getParcelById = client.getParcelById;
-export const getParcelGeoJson = client.getParcelGeoJson;
-export const selectParcelsInPolygon = client.selectParcelsInPolygon;
-export const getAggregateStats = client.getAggregateStats;
-export const getMapLayers = client.getMapLayers;
-export const getNeighborhoods = client.getNeighborhoods;
-export const getPropertyClasses = client.getPropertyClasses;
-
-// Ratio Studies
-export const getRatioStudies = client.getRatioStudies;
-export const getRatioStudyById = client.getRatioStudyById;
-export const runRatioStudy = client.runRatioStudy;
-export const exportRatioStudyReport = client.exportRatioStudyReport;
-
-// Audit Log
-export const getAuditLog = client.getAuditLog;
-
-// Roll Year Snapshots
-export const getRollYearSnapshots = client.getRollYearSnapshots;
-export const createRollYearSnapshot = client.createRollYearSnapshot;
-export const publishSnapshot = client.publishSnapshot;
-
-// Dataset Versions
-export const getDatasetVersions = client.getDatasetVersions;
-export const getDatasetVersionById = client.getDatasetVersionById;
-
-// VEI Findings
-export const getVEIFindings = client.getVEIFindings;
-export const getDriftHotspots = client.getDriftHotspots;
-
-// Calibration (Benton Method)
-export const getCalibrationLevers = client.getCalibrationLevers;
-export const getCalibrationHistory = client.getCalibrationHistory;
-export const simulateCalibration = client.simulateCalibration;
-export const applyCalibration = client.applyCalibration;
-
-// Export Snapshot
-export const exportRatioSnapshot = client.exportRatioSnapshot;
-
-// Data Sources & Freshness
-export const loadCountyDataFreshness = client.loadCountyDataFreshness;
+export {
+  // Authentication
+  login,
+  logout,
+  getCurrentUser,
+  
+  // Counties
+  getCounties,
+  selectCounty,
+  
+  // Data Ingestion
+  uploadDataset,
+  validateDataset,
+  getDatasetErrors,
+  downloadErrorCsv,
+  getSourceFields,
+  saveFieldMapping,
+  previewDataset,
+  publishDataset,
+  
+  // Parcels & Map
+  getParcels,
+  getParcelById,
+  getParcelGeoJson,
+  selectParcelsInPolygon,
+  getAggregateStats,
+  getMapLayers,
+  getNeighborhoods,
+  getPropertyClasses,
+  
+  // Ratio Studies
+  getRatioStudies,
+  getRatioStudyById,
+  runRatioStudy,
+  exportRatioStudyReport,
+  
+  // Audit Log
+  getAuditLog,
+  
+  // Roll Year Snapshots
+  getRollYearSnapshots,
+  createRollYearSnapshot,
+  publishSnapshot,
+  
+  // Dataset Versions
+  getDatasetVersions,
+  getDatasetVersionById,
+  
+  // VEI Findings
+  getVEIFindings,
+  getDriftHotspots,
+  
+  // Calibration (Benton Method)
+  getCalibrationLevers,
+  getCalibrationHistory,
+  simulateCalibration,
+  applyCalibration,
+  
+  // Export Snapshot
+  exportRatioSnapshot,
+  
+  // Data Sources & Freshness
+  loadCountyDataFreshness,
+} from "./demo-client";
