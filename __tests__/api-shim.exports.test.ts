@@ -5,6 +5,26 @@
  * If this test fails, it means exports were removed or renamed - which breaks consumers.
  * 
  * DO NOT remove assertions from this test without verifying all consumers are migrated.
+ * 
+ * ENFORCEMENT ARCHITECTURE:
+ * ========================
+ * 1. ESLint Rule (lib/api/** → barrel-only imports)
+ *    - Blocks all deep imports: @/lib/api-internal/*
+ *    - Forces all imports through @/lib/api-internal barrel
+ * 
+ * 2. Query Surface Allowlist (this file)
+ *    - ALLOWED_QUERY_EXPORTS = single source of truth
+ *    - Exact set equality: catches leakage (unexpected) AND breakage (missing)
+ *    - Three-layer protection: allowlist → blacklist → regex backstop
+ * 
+ * 3. API Shim Surface (this file)
+ *    - Individual assertions for all required exports
+ *    - Type exports verified at compile-time
+ * 
+ * These tripwires make it impossible to accidentally:
+ * - Add mutators to the query surface
+ * - Remove required exports
+ * - Bypass the barrel with deep imports
  */
 
 import { describe, it, expect } from "vitest";
@@ -255,8 +275,8 @@ describe("@/lib/api/query exports", () => {
       );
     }
 
-    // Exact equality assertion for clarity
-    expect(new Set(queryExports)).toEqual(new Set(ALLOWED_QUERY_EXPORTS));
+    // Exact equality assertion (sorted for deterministic output)
+    expect([...queryExports].sort()).toEqual([...ALLOWED_QUERY_EXPORTS].sort());
   });
 
   // ============================================
