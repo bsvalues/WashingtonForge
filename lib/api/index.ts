@@ -20,10 +20,17 @@
 
 import { dataSuiteHub } from "@/lib/data-suite/hub";
 import { eventBus } from "@/lib/data-suite/event-bus";
-import type { DatasetType, RollYearSnapshot } from "@/lib/api-internal/types";
+import type { 
+  DatasetType, 
+  RollYearSnapshot, 
+  MapLayer,
+  ParcelFilter,
+  Parcel,
+  EquityStatus,
+} from "@/lib/api-internal/types";
 
 // Re-export types for backwards compatibility
-export type { RollYearSnapshot };
+export type { RollYearSnapshot, MapLayer, ParcelFilter, Parcel, EquityStatus };
 
 // ============================================
 // KILL SWITCH - flip to "throw" when migration is complete
@@ -394,7 +401,7 @@ export async function getIngestStatus(runId: string) {
 // ============================================
 
 export {
-  // Dataset queries (that actually exist in demo-client)
+  // Dataset queries
   getParcels,
   getParcelById,
   getSourceFields,
@@ -424,7 +431,11 @@ export {
   login,
   logout,
   getCurrentUser,
-} from "@/lib/api-internal/demo-client";
+  // Additional map/parcel functions
+  getParcelGeoJson,
+  selectParcelsInPolygon,
+  getAggregateStats,
+} from "@/lib/api-internal";
 
 // Stub for getDatasets - returns empty array (not implemented in demo-client)
 export async function getDatasets() {
