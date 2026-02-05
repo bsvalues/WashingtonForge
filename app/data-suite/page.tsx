@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useSearchParams } from "next/navigation";
 import { AppShell } from "@/components/app-shell";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -35,6 +36,9 @@ import {
   dataSuiteHub,
   eventBus,
   repository,
+  DataSuiteProvider,
+  useDataSuite,
+  useEventStream,
   type DataSuiteEvent,
   type WACountyFips,
   type CountyDataStatus,
@@ -70,11 +74,23 @@ const tabs: { id: IDSTab; label: string; icon: typeof Database }[] = [
 ];
 
 export default function DataSuitePage() {
+  const searchParams = useSearchParams();
+  const tabParam = searchParams.get("tab") as IDSTab | null;
+  
   const [selectedCounty, setSelectedCounty] = useState<WACountyFips | null>("53005"); // Default: Benton
-  const [activeTab, setActiveTab] = useState<IDSTab>("inventory");
+  const [activeTab, setActiveTab] = useState<IDSTab>(
+    tabParam && tabs.some(t => t.id === tabParam) ? tabParam : "inventory"
+  );
   const [status, setStatus] = useState<CountyDataStatus | null>(null);
   const [events, setEvents] = useState<DataSuiteEvent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Sync tab with URL param
+  useEffect(() => {
+    if (tabParam && tabs.some(t => t.id === tabParam) && tabParam !== activeTab) {
+      setActiveTab(tabParam);
+    }
+  }, [tabParam, activeTab]);
 
   // Load county status
   const loadStatus = useCallback(async () => {

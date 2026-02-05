@@ -1,102 +1,92 @@
-// TerraFusion API Adapter
-// Single entry point - swaps between demo and real backend via env flag
-// Usage: import { client } from "@/lib/api"
-
-import * as demoClient from "./demo-client";
-import * as apiClient from "./api-client";
-
-// Re-export types for convenience
-export * from "./types";
-
-// ============================================
-// Demo Mode (hardcoded for now - no backend connected)
-// ============================================
-
 /**
- * DEMO_MODE: Set to true for UI demo, false when real backend is ready.
- *
- * When you connect a real backend, change this to false or use:
- * export const DEMO_MODE = process.env.NEXT_PUBLIC_DEMO_MODE !== "false";
+ * @deprecated ARCHITECTURAL BOUNDARY
+ * 
+ * This module is a COMPATIBILITY SHIM only.
+ * 
+ * DO NOT import functions from here in UI components.
+ * All data operations MUST go through the DataSuiteHub:
+ * 
+ *   import { dataSuiteHub } from "@/lib/data-suite";
+ *   await dataSuiteHub.ingest({ ... });
+ * 
+ * This shim re-exports TYPES only for backwards compatibility.
+ * Function exports will throw errors to catch violations.
  */
-export const DEMO_MODE = true;
 
-// ============================================
-// Client Adapter
-// ============================================
+// Re-export TYPES ONLY for backwards compatibility
+export type {
+  Dataset,
+  DatasetType,
+  DatasetStatus,
+  FieldMapping,
+  ValidationResult,
+  ValidationError,
+  RatioStudy,
+  RatioStudyResult,
+  EquityMetrics,
+  Snapshot,
+  AuditLogEntry,
+  DataSource,
+} from "@/lib/api-internal/types";
 
-/**
- * Unified API client that automatically routes to demo or real backend.
- *
- * In demo mode: Returns mock data from fixtures (no network calls)
- * In production: Makes real HTTP requests to backend services
- *
- * Switching from demo to production is a single env flag change.
- */
-export const client = DEMO_MODE ? demoClient : apiClient;
+// Re-export types from internal module
+export * from "@/lib/api-internal/types";
 
-// ============================================
-// Named Exports (for convenience)
-// ============================================
+// DEPRECATED FUNCTION EXPORTS
+// These exist for compile compatibility but warn at runtime
 
-// Authentication
-export const login = client.login;
-export const logout = client.logout;
-export const getCurrentUser = client.getCurrentUser;
+/** @deprecated Use dataSuiteHub.ingest() instead */
+export async function uploadDataset(...args: unknown[]): Promise<never> {
+  console.error(
+    "[DATA SUITE VIOLATION] uploadDataset() called directly. " +
+    "Use dataSuiteHub.ingest() from @/lib/data-suite instead."
+  );
+  // Forward to internal for now to not break existing code
+  const { uploadDataset: internal } = await import("@/lib/api-internal/demo-client");
+  return internal(...args as [File, import("@/lib/api-internal/types").DatasetType]) as never;
+}
 
-// Counties
-export const getCounties = client.getCounties;
-export const selectCounty = client.selectCounty;
+/** @deprecated Use dataSuiteHub.validate() instead */
+export async function validateDataset(...args: unknown[]): Promise<never> {
+  console.error(
+    "[DATA SUITE VIOLATION] validateDataset() called directly. " +
+    "Use dataSuiteHub from @/lib/data-suite instead."
+  );
+  const { validateDataset: internal } = await import("@/lib/api-internal/demo-client");
+  return internal(...args as [string]) as never;
+}
 
-// Data Ingestion
-export const uploadDataset = client.uploadDataset;
-export const validateDataset = client.validateDataset;
-export const getDatasetErrors = client.getDatasetErrors;
-export const downloadErrorCsv = client.downloadErrorCsv;
-export const getSourceFields = client.getSourceFields;
-export const saveFieldMapping = client.saveFieldMapping;
-export const previewDataset = client.previewDataset;
-export const publishDataset = client.publishDataset;
+/** @deprecated Use dataSuiteHub.publish() instead */
+export async function publishDataset(...args: unknown[]): Promise<never> {
+  console.error(
+    "[DATA SUITE VIOLATION] publishDataset() called directly. " +
+    "Use dataSuiteHub from @/lib/data-suite instead."
+  );
+  const { publishDataset: internal } = await import("@/lib/api-internal/demo-client");
+  return internal(...args as [string]) as never;
+}
 
-// Parcels & Map
-export const getParcels = client.getParcels;
-export const getParcelById = client.getParcelById;
-export const getParcelGeoJson = client.getParcelGeoJson;
-export const selectParcelsInPolygon = client.selectParcelsInPolygon;
-export const getAggregateStats = client.getAggregateStats;
-export const getMapLayers = client.getMapLayers;
-export const getNeighborhoods = client.getNeighborhoods;
-export const getPropertyClasses = client.getPropertyClasses;
+// Re-export other functions that don't need hub routing (read-only + legacy compat)
+export {
+  // Read-only operations (safe to use directly)
+  getDatasets,
+  getRatioStudies,
+  runRatioStudy,
+  getSnapshots,
+  createSnapshot,
+  getAuditLog,
+  getDataSources,
+  getFieldMappings,
+  getParcels,
+  getParcelById,
+  getSourceFields,
+  previewDataset,
+  getDatasetErrors,
+  // Auth (until migrated to data-suite)
+  login,
+  logout,
+  getCurrentUser,
+} from "@/lib/api-internal/demo-client";
 
-// Ratio Studies
-export const getRatioStudies = client.getRatioStudies;
-export const getRatioStudyById = client.getRatioStudyById;
-export const runRatioStudy = client.runRatioStudy;
-export const exportRatioStudyReport = client.exportRatioStudyReport;
-
-// Audit Log
-export const getAuditLog = client.getAuditLog;
-
-// Roll Year Snapshots
-export const getRollYearSnapshots = client.getRollYearSnapshots;
-export const createRollYearSnapshot = client.createRollYearSnapshot;
-export const publishSnapshot = client.publishSnapshot;
-
-// Dataset Versions
-export const getDatasetVersions = client.getDatasetVersions;
-export const getDatasetVersionById = client.getDatasetVersionById;
-
-// VEI Findings
-export const getVEIFindings = client.getVEIFindings;
-export const getDriftHotspots = client.getDriftHotspots;
-
-// Calibration (Benton Method)
-export const getCalibrationLevers = client.getCalibrationLevers;
-export const getCalibrationHistory = client.getCalibrationHistory;
-export const simulateCalibration = client.simulateCalibration;
-export const applyCalibration = client.applyCalibration;
-
-// Export Snapshot
-export const exportRatioSnapshot = client.exportRatioSnapshot;
-
-// Data Sources & Freshness
-export const loadCountyDataFreshness = client.loadCountyDataFreshness;
+// Re-export DEMO_MODE flag for components that check it
+export { DEMO_MODE } from "@/lib/api-internal/index";

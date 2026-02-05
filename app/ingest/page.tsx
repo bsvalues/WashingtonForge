@@ -2,149 +2,29 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { useState, useCallback } from "react";
-import { AppShell } from "@/components/app-shell";
-import { EnhancedIngestStepper } from "@/components/ingest/enhanced-ingest-stepper";
-import { SmartUploadStep } from "@/components/ingest/smart-upload-step";
-import { SmartMapFieldsStep } from "@/components/ingest/smart-map-fields-step";
-import { ValidateStep } from "@/components/ingest/validate-step";
-import { PreviewStep } from "@/components/ingest/preview-step";
-import { PublishStep } from "@/components/ingest/publish-step";
-import { IngestQuickStart } from "@/components/ingest/ingest-quick-start";
-import { AlertCircle, ArrowRight } from "lucide-react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Button } from "@/components/ui/button";
-import type { Dataset, ValidationResult, FieldMapping } from "@/lib/api";
 
-// FIXED: Correct step order is Upload → Map → Validate → Preview → Publish
-// You must map fields BEFORE validating (need to know what fields mean to validate them)
-export type IngestStep = "upload" | "map" | "validate" | "preview" | "publish";
+/**
+ * HARD REDIRECT: /ingest → /data-suite?tab=ingest
+ * 
+ * The Data Suite is the SINGLE AUTHORITY for all data operations.
+ * This route exists only for backwards compatibility and immediately redirects.
+ * No legacy components mount here - fail-closed architecture.
+ */
+export default function IngestRedirectPage() {
+  const router = useRouter();
 
-const steps: { id: IngestStep; label: string; description: string }[] = [
-  { id: "upload", label: "Upload", description: "Select your data file" },
-  { id: "map", label: "Map Fields", description: "Connect columns to schema" },
-  { id: "validate", label: "Validate", description: "Check data quality" },
-  { id: "preview", label: "Preview", description: "Review mapped data" },
-  { id: "publish", label: "Publish", description: "Make it official" },
-];
+  useEffect(() => {
+    // Hard redirect - no UI, no state, no legacy code paths
+    router.replace("/data-suite?tab=ingest");
+  }, [router]);
 
-export default function IngestPage() {
-  const [currentStep, setCurrentStep] = useState<IngestStep>("upload");
-  const [dataset, setDataset] = useState<Dataset | null>(null);
-  const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
-  const [fieldMappings, setFieldMappings] = useState<FieldMapping[]>([]);
-
-  // Step handlers with correct flow: Upload → Map → Validate → Preview → Publish
-  const handleUploadComplete = useCallback((uploadedDataset: Dataset) => {
-    setDataset(uploadedDataset);
-    setCurrentStep("map"); // Go to mapping after upload
-  }, []);
-
-  const handleMappingComplete = useCallback((mappings: FieldMapping[]) => {
-    setFieldMappings(mappings);
-    setCurrentStep("validate"); // Go to validation after mapping
-  }, []);
-
-  const handleValidationComplete = useCallback((result: ValidationResult) => {
-    setValidationResult(result);
-    setCurrentStep("preview");
-  }, []);
-
-  const handlePreviewComplete = useCallback(() => {
-    setCurrentStep("publish");
-  }, []);
-
-  const handlePublishComplete = useCallback(() => {
-    // Reset for next upload
-    setDataset(null);
-    setValidationResult(null);
-    setFieldMappings([]);
-    setCurrentStep("upload");
-  }, []);
-
-  const goBack = useCallback(() => {
-    const stepIndex = steps.findIndex((s) => s.id === currentStep);
-    if (stepIndex > 0) {
-      setCurrentStep(steps[stepIndex - 1].id);
-    }
-  }, [currentStep]);
-
+  // Minimal loading state during redirect
   return (
-    <AppShell user={{ name: "Demo User", role: "Assessor", county: "Benton County" }}>
-      <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
-        {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-foreground mb-2 text-3xl font-bold tracking-tight">Data Ingest</h1>
-          <p className="text-muted-foreground">
-            Import property data into TerraFusion with guided validation and field mapping
-          </p>
-        </div>
-
-        {/* Redirect Notice to Data Suite */}
-        <Alert className="mb-6 border-blue-400/30 bg-blue-400/10">
-          <AlertCircle className="h-4 w-4 text-blue-400" />
-          <AlertTitle className="text-blue-400">Data Suite Available</AlertTitle>
-          <AlertDescription className="flex items-center justify-between">
-            <span className="text-muted-foreground">
-              The unified Data Suite combines Ingest, Quality, Versions, and Routing in one place.
-            </span>
-            <Button asChild size="sm" variant="outline" className="ml-4">
-              <a href="/data-suite?tab=ingest">
-                Open Data Suite
-                <ArrowRight className="ml-2 h-4 w-4" />
-              </a>
-            </Button>
-          </AlertDescription>
-        </Alert>
-
-        {/* Quick Start Guide - shows on upload step only */}
-        {currentStep === "upload" && <IngestQuickStart />}
-
-        {/* Enhanced Stepper */}
-        <div className="mb-8">
-          <EnhancedIngestStepper steps={steps} currentStep={currentStep} />
-        </div>
-
-        {/* Step Content */}
-        <div className="min-h-[500px]">
-          {currentStep === "upload" && (
-            <SmartUploadStep onComplete={handleUploadComplete} />
-          )}
-          
-          {currentStep === "map" && dataset && (
-            <SmartMapFieldsStep
-              dataset={dataset}
-              onComplete={handleMappingComplete}
-              onBack={goBack}
-            />
-          )}
-          
-          {currentStep === "validate" && dataset && (
-            <ValidateStep
-              dataset={dataset}
-              onComplete={handleValidationComplete}
-              onBack={goBack}
-            />
-          )}
-          
-          {currentStep === "preview" && dataset && (
-            <PreviewStep
-              dataset={dataset}
-              fieldMappings={fieldMappings}
-              onComplete={handlePreviewComplete}
-              onBack={goBack}
-            />
-          )}
-          
-          {currentStep === "publish" && dataset && (
-            <PublishStep
-              dataset={dataset}
-              onComplete={handlePublishComplete}
-              onBack={goBack}
-            />
-          )}
-        </div>
+    <div className="space-bg flex h-screen items-center justify-center">
+      <div className="text-center">
+        <div className="border-primary mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-2 border-t-transparent" />
+        <p className="text-muted-foreground text-sm">Redirecting to Data Suite...</p>
       </div>
-    </AppShell>
+    </div>
   );
 }
