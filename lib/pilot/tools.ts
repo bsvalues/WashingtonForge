@@ -213,6 +213,11 @@ export const TOOL_REGISTRY: ToolDescriptor[] = [
   },
 ];
 
+// Deduplicated list of every RBAC claim referenced in the registry
+export const ALL_CLAIMS: string[] = Array.from(
+  new Set(TOOL_REGISTRY.flatMap((t) => t.requiredClaims))
+).sort();
+
 export function getTool(toolId: string): ToolDescriptor | undefined {
   return TOOL_REGISTRY.find((t) => t.toolId === toolId);
 }

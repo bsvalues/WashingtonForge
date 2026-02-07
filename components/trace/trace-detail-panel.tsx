@@ -20,7 +20,7 @@ import {
   Copy,
   ExternalLink,
 } from "lucide-react";
-import { type TraceEvent, getTraceEvents } from "@/lib/pilot/executor";
+import { type TraceEvent, getTraceFeed } from "@/lib/pilot/executor";
 
 interface TraceDetailPanelProps {
   isOpen: boolean;
@@ -36,7 +36,7 @@ export function TraceDetailPanel({
   // Get all events for this correlation chain
   const chainEvents = useMemo(() => {
     if (!correlationId) return [];
-    return getTraceEvents()
+    return getTraceFeed()
       .filter((e) => e.correlationId === correlationId)
       .sort((a, b) => new Date(a.ts).getTime() - new Date(b.ts).getTime());
   }, [correlationId]);
