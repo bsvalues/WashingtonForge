@@ -335,6 +335,21 @@ export function AppShell({ children, user }: AppShellProps) {
         isOpen={traceFeedOpen}
         onClose={() => setTraceFeedOpen(false)}
       />
+
+      {/* Policy Debug Drawer */}
+      <PolicyDebugDrawer
+        isOpen={policyDebugOpen}
+        onClose={() => setPolicyDebugOpen(false)}
+        userClaims={userClaims}
+        setUserClaims={setUserClaims}
+        enabledTools={enabledTools}
+        setEnabledTools={setEnabledTools}
+        mode="pilot"
+        requireConfirmWriteHigh={requireConfirmWriteHigh}
+        setRequireConfirmWriteHigh={setRequireConfirmWriteHigh}
+        requireSupervisorIrreversible={requireSupervisorIrreversible}
+        setRequireSupervisorIrreversible={setRequireSupervisorIrreversible}
+      />
     </div>
   );
 }
