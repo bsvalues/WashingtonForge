@@ -1,10 +1,10 @@
 // lib/pilot/tools.ts
-// TerraPilot tool registry stub (prototype-safe).
+// TerraPilot tool registry — canonical, aligned to TerraFusion OS Constitution.
 // Enforces: mode + RBAC claims + tool allowlist + risk policy. Emits Trace events via emitTrace().
 
 export type PilotMode = "pilot" | "muse" | "both";
-export type ToolRisk = "read_only" | "write_low" | "write_high" | "irreversible";
-export type SuiteOwner = "os" | "forge" | "atlas" | "dais" | "dossier";
+export type ToolRisk = "read" | "write-medium" | "write-high" | "irreversible";
+export type SuiteOwner = "os" | "forge" | "atlas" | "dais" | "dossier" | "gpt";
 
 export interface RiskPolicy {
   risk: ToolRisk;
@@ -17,12 +17,15 @@ export interface ToolDescriptor {
   toolId: string;
   title: string;
   description: string;
+  category: string;
   mode: PilotMode;
   risk: ToolRisk;
   suiteOwner: SuiteOwner;
   requiredClaims: string[];
   enabledBy?: { license?: string; policyFlag?: string };
   writesTo: string[];
+  /** Muse-mode only: output type */
+  outputType?: "document" | "narrative" | "text" | "template";
 }
 
 export interface ToolExecutionContext {
@@ -60,158 +63,440 @@ export const REASON_CODES = [
   { code: "QA", label: "QA / anomaly investigation" },
 ] as const;
 
-// Alias for backwards compatibility
 export const DEFAULT_REASON_CODES = REASON_CODES;
 
 export function defaultRiskPolicy(risk: ToolRisk): RiskPolicy {
   switch (risk) {
-    case "read_only":
+    case "read":
       return { risk, requiresConfirmation: false, requiresReasonCode: false, requiresSupervisor: false };
-    case "write_low":
+    case "write-medium":
       return { risk, requiresConfirmation: false, requiresReasonCode: false, requiresSupervisor: false };
-    case "write_high":
+    case "write-high":
       return { risk, requiresConfirmation: true, requiresReasonCode: true, requiresSupervisor: false };
     case "irreversible":
       return { risk, requiresConfirmation: true, requiresReasonCode: true, requiresSupervisor: true };
   }
 }
 
-export const TOOL_REGISTRY: ToolDescriptor[] = [
-  // Pilot mode tools
+// ============================================
+// Pilot Mode Tools (18) — "Do the work."
+// ============================================
+
+const PILOT_TOOLS: ToolDescriptor[] = [
+  // Navigation
   {
     toolId: "route_to_parcel",
-    title: "Route to Parcel",
-    description: "Navigate to a specific parcel in the Cockpit map",
+    title: "Open Parcel",
+    description: "Navigate to a specific parcel in the Property Workbench",
+    category: "navigation",
     mode: "pilot",
-    risk: "read_only",
+    risk: "read",
     suiteOwner: "os",
     requiredClaims: ["parcel:read"],
-    enabledBy: { policyFlag: "pilot.route" },
     writesTo: [],
   },
   {
-    toolId: "run_ratio_study",
-    title: "Run Ratio Study",
-    description: "Execute ratio study on current selection",
+    toolId: "open_panel",
+    title: "Open Panel",
+    description: "Open a specific panel or tab in the workbench",
+    category: "navigation",
     mode: "pilot",
-    risk: "write_low",
-    suiteOwner: "forge",
-    requiredClaims: ["ratio:run"],
-    enabledBy: { policyFlag: "pilot.ratio" },
-    writesTo: ["valuation_artifacts"],
+    risk: "read",
+    suiteOwner: "os",
+    requiredClaims: ["parcel:read"],
+    writesTo: [],
   },
   {
-    toolId: "create_calibration_patch",
-    title: "Create Calibration Patch",
-    description: "Draft a calibration patch for the selected zone",
+    toolId: "switch_work_mode",
+    title: "Switch Work Mode",
+    description: "Switch between Overview, Valuation, Mapping, Admin, Case modes",
+    category: "navigation",
     mode: "pilot",
-    risk: "write_high",
-    suiteOwner: "forge",
-    requiredClaims: ["calibration:write"],
-    enabledBy: { policyFlag: "pilot.calibration" },
-    writesTo: ["valuation_artifacts"],
+    risk: "read",
+    suiteOwner: "os",
+    requiredClaims: ["parcel:read"],
+    writesTo: [],
+  },
+  // Workflow (TerraDais)
+  {
+    toolId: "assign_task",
+    title: "Assign Task",
+    description: "Assign a workflow task to a user",
+    category: "workflow",
+    mode: "pilot",
+    risk: "write-medium",
+    suiteOwner: "dais",
+    requiredClaims: ["workflow:write"],
+    writesTo: ["task_assignments"],
   },
   {
-    toolId: "run_valuation_model",
+    toolId: "create_workflow",
+    title: "Create Workflow",
+    description: "Create a new workflow (permit, exemption, appeal)",
+    category: "workflow",
+    mode: "pilot",
+    risk: "write-medium",
+    suiteOwner: "dais",
+    requiredClaims: ["workflow:write"],
+    writesTo: ["workflow_states"],
+  },
+  {
+    toolId: "escalate_task",
+    title: "Escalate Task",
+    description: "Escalate a workflow task to supervisor",
+    category: "workflow",
+    mode: "pilot",
+    risk: "write-medium",
+    suiteOwner: "dais",
+    requiredClaims: ["workflow:write"],
+    writesTo: ["workflow_states"],
+  },
+  // Data (read)
+  {
+    toolId: "fetch_comps",
+    title: "Find Comparables",
+    description: "Fetch comparable sales for a parcel",
+    category: "data",
+    mode: "pilot",
+    risk: "read",
+    suiteOwner: "forge",
+    requiredClaims: ["sales:read"],
+    writesTo: [],
+  },
+  {
+    toolId: "search_parcels",
+    title: "Search Parcels",
+    description: "Search parcels by address, PIN, or owner",
+    category: "data",
+    mode: "pilot",
+    risk: "read",
+    suiteOwner: "os",
+    requiredClaims: ["parcel:read"],
+    writesTo: [],
+  },
+  {
+    toolId: "get_permit_history",
+    title: "Get Permit History",
+    description: "Retrieve permit history for a parcel",
+    category: "data",
+    mode: "pilot",
+    risk: "read",
+    suiteOwner: "dais",
+    requiredClaims: ["permit:read"],
+    writesTo: [],
+  },
+  {
+    toolId: "get_exemption_status",
+    title: "Get Exemption Status",
+    description: "Check current exemption status for a parcel",
+    category: "data",
+    mode: "pilot",
+    risk: "read",
+    suiteOwner: "dais",
+    requiredClaims: ["exemption:read"],
+    writesTo: [],
+  },
+  // Execution
+  {
+    toolId: "run_model",
     title: "Run Valuation Model",
-    description: "Execute valuation model on selection (draft)",
+    description: "Execute valuation model on selection (draft version)",
+    category: "execution",
     mode: "pilot",
-    risk: "write_high",
+    risk: "write-medium",
     suiteOwner: "forge",
     requiredClaims: ["model:run"],
-    enabledBy: { policyFlag: "pilot.model" },
     writesTo: ["valuation_artifacts"],
   },
   {
-    toolId: "export_ratio_snapshot",
-    title: "Export Ratio Snapshot",
-    description: "Generate and download ratio study report",
+    toolId: "generate_notice",
+    title: "Generate Notice",
+    description: "Generate assessment change notice for parcel(s)",
+    category: "execution",
     mode: "pilot",
-    risk: "read_only",
-    suiteOwner: "dossier",
-    requiredClaims: ["ratio:read"],
-    enabledBy: { policyFlag: "pilot.export" },
-    writesTo: [],
+    risk: "write-high",
+    suiteOwner: "dais",
+    requiredClaims: ["notice:write"],
+    writesTo: ["notices"],
+  },
+  {
+    toolId: "create_exemption",
+    title: "Create Exemption",
+    description: "Create a new exemption record for a parcel",
+    category: "execution",
+    mode: "pilot",
+    risk: "write-medium",
+    suiteOwner: "dais",
+    requiredClaims: ["exemption:write"],
+    writesTo: ["exemption_records"],
   },
   {
     toolId: "assemble_packet",
-    title: "Assemble Evidence Packet",
-    description: "Create draft evidence packet for appeal/review",
+    title: "Assemble BOE Packet",
+    description: "Assemble Board of Equalization evidence packet",
+    category: "execution",
     mode: "pilot",
-    risk: "write_high",
+    risk: "write-medium",
     suiteOwner: "dossier",
-    requiredClaims: ["dossier:draft"],
-    enabledBy: { policyFlag: "pilot.packet" },
-    writesTo: ["evidence_packets"],
+    requiredClaims: ["dossier:write"],
+    writesTo: ["packets"],
   },
   {
-    toolId: "publish_snapshot",
-    title: "Publish Roll Year Snapshot",
-    description: "Publish snapshot to production (irreversible)",
+    toolId: "approve_exemption",
+    title: "Approve Exemption",
+    description: "Approve an exemption application (write-high)",
+    category: "execution",
     mode: "pilot",
-    risk: "irreversible",
-    suiteOwner: "forge",
-    requiredClaims: ["snapshot:publish"],
-    enabledBy: { policyFlag: "pilot.publish" },
-    writesTo: ["roll_snapshots"],
+    risk: "write-high",
+    suiteOwner: "dais",
+    requiredClaims: ["exemption:approve"],
+    writesTo: ["exemption_records"],
   },
-  // Muse mode tools
+  // Monitoring
   {
-    toolId: "explain_value_change",
-    title: "Explain Value Change",
-    description: "Summarize why a parcel's value changed",
+    toolId: "check_cert_status",
+    title: "Check Certification",
+    description: "Check certification status for current roll year",
+    category: "monitoring",
+    mode: "pilot",
+    risk: "read",
+    suiteOwner: "dais",
+    requiredClaims: ["cert:read"],
+    writesTo: [],
+  },
+  {
+    toolId: "verify_roll_ready",
+    title: "Verify Roll Ready",
+    description: "Verify all requirements met for roll certification",
+    category: "monitoring",
+    mode: "pilot",
+    risk: "read",
+    suiteOwner: "dais",
+    requiredClaims: ["cert:read"],
+    writesTo: [],
+  },
+  {
+    toolId: "check_queue",
+    title: "Check My Queue",
+    description: "View current task queue and pending items",
+    category: "monitoring",
+    mode: "pilot",
+    risk: "read",
+    suiteOwner: "dais",
+    requiredClaims: ["workflow:read"],
+    writesTo: [],
+  },
+];
+
+// ============================================
+// Muse Mode Tools (16) — "Draft and explain."
+// ============================================
+
+const MUSE_TOOLS: ToolDescriptor[] = [
+  // Draft
+  {
+    toolId: "draft_notice",
+    title: "Draft Notice",
+    description: "Draft an assessment notice document",
+    category: "draft",
     mode: "muse",
-    risk: "read_only",
-    suiteOwner: "dossier",
+    risk: "read",
+    suiteOwner: "dais",
+    requiredClaims: ["notice:read"],
+    writesTo: [],
+    outputType: "document",
+  },
+  {
+    toolId: "draft_letter",
+    title: "Draft Letter",
+    description: "Draft a general correspondence letter",
+    category: "draft",
+    mode: "muse",
+    risk: "read",
+    suiteOwner: "dais",
     requiredClaims: ["parcel:read"],
-    enabledBy: { policyFlag: "muse.explain" },
     writesTo: [],
-  },
-  {
-    toolId: "summarize_hotspots",
-    title: "Summarize Drift Hotspots",
-    description: "Explain current equity drift hotspots",
-    mode: "muse",
-    risk: "read_only",
-    suiteOwner: "atlas",
-    requiredClaims: ["ratio:read"],
-    enabledBy: { policyFlag: "muse.hotspots" },
-    writesTo: [],
+    outputType: "document",
   },
   {
     toolId: "draft_appeal_response",
     title: "Draft Appeal Response",
-    description: "Generate draft response outline for appeal",
+    description: "Draft a response outline for an appeal",
+    category: "draft",
     mode: "muse",
-    risk: "write_low",
-    suiteOwner: "dossier",
-    requiredClaims: ["dossier:draft"],
-    enabledBy: { policyFlag: "muse.appeal" },
-    writesTo: ["evidence_packets"],
+    risk: "read",
+    suiteOwner: "dais",
+    requiredClaims: ["appeal:read"],
+    writesTo: [],
+    outputType: "document",
+  },
+  {
+    toolId: "draft_exemption_letter",
+    title: "Draft Exemption Letter",
+    description: "Draft an exemption approval/denial letter",
+    category: "draft",
+    mode: "muse",
+    risk: "read",
+    suiteOwner: "dais",
+    requiredClaims: ["exemption:read"],
+    writesTo: [],
+    outputType: "document",
   },
   {
     toolId: "draft_commissioner_memo",
     title: "Draft Commissioner Memo",
-    description: "Generate draft memo for commissioner briefing",
+    description: "Draft a briefing memo for the commissioner",
+    category: "draft",
     mode: "muse",
-    risk: "write_low",
-    suiteOwner: "dossier",
-    requiredClaims: ["dossier:draft"],
-    enabledBy: { policyFlag: "muse.memo" },
-    writesTo: ["evidence_packets"],
+    risk: "read",
+    suiteOwner: "dais",
+    requiredClaims: ["parcel:read"],
+    writesTo: [],
+    outputType: "document",
+  },
+  // Explain
+  {
+    toolId: "explain_value_change",
+    title: "Explain Value Change",
+    description: "Summarize why a parcel's assessed value changed",
+    category: "explain",
+    mode: "muse",
+    risk: "read",
+    suiteOwner: "forge",
+    requiredClaims: ["parcel:read"],
+    writesTo: [],
+    outputType: "narrative",
   },
   {
-    toolId: "analyze_comparable_sales",
-    title: "Analyze Comparable Sales",
-    description: "Find and explain comparable sales for a parcel",
+    toolId: "explain_model_results",
+    title: "Explain Model Results",
+    description: "Explain valuation model outputs in plain language",
+    category: "explain",
     mode: "muse",
-    risk: "read_only",
-    suiteOwner: "atlas",
-    requiredClaims: ["sales:read"],
-    enabledBy: { policyFlag: "muse.comps" },
+    risk: "read",
+    suiteOwner: "forge",
+    requiredClaims: ["model:read"],
     writesTo: [],
+    outputType: "narrative",
+  },
+  {
+    toolId: "explain_exemption_decision",
+    title: "Explain Exemption Decision",
+    description: "Explain why an exemption was approved or denied",
+    category: "explain",
+    mode: "muse",
+    risk: "read",
+    suiteOwner: "dais",
+    requiredClaims: ["exemption:read"],
+    writesTo: [],
+    outputType: "narrative",
+  },
+  {
+    toolId: "explain_appeal_outcome",
+    title: "Explain Appeal Outcome",
+    description: "Explain the outcome of an appeal hearing",
+    category: "explain",
+    mode: "muse",
+    risk: "read",
+    suiteOwner: "dais",
+    requiredClaims: ["appeal:read"],
+    writesTo: [],
+    outputType: "narrative",
+  },
+  // Summarize
+  {
+    toolId: "summarize_dossier",
+    title: "Summarize Case File",
+    description: "Summarize all evidence and documents in a case file",
+    category: "summarize",
+    mode: "muse",
+    risk: "read",
+    suiteOwner: "dossier",
+    requiredClaims: ["dossier:read"],
+    writesTo: [],
+    outputType: "text",
+  },
+  {
+    toolId: "summarize_parcel_history",
+    title: "Summarize Parcel History",
+    description: "Summarize the full history of a parcel",
+    category: "summarize",
+    mode: "muse",
+    risk: "read",
+    suiteOwner: "os",
+    requiredClaims: ["parcel:read"],
+    writesTo: [],
+    outputType: "text",
+  },
+  {
+    toolId: "summarize_permit_activity",
+    title: "Summarize Permit Activity",
+    description: "Summarize recent permit activity for a parcel or area",
+    category: "summarize",
+    mode: "muse",
+    risk: "read",
+    suiteOwner: "dais",
+    requiredClaims: ["permit:read"],
+    writesTo: [],
+    outputType: "text",
+  },
+  // Synthesize
+  {
+    toolId: "synthesize_evidence",
+    title: "Synthesize Evidence",
+    description: "Synthesize multiple evidence items into a narrative",
+    category: "synthesize",
+    mode: "muse",
+    risk: "read",
+    suiteOwner: "dossier",
+    requiredClaims: ["dossier:read"],
+    writesTo: [],
+    outputType: "narrative",
+  },
+  {
+    toolId: "create_hearing_narrative",
+    title: "Create Hearing Narrative",
+    description: "Create a narrative document for a hearing",
+    category: "synthesize",
+    mode: "muse",
+    risk: "read",
+    suiteOwner: "dossier",
+    requiredClaims: ["dossier:read"],
+    writesTo: [],
+    outputType: "document",
+  },
+  // Template
+  {
+    toolId: "create_template",
+    title: "Create Template",
+    description: "Create a new document template",
+    category: "template",
+    mode: "muse",
+    risk: "read",
+    suiteOwner: "os",
+    requiredClaims: ["template:write"],
+    writesTo: [],
+    outputType: "template",
+  },
+  {
+    toolId: "customize_template",
+    title: "Customize Template",
+    description: "Customize an existing template for a specific use case",
+    category: "template",
+    mode: "muse",
+    risk: "read",
+    suiteOwner: "os",
+    requiredClaims: ["template:write"],
+    writesTo: [],
+    outputType: "template",
   },
 ];
+
+// ============================================
+// Combined Registry
+// ============================================
+
+export const TOOL_REGISTRY: ToolDescriptor[] = [...PILOT_TOOLS, ...MUSE_TOOLS];
 
 // Deduplicated list of every RBAC claim referenced in the registry
 export const ALL_CLAIMS: string[] = Array.from(
@@ -224,6 +509,14 @@ export function getTool(toolId: string): ToolDescriptor | undefined {
 
 export function getToolsByMode(mode: "pilot" | "muse"): ToolDescriptor[] {
   return TOOL_REGISTRY.filter((t) => t.mode === mode || t.mode === "both");
+}
+
+export function getToolsByCategory(category: string): ToolDescriptor[] {
+  return TOOL_REGISTRY.filter((t) => t.category === category);
+}
+
+export function getToolsBySuite(suite: SuiteOwner): ToolDescriptor[] {
+  return TOOL_REGISTRY.filter((t) => t.suiteOwner === suite);
 }
 
 export function guardToolExecution(
@@ -265,14 +558,17 @@ export function guardToolExecution(
   return { ok: true, policy: tightened };
 }
 
-// Risk badge styling
+// ============================================
+// Display helpers
+// ============================================
+
 export function getRiskBadgeColor(risk: ToolRisk): string {
   switch (risk) {
-    case "read_only":
+    case "read":
       return "bg-emerald-500/20 text-emerald-400 border-emerald-500/30";
-    case "write_low":
+    case "write-medium":
       return "bg-sky-500/20 text-sky-400 border-sky-500/30";
-    case "write_high":
+    case "write-high":
       return "bg-amber-500/20 text-amber-400 border-amber-500/30";
     case "irreversible":
       return "bg-red-500/20 text-red-400 border-red-500/30";
@@ -281,11 +577,11 @@ export function getRiskBadgeColor(risk: ToolRisk): string {
 
 export function getRiskLabel(risk: ToolRisk): string {
   switch (risk) {
-    case "read_only":
+    case "read":
       return "Read";
-    case "write_low":
+    case "write-medium":
       return "Write";
-    case "write_high":
+    case "write-high":
       return "Write (High)";
     case "irreversible":
       return "Irreversible";
@@ -304,5 +600,23 @@ export function getSuiteLabel(suite: SuiteOwner): string {
       return "TerraDais";
     case "dossier":
       return "TerraDossier";
+    case "gpt":
+      return "TerraGPT";
+  }
+}
+
+export function getCategoryLabel(category: string): string {
+  switch (category) {
+    case "navigation": return "Navigation";
+    case "workflow": return "Workflow";
+    case "data": return "Data";
+    case "execution": return "Execution";
+    case "monitoring": return "Monitoring";
+    case "draft": return "Draft";
+    case "explain": return "Explain";
+    case "summarize": return "Summarize";
+    case "synthesize": return "Synthesize";
+    case "template": return "Template";
+    default: return category;
   }
 }

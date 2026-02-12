@@ -78,8 +78,8 @@ export function PolicyDebugDrawer({
     const reasons: string[] = [];
 
     // Mode check
-    if (tool.suiteOwner === "pilot" && mode === "muse") {
-      reasons.push("Mode: Pilot-only tool (current mode: Muse)");
+    if (tool.mode !== "both" && tool.mode !== mode) {
+      reasons.push(`Mode: ${tool.mode}-only tool (current mode: ${mode})`);
     }
 
     // Allowlist check
@@ -96,7 +96,7 @@ export function PolicyDebugDrawer({
     }
 
     // Risk policy
-    if (tool.risk === "write_high" && requireConfirmWriteHigh) {
+    if (tool.risk === "write-high" && requireConfirmWriteHigh) {
       reasons.push("Policy: Requires confirmation + reason code");
     }
     if (tool.risk === "irreversible" && requireSupervisorIrreversible) {
@@ -250,7 +250,7 @@ export function PolicyDebugDrawer({
                       <Badge
                         variant="outline"
                         className={`text-[10px] ${
-                          tool.suiteOwner === "pilot"
+                          tool.mode === "pilot"
                             ? "border-primary/40 text-primary"
                             : "border-accent/40 text-accent"
                         }`}
@@ -260,12 +260,12 @@ export function PolicyDebugDrawer({
                       <Badge
                         variant="outline"
                         className={`text-[10px] ${
-                          tool.risk === "read_only"
-                            ? "border-chart-1/40 text-chart-1"
-                            : tool.risk === "write_low"
-                              ? "border-chart-2/40 text-chart-2"
-                              : tool.risk === "write_high"
-                                ? "border-chart-3/40 text-chart-3"
+                          tool.risk === "read"
+                            ? "border-emerald-500/40 text-emerald-400"
+                            : tool.risk === "write-medium"
+                              ? "border-sky-500/40 text-sky-400"
+                              : tool.risk === "write-high"
+                                ? "border-amber-500/40 text-amber-400"
                                 : "border-destructive/40 text-destructive"
                         }`}
                       >

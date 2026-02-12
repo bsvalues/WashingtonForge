@@ -340,7 +340,7 @@ export function TerraPilotPanel({ isOpen, onClose }: TerraPilotPanelProps) {
               onClick={handleConfirmExecute}
               disabled={
                 !confirmDialog?.reasonCode ||
-                (defaultRiskPolicy(confirmDialog?.tool.risk || "read_only").requiresSupervisor && !confirmDialog?.supervisorRef)
+                (defaultRiskPolicy(confirmDialog?.tool.risk || "read").requiresSupervisor && !confirmDialog?.supervisorRef)
               }
               className="bg-primary/20 hover:bg-primary/30 text-primary border border-primary/30"
             >

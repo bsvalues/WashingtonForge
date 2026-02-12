@@ -5,6 +5,8 @@
 import {
   guardToolExecution,
   getTool,
+  ALL_CLAIMS,
+  TOOL_REGISTRY,
   type ToolExecutionContext,
   type ToolInvokeOptions,
   type ToolResult,
@@ -164,35 +166,13 @@ export async function executeTool(
   return result;
 }
 
-// Get demo context for prototype
+// Get demo context for prototype — grants all claims and enables all tools
 export function getDemoPilotContext(mode: "pilot" | "muse"): ToolExecutionContext {
   return {
     countyId: "benton",
     userId: "demo_user",
-    userClaims: [
-      "parcel:read",
-      "ratio:run",
-      "ratio:read",
-      "calibration:write",
-      "model:run",
-      "dossier:draft",
-      "sales:read",
-      "snapshot:publish",
-    ],
-    enabledTools: [
-      "route_to_parcel",
-      "run_ratio_study",
-      "create_calibration_patch",
-      "run_valuation_model",
-      "export_ratio_snapshot",
-      "assemble_packet",
-      "publish_snapshot",
-      "explain_value_change",
-      "summarize_hotspots",
-      "draft_appeal_response",
-      "draft_commissioner_memo",
-      "analyze_comparable_sales",
-    ],
+    userClaims: [...ALL_CLAIMS],
+    enabledTools: TOOL_REGISTRY.map((t) => t.toolId),
     currentMode: mode,
     correlationId: generateCorrelationId(),
   };
