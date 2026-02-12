@@ -159,8 +159,8 @@ export function AuditContent() {
   };
 
   return (
-    <div className="space-bg min-h-screen p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
+    <div>
+      <div className="p-4 md:p-6 max-w-7xl mx-auto space-y-5">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>

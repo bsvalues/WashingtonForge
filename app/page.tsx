@@ -16,7 +16,7 @@ export default function HomePage() {
   }, [router]);
 
   return (
-    <div className="min-h-screen space-bg flex items-center justify-center">
+    <div className="min-h-screen space-bg flex items-center justify-center p-4">
       <div className="text-center">
         {/* Logo */}
         <div className="flex items-center justify-center gap-3 mb-6">

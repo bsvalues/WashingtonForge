@@ -5,6 +5,7 @@ import React from "react"
 import { useState } from "react";
 import { X, Loader2, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { CommitmentButton } from "@/components/ui/commitment-button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -151,23 +152,14 @@ export function RunStudyModal({
             >
               Cancel
             </Button>
-            <Button
+            <CommitmentButton
               type="submit"
               disabled={isRunning}
-              className="glass-btn-primary text-foreground"
+              loading={isRunning}
+              icon={<Play className="w-4 h-4" />}
             >
-              {isRunning ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Starting...
-                </>
-              ) : (
-                <>
-                  <Play className="w-4 h-4 mr-2" />
-                  Run Study
-                </>
-              )}
-            </Button>
+              {isRunning ? "Starting..." : "Run Study"}
+            </CommitmentButton>
           </div>
         </form>
       </div>

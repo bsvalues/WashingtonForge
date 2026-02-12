@@ -19,6 +19,7 @@ import {
   Save,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { CommitmentButton } from "@/components/ui/commitment-button";
 import {
   getVEIFindings,
   getCalibrationLevers,
@@ -199,8 +200,8 @@ export function CalibrationContent() {
   };
 
   return (
-    <div className="space-bg min-h-screen p-6">
-      <div className="max-w-7xl mx-auto space-y-6">
+ <div>
+  <div className="p-4 md:p-6 max-w-7xl mx-auto space-y-5">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
@@ -514,23 +515,15 @@ export function CalibrationContent() {
                     </span>
                   </div>
                 ) : (
-                  <Button
-                    onClick={handleApply}
-                    disabled={isApplying}
-                    className="w-full glass-btn-primary"
-                  >
-                    {isApplying ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Applying...
-                      </>
-                    ) : (
-                      <>
-                        <Save className="w-4 h-4 mr-2" />
-                        Apply & Create New Version
-                      </>
-                    )}
-                  </Button>
+  <CommitmentButton
+  onClick={handleApply}
+  disabled={isApplying}
+  loading={isApplying}
+  icon={<Save className="w-4 h-4" />}
+  className="w-full"
+  >
+  {isApplying ? "Applying..." : "Apply & Create New Version"}
+  </CommitmentButton>
                 )}
               </div>
             )}

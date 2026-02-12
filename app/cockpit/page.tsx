@@ -79,7 +79,7 @@ export default function CockpitPage() {
       <AppShell
         user={{ name: "Jane Doe", role: "Assessor", county: "Benton County" }}
       >
-        <div className="h-[calc(100vh-4rem)] relative flex overflow-hidden">
+        <div className="h-[calc(100vh-var(--system-bar-h)-var(--dock-h)-2*var(--stage-inset)-0.75rem)] relative flex overflow-hidden">
           {/* Left Panel - Filters */}
           <FilterPanel filters={filters} onFilterChange={handleFilterChange} />
 

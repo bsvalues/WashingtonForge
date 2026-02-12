@@ -19,6 +19,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { CommitmentButton } from "@/components/ui/commitment-button";
 import {
   getRollYearSnapshots,
   getRatioStudies,
@@ -122,8 +123,8 @@ export function SnapshotsContent() {
   };
 
   return (
-    <div className="space-bg min-h-screen p-6">
-      <div className="max-w-6xl mx-auto space-y-6">
+ <div>
+  <div className="p-4 md:p-6 max-w-6xl mx-auto space-y-5">
         {/* Header */}
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
@@ -135,23 +136,14 @@ export function SnapshotsContent() {
             </p>
           </div>
           
-          <Button
-            onClick={handleCreateSnapshot}
-            disabled={isCreating}
-            className="glass-btn-primary"
-          >
-            {isCreating ? (
-              <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Creating...
-              </>
-            ) : (
-              <>
-                <Plus className="w-4 h-4 mr-2" />
-                New Snapshot
-              </>
-            )}
-          </Button>
+  <CommitmentButton
+  onClick={handleCreateSnapshot}
+  disabled={isCreating}
+  loading={isCreating}
+  icon={<Plus className="w-4 h-4" />}
+  >
+  {isCreating ? "Creating..." : "Create Snapshot"}
+  </CommitmentButton>
         </div>
 
         {/* Loading State */}
@@ -253,20 +245,15 @@ export function SnapshotsContent() {
                     {/* Actions */}
                     <div className="flex gap-2">
                       {snapshot.status === "draft" && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handlePublish(snapshot.id)}
-                          disabled={isPublishing === snapshot.id}
-                          className="flex-1 glass-btn text-foreground bg-transparent"
-                        >
-                          {isPublishing === snapshot.id ? (
-                            <Loader2 className="w-4 h-4 mr-1 animate-spin" />
-                          ) : (
-                            <CheckCircle className="w-4 h-4 mr-1" />
-                          )}
-                          Publish
-                        </Button>
+  <CommitmentButton
+  onClick={() => handlePublish(snapshot.id)}
+  disabled={isPublishing === snapshot.id}
+  loading={isPublishing === snapshot.id}
+  icon={<CheckCircle className="w-4 h-4" />}
+  className="flex-1 text-sm"
+  >
+  Publish
+  </CommitmentButton>
                       )}
                       
                       {ratioStudy && (

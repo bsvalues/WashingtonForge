@@ -10,6 +10,7 @@ import {
   Clock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { CommitmentButton } from "@/components/ui/commitment-button";
 import { publishDataset, type Dataset } from "@/lib/api";
 
 interface PublishStepProps {
@@ -162,23 +163,15 @@ export function PublishStep({ dataset, onComplete, onBack }: PublishStepProps) {
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back
         </Button>
-        <Button
+        <CommitmentButton
           onClick={handlePublish}
           disabled={isPublishing}
-          className="glass-btn-primary text-foreground font-medium px-8"
+          loading={isPublishing}
+          icon={<Rocket className="w-4 h-4" />}
+          className="px-8"
         >
-          {isPublishing ? (
-            <>
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-              Publishing...
-            </>
-          ) : (
-            <>
-              <Rocket className="w-4 h-4 mr-2" />
-              Publish Dataset
-            </>
-          )}
-        </Button>
+          {isPublishing ? "Publishing..." : "Publish Dataset"}
+        </CommitmentButton>
       </div>
     </div>
   );
