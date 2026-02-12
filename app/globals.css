@@ -48,6 +48,17 @@
   --glass-bg: oklch(0.15 0.02 260 / 0.4);
   --glass-border: oklch(0.4 0.04 260 / 0.2);
   --glass-highlight: oklch(0.8 0.05 260 / 0.1);
+
+  /* OS Signal Neon (alerts, status, badges ONLY -- never decorative) */
+  --neon-cyan: oklch(0.8 0.15 195);
+  --neon-amber: oklch(0.8 0.15 75);
+  --neon-red: oklch(0.65 0.22 25);
+  --neon-green: oklch(0.75 0.18 155);
+
+  /* OS Layout */
+  --system-bar-h: 2.5rem;
+  --dock-h: 4rem;
+  --stage-inset: 0.75rem;
 }
 
 .dark {
@@ -130,6 +141,10 @@
   --color-glass-bg: var(--glass-bg);
   --color-glass-border: var(--glass-border);
   --color-glass-highlight: var(--glass-highlight);
+  --color-neon-cyan: var(--neon-cyan);
+  --color-neon-amber: var(--neon-amber);
+  --color-neon-red: var(--neon-red);
+  --color-neon-green: var(--neon-green);
 }
 
 @layer base {
@@ -198,4 +213,212 @@
 .equity-regressive {
   box-shadow: 0 0 20px oklch(0.6 0.22 25 / 0.5);
   border-color: oklch(0.6 0.22 25 / 0.6);
+}
+
+/* ============================================
+   OS System Bar
+   ============================================ */
+.system-bar {
+  height: var(--system-bar-h);
+  background: oklch(0.06 0.02 260 / 0.85);
+  backdrop-filter: blur(24px) saturate(1.4);
+  border-bottom: 1px solid oklch(0.3 0.03 260 / 0.25);
+  z-index: 50;
+}
+
+/* ============================================
+   OS Dock Launcher
+   ============================================ */
+.dock {
+  height: var(--dock-h);
+  background: oklch(0.1 0.02 260 / 0.7);
+  backdrop-filter: blur(24px) saturate(1.4);
+  border: 1px solid oklch(0.35 0.04 260 / 0.25);
+  border-radius: 1rem;
+  z-index: 40;
+}
+
+.dock-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 0.625rem;
+  transition: transform 0.22s cubic-bezier(0.34, 1.56, 0.64, 1), 
+              background 0.15s ease;
+  cursor: pointer;
+  position: relative;
+  color: oklch(0.6 0.02 260);
+}
+
+.dock-item:hover {
+  transform: scale(1.22) translateY(-3px);
+  background: oklch(0.2 0.03 260 / 0.5);
+  color: oklch(0.95 0.01 260);
+}
+
+.dock-item.active {
+  color: var(--primary);
+  background: oklch(0.7 0.15 200 / 0.12);
+}
+
+.dock-item.active::after {
+  content: '';
+  position: absolute;
+  bottom: -0.25rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--primary);
+  box-shadow: 0 0 6px var(--primary);
+}
+
+/* ============================================
+   OS Stage Container
+   ============================================ */
+.stage {
+  padding-top: calc(var(--system-bar-h) + var(--stage-inset));
+  padding-bottom: calc(var(--dock-h) + var(--stage-inset) + 0.75rem);
+  padding-left: var(--stage-inset);
+  padding-right: var(--stage-inset);
+  min-height: 100vh;
+  overflow-y: auto;
+}
+
+/* ============================================
+   Commitment Button (Tactile Maximalism)
+   Used ONLY for: Run, Publish, Certify, Export
+   ============================================ */
+.commitment-btn {
+  position: relative;
+  background: oklch(0.7 0.15 200 / 0.2);
+  border: 1px solid oklch(0.7 0.15 200 / 0.5);
+  box-shadow: 
+    0 2px 8px oklch(0.7 0.15 200 / 0.15),
+    0 0 0 1px oklch(0.7 0.15 200 / 0.08),
+    inset 0 1px 0 oklch(1 0 0 / 0.06);
+  transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1),
+              box-shadow 0.15s ease,
+              background 0.15s ease;
+  cursor: pointer;
+}
+
+.commitment-btn:hover {
+  background: oklch(0.7 0.15 200 / 0.28);
+  box-shadow: 
+    0 4px 16px oklch(0.7 0.15 200 / 0.25),
+    0 0 0 1px oklch(0.7 0.15 200 / 0.15),
+    inset 0 1px 0 oklch(1 0 0 / 0.08);
+}
+
+.commitment-btn:active {
+  transform: scale(0.96);
+  box-shadow: 
+    0 1px 4px oklch(0.7 0.15 200 / 0.2),
+    inset 0 1px 2px oklch(0 0 0 / 0.1);
+}
+
+.commitment-btn--destructive {
+  background: oklch(0.55 0.22 25 / 0.2);
+  border-color: oklch(0.55 0.22 25 / 0.5);
+  box-shadow: 
+    0 2px 8px oklch(0.55 0.22 25 / 0.15),
+    0 0 0 1px oklch(0.55 0.22 25 / 0.08),
+    inset 0 1px 0 oklch(1 0 0 / 0.06);
+}
+
+.commitment-btn--destructive:hover {
+  background: oklch(0.55 0.22 25 / 0.28);
+  box-shadow: 
+    0 4px 16px oklch(0.55 0.22 25 / 0.25),
+    0 0 0 1px oklch(0.55 0.22 25 / 0.15),
+    inset 0 1px 0 oklch(1 0 0 / 0.08);
+}
+
+/* ============================================
+   WCAG AA Tint Layer for glass surfaces
+   ============================================ */
+.tint-layer {
+  position: relative;
+}
+.tint-layer::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: oklch(0.08 0.02 260 / 0.55);
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 0;
+}
+.tint-layer > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* ============================================
+   Signal Neon Pulse (status indicators only)
+   ============================================ */
+.neon-pulse {
+  animation: neon-glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes neon-glow {
+  from { opacity: 0.7; }
+  to { opacity: 1; }
+}
+
+/* ============================================
+   Control Center Drawer
+   ============================================ */
+.control-center {
+  background: oklch(0.08 0.02 260 / 0.92);
+  backdrop-filter: blur(32px) saturate(1.5);
+  border-left: 1px solid oklch(0.3 0.03 260 / 0.25);
+  box-shadow: -8px 0 32px oklch(0 0 0 / 0.4);
+}
+
+/* ============================================
+   Accessibility: Reduced Motion
+   ============================================ */
+@media (prefers-reduced-motion: reduce) {
+  .dock-item {
+    transition: none;
+  }
+  .dock-item:hover {
+    transform: none;
+  }
+  .commitment-btn,
+  .commitment-btn:active {
+    transition: none;
+    transform: none;
+  }
+  .neon-pulse {
+    animation: none;
+  }
+}
+
+/* ============================================
+   Accessibility: Reduced Transparency
+   ============================================ */
+@media (prefers-reduced-transparency: reduce) {
+  .system-bar {
+    background: oklch(0.06 0.02 260);
+    backdrop-filter: none;
+  }
+  .dock {
+    background: oklch(0.1 0.02 260);
+    backdrop-filter: none;
+  }
+  .glass-panel {
+    background: oklch(0.12 0.02 260);
+    backdrop-filter: none;
+  }
+  .control-center {
+    background: oklch(0.08 0.02 260);
+    backdrop-filter: none;
+  }
 }

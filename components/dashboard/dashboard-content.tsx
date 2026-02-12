@@ -21,7 +21,10 @@ import {
   Loader2,
   XCircle,
   RefreshCw,
+  Zap,
+  Radio,
 } from "lucide-react";
+import { CommitmentButton } from "@/components/ui/commitment-button";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
@@ -171,7 +174,7 @@ export function DashboardContent({ datasetVersionId }: DashboardContentProps) {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen space-bg flex items-center justify-center">
+      <div className="flex items-center justify-center py-32">
         <div className="text-center">
           <Loader2 className="w-8 h-8 animate-spin text-primary mx-auto mb-3" />
           <p className="text-sm text-muted-foreground">Loading dashboard...</p>
@@ -182,7 +185,7 @@ export function DashboardContent({ datasetVersionId }: DashboardContentProps) {
 
   if (error || !data) {
     return (
-      <div className="min-h-screen space-bg flex items-center justify-center">
+      <div className="flex items-center justify-center py-32">
         <div className="text-center glass-panel rounded-xl p-8 max-w-md">
           <XCircle className="w-12 h-12 text-destructive mx-auto mb-4" />
           <h2 className="text-lg font-semibold text-foreground mb-2">
@@ -210,8 +213,8 @@ export function DashboardContent({ datasetVersionId }: DashboardContentProps) {
   };
 
   return (
-    <div className="min-h-screen space-bg">
-      <div className="p-6 md:p-8 max-w-7xl mx-auto space-y-6">
+    <div>
+      <div className="p-4 md:p-6 max-w-7xl mx-auto space-y-5">
         {/* Header with Dataset Version Badge */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
           <div>
@@ -289,6 +292,34 @@ export function DashboardContent({ datasetVersionId }: DashboardContentProps) {
             </Button>
           </Link>
         </div>
+
+        {/* Next Required Step -- "I always know what to do next." */}
+        {data.pendingTasks.length > 0 && (
+          <div className="glass-panel rounded-xl p-5 border border-neon-amber/20 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-neon-amber/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-2xl pointer-events-none" />
+            <div className="flex items-start gap-4 relative">
+              <div className="w-10 h-10 rounded-lg bg-neon-amber/15 border border-neon-amber/25 flex items-center justify-center shrink-0">
+                <Zap className="w-5 h-5 text-neon-amber" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-[10px] uppercase tracking-widest text-neon-amber font-medium mb-1">
+                  Next Required Step
+                </p>
+                <p className="text-sm font-medium text-foreground">
+                  {data.pendingTasks[0].task}
+                </p>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  {data.pendingTasks[0].count} item{data.pendingTasks[0].count !== 1 ? "s" : ""} awaiting action
+                </p>
+              </div>
+              <Link href={data.pendingTasks[0].href}>
+                <CommitmentButton icon={<ArrowRight className="w-4 h-4" />}>
+                  Go
+                </CommitmentButton>
+              </Link>
+            </div>
+          </div>
+        )}
 
         {/* KPI Cards (Derived from DatasetVersion metrics) */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">

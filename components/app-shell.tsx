@@ -10,10 +10,7 @@ import {
   BarChart3,
   Building2,
   LogOut,
-  FileText,
   Camera,
-  Menu,
-  X,
   LayoutDashboard,
   Sliders,
   ScrollText,
@@ -21,6 +18,12 @@ import {
   Zap,
   Shield,
   Settings2,
+  Search,
+  PanelRightOpen,
+  PanelRightClose,
+  Radio,
+  Menu,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AuditLogModal } from "@/components/audit-log-modal";
@@ -29,8 +32,17 @@ import { TerraPilotPanel } from "@/components/pilot/terra-pilot-panel";
 import { CommandPalette } from "@/components/pilot/command-palette";
 import { TraceFeedDrawer } from "@/components/trace/trace-feed-drawer";
 import { PolicyDebugDrawer } from "@/components/pilot/policy-debug-drawer";
-import { type ToolDescriptor, defaultRiskPolicy, DEFAULT_REASON_CODES, TOOL_REGISTRY, ALL_CLAIMS } from "@/lib/pilot/tools";
-import { executeTool, getDemoPilotContext, generateCorrelationId } from "@/lib/pilot/executor";
+import {
+  type ToolDescriptor,
+  TOOL_REGISTRY,
+  ALL_CLAIMS,
+} from "@/lib/pilot/tools";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface AppShellProps {
   children: React.ReactNode;
@@ -41,13 +53,13 @@ interface AppShellProps {
   };
 }
 
-const navItems = [
+const dockItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/cockpit", label: "Cockpit", icon: Map },
   { href: "/ingest", label: "Ingest", icon: Upload },
-  { href: "/ratio-studies", label: "Ratio Studies", icon: BarChart3 },
-  { href: "/calibration", label: "Calibration", icon: Sliders },
-  { href: "/data-sources", label: "Data Sources", icon: Database },
+  { href: "/ratio-studies", label: "Ratios", icon: BarChart3 },
+  { href: "/calibration", label: "Calibrate", icon: Sliders },
+  { href: "/data-sources", label: "Sources", icon: Database },
   { href: "/snapshots", label: "Snapshots", icon: Camera },
   { href: "/audit", label: "Audit", icon: ScrollText },
 ];
@@ -55,22 +67,27 @@ const navItems = [
 export function AppShell({ children, user }: AppShellProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [auditLogOpen, setAuditLogOpen] = useState(false);
   const [snapshotOpen, setSnapshotOpen] = useState(false);
   const [pilotPanelOpen, setPilotPanelOpen] = useState(false);
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false);
   const [traceFeedOpen, setTraceFeedOpen] = useState(false);
   const [policyDebugOpen, setPolicyDebugOpen] = useState(false);
-  const [pendingConfirmTool, setPendingConfirmTool] = useState<ToolDescriptor | null>(null);
+  const [controlCenterOpen, setControlCenterOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [pendingConfirmTool, setPendingConfirmTool] =
+    useState<ToolDescriptor | null>(null);
 
-  // Policy debug state (live toggles)
+  // Policy debug state
   const [userClaims, setUserClaims] = useState<string[]>([...ALL_CLAIMS]);
-  const [enabledTools, setEnabledTools] = useState<string[]>(TOOL_REGISTRY.map((t) => t.toolId));
+  const [enabledTools, setEnabledTools] = useState<string[]>(
+    TOOL_REGISTRY.map((t) => t.toolId)
+  );
   const [requireConfirmWriteHigh, setRequireConfirmWriteHigh] = useState(true);
-  const [requireSupervisorIrreversible, setRequireSupervisorIrreversible] = useState(true);
+  const [requireSupervisorIrreversible, setRequireSupervisorIrreversible] =
+    useState(true);
 
-  // Global keyboard shortcut for command palette
+  // Cmd+K for command palette
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
@@ -86,152 +103,105 @@ export function AppShell({ children, user }: AppShellProps) {
     setPendingConfirmTool(tool);
   }, []);
 
+  const currentPage =
+    dockItems.find((item) => pathname === item.href)?.label || "Dashboard";
+
   return (
-    <div className="space-bg min-h-screen flex flex-col">
-      {/* Top Navigation Bar */}
-      <header className="glass-panel sticky top-0 z-50 border-b border-border/50">
-        <div className="flex items-center justify-between px-4 h-16">
-          {/* Logo & Brand */}
-          <div className="flex items-center gap-4">
-            <Link href="/dashboard" className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-lg bg-primary/20 border border-primary/40 flex items-center justify-center">
-                <Building2 className="w-5 h-5 text-primary" />
-              </div>
-              <div className="hidden sm:block">
-                <h1 className="text-lg font-semibold text-foreground tracking-tight">
-                  TerraFusion
-                </h1>
-                <p className="text-xs text-muted-foreground -mt-0.5">
-                  Sovereign Valuation OS
-                </p>
-              </div>
-            </Link>
-          </div>
+    <div className="space-bg min-h-screen relative">
+      {/* ============================================
+          TOP SYSTEM BAR
+          "I always know where I am."
+          ============================================ */}
+      <header className="system-bar fixed top-0 left-0 right-0 flex items-center justify-between px-4">
+        {/* Left: Brand + County Context */}
+        <div className="flex items-center gap-3">
+          <Link
+            href="/dashboard"
+            className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+          >
+            <div className="w-6 h-6 rounded-md bg-primary/20 border border-primary/40 flex items-center justify-center">
+              <Building2 className="w-3.5 h-3.5 text-primary" />
+            </div>
+            <span className="text-xs font-semibold tracking-tight text-foreground hidden sm:inline">
+              TerraFusion
+            </span>
+          </Link>
 
-          {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-1">
-            {navItems.map((item) => {
-              const Icon = item.icon;
-              const isActive = pathname === item.href;
-              return (
-                <Link key={item.href} href={item.href}>
-                  <Button
-                    variant="ghost"
-                    className={cn(
-                      "gap-2 text-muted-foreground hover:text-foreground hover:bg-secondary/50",
-                      isActive && "bg-secondary/50 text-foreground"
-                    )}
-                  >
-                    <Icon className="w-4 h-4" />
-                    {item.label}
-                  </Button>
-                </Link>
-              );
-            })}
-          </nav>
+          <div className="h-4 w-px bg-border/40 hidden sm:block" />
 
-          {/* Right Actions */}
-          <div className="flex items-center gap-2">
-            {/* TerraPilot Button */}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setPilotPanelOpen(true)}
-              className="hidden sm:flex gap-2 glass-btn border-primary/50 text-primary hover:bg-primary/10 bg-transparent"
-            >
-              <Zap className="w-4 h-4" />
-              TerraPilot
-            </Button>
-
-            {/* Trace Feed Button */}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setTraceFeedOpen(true)}
-              className="hidden sm:flex gap-2 glass-btn border-violet-500/50 text-violet-400 hover:bg-violet-500/10 bg-transparent"
-            >
-              <Shield className="w-4 h-4" />
-              Trace
-            </Button>
-
-            {/* Policy Debug Button */}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setPolicyDebugOpen(true)}
-              className="hidden lg:flex gap-2 glass-btn border-amber-500/50 text-amber-400 hover:bg-amber-500/10 bg-transparent"
-              title="Debug policy gates"
-            >
-              <Settings2 className="w-4 h-4" />
-              Policy
-            </Button>
-
-            {/* Audit Log Button */}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setAuditLogOpen(true)}
-              className="hidden lg:flex gap-2 glass-btn border-border/50 text-foreground bg-transparent"
-            >
-              <FileText className="w-4 h-4" />
-              Audit Log
-            </Button>
-
-            {/* Roll Year Snapshot Button */}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setSnapshotOpen(true)}
-              className="hidden lg:flex gap-2 glass-btn border-border/50 text-foreground bg-transparent"
-            >
-              <Camera className="w-4 h-4" />
-              Snapshot
-            </Button>
-
-            {/* User Info */}
-            {user && (
-              <div className="hidden xl:flex items-center gap-3 ml-2 pl-4 border-l border-border/50">
-                <div className="text-right">
-                  <p className="text-sm font-medium text-foreground">
-                    {user.name}
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {user.county} · {user.role}
-                  </p>
-                </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => router.push("/login")}
-                  className="text-muted-foreground hover:text-foreground"
-                >
-                  <LogOut className="w-4 h-4" />
-                  <span className="sr-only">Log out</span>
-                </Button>
-              </div>
-            )}
-
-            {/* Mobile Menu Toggle */}
-            <Button
-              variant="ghost"
-              size="icon"
-              className="md:hidden text-foreground"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            >
-              {mobileMenuOpen ? (
-                <X className="w-5 h-5" />
-              ) : (
-                <Menu className="w-5 h-5" />
-              )}
-              <span className="sr-only">Toggle menu</span>
-            </Button>
+          {/* Context Breadcrumb */}
+          <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
+            <span className="hidden sm:inline">
+              {user?.county || "Benton County"}
+            </span>
+            <span className="hidden md:inline text-border/60">|</span>
+            <span className="hidden md:inline">RY 2024</span>
+            <span className="hidden lg:inline text-border/60">|</span>
+            <span className="hidden lg:inline">
+              {user?.role || "Assessor Admin"}
+            </span>
           </div>
         </div>
 
-        {/* Mobile Navigation */}
-        {mobileMenuOpen && (
-          <nav className="md:hidden border-t border-border/50 p-4 space-y-2">
-            {navItems.map((item) => {
+        {/* Center: Current Page */}
+        <div className="absolute left-1/2 -translate-x-1/2 text-xs font-medium text-foreground/80 tracking-wide">
+          {currentPage}
+        </div>
+
+        {/* Right: Status + Search + Control Center Toggle */}
+        <div className="flex items-center gap-2">
+          {/* Sync Status */}
+          <div className="hidden sm:flex items-center gap-1.5 text-[10px] text-neon-green">
+            <Radio className="w-3 h-3 neon-pulse" />
+            <span className="hidden md:inline font-medium">Sync Live</span>
+          </div>
+
+          <div className="h-4 w-px bg-border/30 hidden sm:block" />
+
+          {/* Cmd+K Search Trigger */}
+          <button
+            onClick={() => setCommandPaletteOpen(true)}
+            className="flex items-center gap-1.5 px-2 py-1 rounded-md text-[11px] text-muted-foreground hover:text-foreground hover:bg-secondary/40 transition-colors"
+          >
+            <Search className="w-3.5 h-3.5" />
+            <kbd className="hidden md:inline text-[10px] font-mono px-1 py-0.5 rounded bg-secondary/50 border border-border/40 text-muted-foreground">
+              {"Cmd+K"}
+            </kbd>
+          </button>
+
+          {/* Control Center Toggle */}
+          <button
+            onClick={() => setControlCenterOpen(!controlCenterOpen)}
+            className="flex items-center gap-1 px-1.5 py-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary/40 transition-colors"
+            title="Control Center"
+          >
+            {controlCenterOpen ? (
+              <PanelRightClose className="w-4 h-4" />
+            ) : (
+              <PanelRightOpen className="w-4 h-4" />
+            )}
+          </button>
+
+          {/* Mobile Menu */}
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            className="md:hidden flex items-center p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-secondary/40 transition-colors"
+          >
+            {mobileMenuOpen ? (
+              <X className="w-4 h-4" />
+            ) : (
+              <Menu className="w-4 h-4" />
+            )}
+            <span className="sr-only">Toggle menu</span>
+          </button>
+        </div>
+      </header>
+
+      {/* Mobile Menu Dropdown */}
+      {mobileMenuOpen && (
+        <div className="fixed top-[var(--system-bar-h)] left-0 right-0 z-40 glass-panel border-b border-border/30 p-3 md:hidden">
+          <nav className="grid grid-cols-4 gap-2">
+            {dockItems.map((item) => {
               const Icon = item.icon;
               const isActive = pathname === item.href;
               return (
@@ -239,74 +209,279 @@ export function AppShell({ children, user }: AppShellProps) {
                   key={item.href}
                   href={item.href}
                   onClick={() => setMobileMenuOpen(false)}
+                  className={cn(
+                    "flex flex-col items-center gap-1 py-2 px-1 rounded-lg text-[10px] text-muted-foreground transition-colors",
+                    isActive
+                      ? "text-primary bg-primary/10"
+                      : "hover:text-foreground hover:bg-secondary/30"
+                  )}
                 >
-                  <Button
-                    variant="ghost"
-                    className={cn(
-                      "w-full justify-start gap-3 text-muted-foreground",
-                      isActive && "bg-secondary/50 text-foreground"
-                    )}
-                  >
-                    <Icon className="w-4 h-4" />
-                    {item.label}
-                  </Button>
+                  <Icon className="w-4 h-4" />
+                  {item.label}
                 </Link>
               );
             })}
-            <div className="pt-2 border-t border-border/50 space-y-2">
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  setPilotPanelOpen(true);
-                }}
-                className="w-full justify-start gap-3 glass-btn border-primary/50 text-primary bg-transparent"
-              >
-                <Zap className="w-4 h-4" />
-                TerraPilot
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  setTraceFeedOpen(true);
-                }}
-                className="w-full justify-start gap-3 glass-btn border-violet-500/50 text-violet-400 bg-transparent"
-              >
-                <Shield className="w-4 h-4" />
-                Trace Feed
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  setAuditLogOpen(true);
-                }}
-                className="w-full justify-start gap-3 glass-btn border-border/50 text-foreground bg-transparent"
-              >
-                <FileText className="w-4 h-4" />
-                Audit Log
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => {
-                  setMobileMenuOpen(false);
-                  setSnapshotOpen(true);
-                }}
-                className="w-full justify-start gap-3 glass-btn border-border/50 text-foreground bg-transparent"
-              >
-                <Camera className="w-4 h-4" />
-                Roll Year Snapshot
-              </Button>
-            </div>
           </nav>
+          <div className="mt-3 pt-3 border-t border-border/30 flex flex-wrap gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setMobileMenuOpen(false);
+                setPilotPanelOpen(true);
+              }}
+              className="flex-1 gap-1.5 text-xs glass-btn border-primary/40 text-primary bg-transparent"
+            >
+              <Zap className="w-3.5 h-3.5" />
+              Pilot
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                setMobileMenuOpen(false);
+                setTraceFeedOpen(true);
+              }}
+              className="flex-1 gap-1.5 text-xs glass-btn border-violet-500/40 text-violet-400 bg-transparent"
+            >
+              <Shield className="w-3.5 h-3.5" />
+              Trace
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* ============================================
+          STAGE (Workspace)
+          ============================================ */}
+      <main className="stage">{children}</main>
+
+      {/* ============================================
+          DOCK LAUNCHER (Bottom)
+          "I always know what to do next."
+          ============================================ */}
+      <div className="fixed bottom-3 left-1/2 -translate-x-1/2 z-40">
+        <TooltipProvider delayDuration={200}>
+          <nav className="dock flex items-center gap-1 px-3">
+            {dockItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = pathname === item.href;
+              return (
+                <Tooltip key={item.href}>
+                  <TooltipTrigger asChild>
+                    <Link
+                      href={item.href}
+                      className={cn("dock-item", isActive && "active")}
+                    >
+                      <Icon className="w-5 h-5" />
+                    </Link>
+                  </TooltipTrigger>
+                  <TooltipContent
+                    side="top"
+                    sideOffset={10}
+                    className="glass-panel text-xs font-medium px-2.5 py-1"
+                  >
+                    {item.label}
+                  </TooltipContent>
+                </Tooltip>
+              );
+            })}
+
+            {/* Divider */}
+            <div className="h-6 w-px bg-border/30 mx-1" />
+
+            {/* Quick Actions in Dock */}
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => setPilotPanelOpen(true)}
+                  className="dock-item"
+                >
+                  <Zap className="w-5 h-5" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent
+                side="top"
+                sideOffset={10}
+                className="glass-panel text-xs font-medium px-2.5 py-1"
+              >
+                TerraPilot
+              </TooltipContent>
+            </Tooltip>
+          </nav>
+        </TooltipProvider>
+      </div>
+
+      {/* ============================================
+          CONTROL CENTER (Right Edge Drawer)
+          "I can always prove what I did."
+          ============================================ */}
+      <div
+        className={cn(
+          "fixed top-[var(--system-bar-h)] right-0 bottom-0 w-72 control-center z-30",
+          "transform transition-transform duration-300 ease-out",
+          controlCenterOpen ? "translate-x-0" : "translate-x-full"
         )}
-      </header>
+      >
+        <div className="p-4 h-full flex flex-col overflow-y-auto">
+          <div className="flex items-center justify-between mb-5">
+            <h2 className="text-sm font-semibold text-foreground tracking-tight">
+              Control Center
+            </h2>
+            <button
+              onClick={() => setControlCenterOpen(false)}
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
 
-      {/* Main Content */}
-      <main className="flex-1">{children}</main>
+          {/* User Section */}
+          <div className="glass-panel rounded-lg p-3 mb-4">
+            <div className="text-sm font-medium text-foreground">
+              {user?.name || "Demo Assessor"}
+            </div>
+            <div className="text-[11px] text-muted-foreground mt-0.5">
+              {user?.county || "Benton County"} --{" "}
+              {user?.role || "Assessor Admin"}
+            </div>
+            <button
+              onClick={() => router.push("/login")}
+              className="mt-2 flex items-center gap-1.5 text-[11px] text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <LogOut className="w-3 h-3" />
+              Sign out
+            </button>
+          </div>
 
-      {/* Modals */}
+          {/* Suite Launchers */}
+          <div className="space-y-2 mb-4">
+            <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-medium mb-2">
+              Suites
+            </p>
+            <button
+              onClick={() => {
+                setControlCenterOpen(false);
+                setPilotPanelOpen(true);
+              }}
+              className="w-full flex items-center gap-3 p-2.5 rounded-lg text-left hover:bg-secondary/30 transition-colors group"
+            >
+              <div className="w-8 h-8 rounded-lg bg-primary/15 border border-primary/30 flex items-center justify-center group-hover:bg-primary/25 transition-colors">
+                <Zap className="w-4 h-4 text-primary" />
+              </div>
+              <div>
+                <div className="text-xs font-medium text-foreground">
+                  TerraPilot
+                </div>
+                <div className="text-[10px] text-muted-foreground">
+                  Execute and explain
+                </div>
+              </div>
+            </button>
+
+            <button
+              onClick={() => {
+                setControlCenterOpen(false);
+                setTraceFeedOpen(true);
+              }}
+              className="w-full flex items-center gap-3 p-2.5 rounded-lg text-left hover:bg-secondary/30 transition-colors group"
+            >
+              <div className="w-8 h-8 rounded-lg bg-violet-500/15 border border-violet-500/30 flex items-center justify-center group-hover:bg-violet-500/25 transition-colors">
+                <Shield className="w-4 h-4 text-violet-400" />
+              </div>
+              <div>
+                <div className="text-xs font-medium text-foreground">
+                  TerraTrace
+                </div>
+                <div className="text-[10px] text-muted-foreground">
+                  Audit feed
+                </div>
+              </div>
+            </button>
+
+            <button
+              onClick={() => {
+                setControlCenterOpen(false);
+                setPolicyDebugOpen(true);
+              }}
+              className="w-full flex items-center gap-3 p-2.5 rounded-lg text-left hover:bg-secondary/30 transition-colors group"
+            >
+              <div className="w-8 h-8 rounded-lg bg-amber-500/15 border border-amber-500/30 flex items-center justify-center group-hover:bg-amber-500/25 transition-colors">
+                <Settings2 className="w-4 h-4 text-amber-400" />
+              </div>
+              <div>
+                <div className="text-xs font-medium text-foreground">
+                  Policy Debug
+                </div>
+                <div className="text-[10px] text-muted-foreground">
+                  RBAC and risk gates
+                </div>
+              </div>
+            </button>
+          </div>
+
+          {/* Quick Actions */}
+          <div className="space-y-2 mb-4">
+            <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-medium mb-2">
+              Quick Actions
+            </p>
+            <button
+              onClick={() => {
+                setControlCenterOpen(false);
+                setAuditLogOpen(true);
+              }}
+              className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-secondary/30 transition-colors"
+            >
+              <ScrollText className="w-3.5 h-3.5" />
+              View Audit Log
+            </button>
+            <button
+              onClick={() => {
+                setControlCenterOpen(false);
+                setSnapshotOpen(true);
+              }}
+              className="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-xs text-muted-foreground hover:text-foreground hover:bg-secondary/30 transition-colors"
+            >
+              <Camera className="w-3.5 h-3.5" />
+              Create Snapshot
+            </button>
+          </div>
+
+          {/* System Status */}
+          <div className="mt-auto pt-4 border-t border-border/20">
+            <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-medium mb-3">
+              System
+            </p>
+            <div className="space-y-2 text-[11px]">
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">Sync</span>
+                <span className="flex items-center gap-1 text-neon-green font-medium">
+                  <Radio className="w-3 h-3 neon-pulse" />
+                  Live
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">Roll Year</span>
+                <span className="text-foreground font-medium">2024</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">Mode</span>
+                <span className="text-foreground font-medium">Production</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-muted-foreground">Version</span>
+                <span className="text-muted-foreground font-mono text-[10px]">
+                  v0.9.0-alpha
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* ============================================
+          OVERLAYS (Modals, Drawers, Palettes)
+          ============================================ */}
       <AuditLogModal
         isOpen={auditLogOpen}
         onClose={() => setAuditLogOpen(false)}
@@ -315,28 +490,20 @@ export function AppShell({ children, user }: AppShellProps) {
         isOpen={snapshotOpen}
         onClose={() => setSnapshotOpen(false)}
       />
-
-      {/* TerraPilot Panel */}
       <TerraPilotPanel
         isOpen={pilotPanelOpen}
         onClose={() => setPilotPanelOpen(false)}
       />
-
-      {/* Command Palette */}
       <CommandPalette
         isOpen={commandPaletteOpen}
         onClose={() => setCommandPaletteOpen(false)}
         onOpenPanel={() => setPilotPanelOpen(true)}
         onNeedsConfirmation={handleNeedsConfirmation}
       />
-
-      {/* Trace Feed Drawer */}
       <TraceFeedDrawer
         isOpen={traceFeedOpen}
         onClose={() => setTraceFeedOpen(false)}
       />
-
-      {/* Policy Debug Drawer */}
       <PolicyDebugDrawer
         isOpen={policyDebugOpen}
         onClose={() => setPolicyDebugOpen(false)}
