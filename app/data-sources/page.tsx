@@ -159,6 +159,7 @@ export default function DataSourcesPage() {
             <div className="relative">
               <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
               <input
+                suppressHydrationWarning
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 placeholder="Search county..."
@@ -167,6 +168,7 @@ export default function DataSourcesPage() {
             </div>
 
             <select
+              suppressHydrationWarning
               value={status}
               onChange={(e) => setStatus(e.target.value as OverlayStatus | "all")}
               className="border-border/50 bg-input text-foreground focus:border-primary/50 rounded-lg border px-3 py-2 text-sm outline-none"
@@ -179,6 +181,7 @@ export default function DataSourcesPage() {
             </select>
 
             <select
+              suppressHydrationWarning
               value={lane}
               onChange={(e) => setLane(e.target.value as UpdateLane | "all")}
               className="border-border/50 bg-input text-foreground focus:border-primary/50 rounded-lg border px-3 py-2 text-sm outline-none"
@@ -191,6 +194,7 @@ export default function DataSourcesPage() {
 
             <div className="flex items-center gap-2">
               <select
+                suppressHydrationWarning
                 value={sort}
                 onChange={(e) =>
                   setSort(
@@ -207,6 +211,7 @@ export default function DataSourcesPage() {
               </select>
 
               <button
+                suppressHydrationWarning
                 type="button"
                 onClick={() => setDir((d) => (d === "asc" ? "desc" : "asc"))}
                 className="border-border/50 bg-secondary/50 text-foreground hover:bg-secondary/70 rounded-lg border p-2 text-sm transition-colors"

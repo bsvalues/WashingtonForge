@@ -136,6 +136,7 @@ export default function LoginPage() {
           <div className="mt-4 text-center">
             <button
               type="button"
+              suppressHydrationWarning
               className="text-muted-foreground hover:text-primary text-sm transition-colors"
             >
               Forgot your password?

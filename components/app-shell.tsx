@@ -21,6 +21,8 @@ import {
   Zap,
   Shield,
   Settings2,
+  Rocket,
+  Layers,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { AuditLogModal } from "@/components/audit-log-modal";
@@ -48,13 +50,13 @@ interface AppShellProps {
   };
 }
 
+// Main nav - Data Suite is the unified entry for all data operations
 const navItems = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/data-suite", label: "Data Suite", icon: Layers, primary: true }, // THE hub
   { href: "/cockpit", label: "Cockpit", icon: Map },
-  { href: "/ingest", label: "Ingest", icon: Upload },
   { href: "/ratio-studies", label: "Ratio Studies", icon: BarChart3 },
   { href: "/calibration", label: "Calibration", icon: Sliders },
-  { href: "/data-sources", label: "Data Sources", icon: Database },
   { href: "/snapshots", label: "Snapshots", icon: Camera },
   { href: "/audit", label: "Audit", icon: ScrollText },
 ];
@@ -118,13 +120,18 @@ export function AppShell({ children, user }: AppShellProps) {
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = pathname === item.href;
+              const isPrimary = "primary" in item && item.primary;
               return (
                 <Link key={item.href} href={item.href}>
                   <Button
                     variant="ghost"
                     className={cn(
-                      "text-muted-foreground hover:text-foreground hover:bg-secondary/50 gap-2",
-                      isActive && "bg-secondary/50 text-foreground"
+                      "gap-2",
+                      isPrimary 
+                        ? "text-primary border-primary/30 border bg-primary/10 hover:bg-primary/20"
+                        : "text-muted-foreground hover:text-foreground hover:bg-secondary/50",
+                      isActive && !isPrimary && "bg-secondary/50 text-foreground",
+                      isActive && isPrimary && "bg-primary/20"
                     )}
                   >
                     <Icon className="h-4 w-4" />

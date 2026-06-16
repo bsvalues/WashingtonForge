@@ -87,7 +87,7 @@ export function UploadStep({ onComplete }: UploadStepProps) {
       const dataset = await uploadDataset(file, datasetType);
       onComplete(dataset);
     } catch (err) {
-      console.error("[v0] Upload error:", err);
+      console.error("Upload error:", err);
       setError("Failed to upload file. Please try again.");
     } finally {
       setIsUploading(false);
