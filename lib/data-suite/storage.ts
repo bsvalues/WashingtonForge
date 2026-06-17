@@ -1,9 +1,9 @@
 /**
  * DataSuite Browser Storage
- * 
+ *
  * Provides localStorage-backed persistence for the DemoRepository.
  * This ensures data survives page reloads and navigation.
- * 
+ *
  * For production: replace with Postgres/Supabase calls.
  */
 
@@ -11,7 +11,7 @@ const STORAGE_PREFIX = "datasuite_";
 const STORAGE_VERSION = "v1";
 
 // Type-safe storage keys
-type StorageKey = 
+type StorageKey =
   | "activePointers"
   | "routeRecords"
   | "countyStatuses"
@@ -35,7 +35,7 @@ function isBrowser(): boolean {
  */
 export function saveToStorage<T>(key: StorageKey, data: T): void {
   if (!isBrowser()) return;
-  
+
   try {
     const serialized = JSON.stringify(data, (_, value) => {
       // Convert Map to array of entries for JSON serialization
@@ -65,11 +65,11 @@ export function saveToStorage<T>(key: StorageKey, data: T): void {
  */
 export function loadFromStorage<T>(key: StorageKey, defaultValue: T): T {
   if (!isBrowser()) return defaultValue;
-  
+
   try {
     const serialized = localStorage.getItem(getKey(key));
     if (!serialized) return defaultValue;
-    
+
     return JSON.parse(serialized, (_, value) => {
       // Reconstruct Map from serialized format
       if (value && typeof value === "object" && value.__type === "Map") {
@@ -92,7 +92,7 @@ export function loadFromStorage<T>(key: StorageKey, defaultValue: T): T {
  */
 export function clearStorage(): void {
   if (!isBrowser()) return;
-  
+
   const keys: StorageKey[] = [
     "activePointers",
     "routeRecords",
@@ -101,8 +101,8 @@ export function clearStorage(): void {
     "lineageEvents",
     "ingestRuns",
   ];
-  
-  keys.forEach(key => {
+
+  keys.forEach((key) => {
     localStorage.removeItem(getKey(key));
   });
 }
@@ -126,10 +126,10 @@ export function getStorageStats(): {
   if (!isBrowser()) {
     return { initialized: false, keys: [], totalSize: 0 };
   }
-  
+
   const keys: string[] = [];
   let totalSize = 0;
-  
+
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i);
     if (key?.startsWith(STORAGE_PREFIX)) {
@@ -138,7 +138,7 @@ export function getStorageStats(): {
       totalSize += (key.length + (value?.length || 0)) * 2; // UTF-16
     }
   }
-  
+
   return {
     initialized: hasStorageData(),
     keys,

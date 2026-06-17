@@ -1,26 +1,26 @@
 /**
  * API Shim Exports Contract Test
- * 
+ *
  * This test FREEZES the public surface of @/lib/api to prevent export drift.
  * If this test fails, it means exports were removed or renamed - which breaks consumers.
- * 
+ *
  * DO NOT remove assertions from this test without verifying all consumers are migrated.
- * 
+ *
  * ENFORCEMENT ARCHITECTURE:
  * ========================
  * 1. ESLint Rule (lib/api/** → barrel-only imports)
  *    - Blocks all deep imports: @/lib/api-internal/*
  *    - Forces all imports through @/lib/api-internal barrel
- * 
+ *
  * 2. Query Surface Allowlist (this file)
  *    - ALLOWED_QUERY_EXPORTS = single source of truth
  *    - Exact set equality: catches leakage (unexpected) AND breakage (missing)
  *    - Three-layer protection: allowlist → blacklist → regex backstop
- * 
+ *
  * 3. API Shim Surface (this file)
  *    - Individual assertions for all required exports
  *    - Type exports verified at compile-time
- * 
+ *
  * These tripwires make it impossible to accidentally:
  * - Add mutators to the query surface
  * - Remove required exports
@@ -260,38 +260,32 @@ describe("@/lib/api/query exports", () => {
     const queryExports = Object.keys(query).filter(
       (k) => typeof (query as Record<string, unknown>)[k] === "function"
     );
-    
+
     // Check for unexpected exports (leakage)
-    const unexpectedExports = queryExports.filter(
-      (name) => !ALLOWED_QUERY_EXPORTS.includes(name)
-    );
+    const unexpectedExports = queryExports.filter((name) => !ALLOWED_QUERY_EXPORTS.includes(name));
 
     // Check for missing exports (breakage)
-    const missingExports = ALLOWED_QUERY_EXPORTS.filter(
-      (name) => !queryExports.includes(name)
-    );
+    const missingExports = ALLOWED_QUERY_EXPORTS.filter((name) => !queryExports.includes(name));
 
     const errors: string[] = [];
 
     if (unexpectedExports.length > 0) {
       errors.push(
         `LEAKAGE: Query surface has unexpected exports: ${unexpectedExports.join(", ")}.\n` +
-        `  → If legitimate read-only, add to ALLOWED_QUERY_EXPORTS.\n` +
-        `  → If mutators, route through dataSuiteHub instead.`
+          `  → If legitimate read-only, add to ALLOWED_QUERY_EXPORTS.\n` +
+          `  → If mutators, route through dataSuiteHub instead.`
       );
     }
 
     if (missingExports.length > 0) {
       errors.push(
         `BREAKAGE: Query surface is missing expected exports: ${missingExports.join(", ")}.\n` +
-        `  → Restore these exports or update ALLOWED_QUERY_EXPORTS.`
+          `  → Restore these exports or update ALLOWED_QUERY_EXPORTS.`
       );
     }
 
     if (errors.length > 0) {
-      throw new Error(
-        `Query surface integrity check failed:\n\n${errors.join("\n\n")}`
-      );
+      throw new Error(`Query surface integrity check failed:\n\n${errors.join("\n\n")}`);
     }
 
     // Exact equality assertion (sorted for deterministic output)
@@ -352,7 +346,7 @@ describe("@/lib/api/query exports", () => {
     if (violators.length > 0) {
       throw new Error(
         `Query surface contains mutator-like exports: ${violators.join(", ")}.\n` +
-        `Mutators must go through dataSuiteHub, not lib/api/query.`
+          `Mutators must go through dataSuiteHub, not lib/api/query.`
       );
     }
   });

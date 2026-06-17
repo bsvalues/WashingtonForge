@@ -1,14 +1,14 @@
 /**
  * READ-ONLY QUERY API
- * 
+ *
  * This module exports ONLY pure fetch/compute functions that do NOT mutate data.
  * Safe to import directly - no hub routing required.
- * 
+ *
  * RULES:
  * - Functions here must be pure queries (no writes, no cache invalidation)
  * - No enqueue, publish, trigger, or job operations
  * - If it feels like a query but has side effects, it goes through the hub
- * 
+ *
  * Usage:
  *   import { getParcels, getAuditLog } from "@/lib/api/query";
  */
@@ -47,17 +47,13 @@ export {
 // AUDIT LOG (pure fetch)
 // ============================================
 
-export {
-  getAuditLog,
-} from "@/lib/api-internal";
+export { getAuditLog } from "@/lib/api-internal";
 
 // ============================================
 // DATA SOURCES (pure fetch)
 // ============================================
 
-export {
-  loadCountyDataFreshness as getDataSources,
-} from "@/lib/api-internal";
+export { loadCountyDataFreshness as getDataSources } from "@/lib/api-internal";
 
 // ============================================
 // AUTH (pure session read)

@@ -44,7 +44,8 @@ export default [
           patterns: [
             {
               group: ["@/lib/api", "@/lib/api/*", "../api", "../api/*"],
-              message: "data-suite cannot import from lib/api. This would create a circular dependency.",
+              message:
+                "data-suite cannot import from lib/api. This would create a circular dependency.",
             },
           ],
         },
@@ -67,12 +68,9 @@ export default [
           patterns: [
             {
               // Block all deep imports into api-internal (barrel only)
-              group: [
-                "@/lib/api-internal/*",
-                "../api-internal/*",
-                "../../api-internal/*",
-              ],
-              message: "Import from @/lib/api-internal (barrel) not deep paths. Barrel controls the public surface.",
+              group: ["@/lib/api-internal/*", "../api-internal/*", "../../api-internal/*"],
+              message:
+                "Import from @/lib/api-internal (barrel) not deep paths. Barrel controls the public surface.",
             },
           ],
         },

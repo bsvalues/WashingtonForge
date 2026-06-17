@@ -1,6 +1,6 @@
 /**
  * Vitest Test Setup
- * 
+ *
  * Configures testing environment for React/JSX tests.
  */
 

@@ -194,9 +194,7 @@ export function CourtReadyExport({
             </div>
             <div>
               <p className="text-muted-foreground text-xs">Market Value ({rollYear})</p>
-              <p className="text-foreground text-sm font-medium">
-                ${marketValue.toLocaleString()}
-              </p>
+              <p className="text-foreground text-sm font-medium">${marketValue.toLocaleString()}</p>
             </div>
           </div>
         </CardContent>
@@ -224,11 +222,7 @@ export function CourtReadyExport({
                   )}
                   onClick={() => toggleSection(section.id)}
                 >
-                  <Checkbox
-                    checked={isSelected}
-                    disabled={section.required}
-                    className="mt-0.5"
-                  />
+                  <Checkbox checked={isSelected} disabled={section.required} className="mt-0.5" />
                   <div className="flex-1">
                     <div className="flex items-center gap-2">
                       <span className="text-muted-foreground">{section.icon}</span>
@@ -365,9 +359,7 @@ export function CourtReadyExport({
             <div className="flex items-center gap-1.5">
               <Clock className="text-muted-foreground h-3 w-3" />
               <span className="text-muted-foreground">Generated:</span>
-              <span className="text-foreground font-mono">
-                {new Date().toLocaleString()}
-              </span>
+              <span className="text-foreground font-mono">{new Date().toLocaleString()}</span>
             </div>
             <div className="flex items-center gap-1.5">
               <User className="text-muted-foreground h-3 w-3" />

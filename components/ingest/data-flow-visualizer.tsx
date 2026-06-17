@@ -79,9 +79,7 @@ export function DataFlowVisualizer({ currentStage = "ingest", stats }: DataFlowV
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h3 className="text-foreground font-semibold">Data Pipeline</h3>
-          <p className="text-muted-foreground text-sm">
-            How your data flows through TerraFusion
-          </p>
+          <p className="text-muted-foreground text-sm">How your data flows through TerraFusion</p>
         </div>
         {stats?.lastUpdated && (
           <div className="text-muted-foreground flex items-center gap-2 text-xs">
@@ -107,12 +105,15 @@ export function DataFlowVisualizer({ currentStage = "ingest", stats }: DataFlowV
                   className={cn(
                     "relative flex h-14 w-14 items-center justify-center rounded-xl transition-all",
                     isCompleted && `${stage.bgColor} ${stage.color}`,
-                    isActive && `${stage.bgColor} ${stage.color} ring-2 ring-offset-2 ring-offset-transparent`,
+                    isActive &&
+                      `${stage.bgColor} ${stage.color} ring-2 ring-offset-2 ring-offset-transparent`,
                     isPending && "bg-muted/30 text-muted-foreground"
                   )}
                   style={
                     isActive
-                      ? { "--tw-ring-color": `oklch(0.7 0.15 ${index * 60})` } as React.CSSProperties
+                      ? ({
+                          "--tw-ring-color": `oklch(0.7 0.15 ${index * 60})`,
+                        } as React.CSSProperties)
                       : undefined
                   }
                 >
@@ -167,7 +168,7 @@ export function DataFlowVisualizer({ currentStage = "ingest", stats }: DataFlowV
 
       {/* Stats Row */}
       {stats && (
-        <div className="mt-6 grid grid-cols-3 gap-4 border-t border-border/50 pt-6">
+        <div className="border-border/50 mt-6 grid grid-cols-3 gap-4 border-t pt-6">
           <div className="text-center">
             <p className="text-foreground text-xl font-semibold">
               {stats.recordsIngested?.toLocaleString() ?? "—"}

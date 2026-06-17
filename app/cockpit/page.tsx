@@ -49,7 +49,7 @@ export default function CockpitPage() {
 
   // Load data from DataSuiteHub - THE CANONICAL READ PATH
   const loadCockpitData = useCallback(async () => {
-    setDataState(prev => ({ ...prev, status: "loading", error: null }));
+    setDataState((prev) => ({ ...prev, status: "loading", error: null }));
     console.log("[v0] Cockpit: Starting data load for", DEFAULT_COUNTY);
 
     try {
@@ -60,7 +60,7 @@ export default function CockpitPage() {
       // Ensure demo data is initialized (this runs once per session)
       const countyStatus = await dataSuiteHub.getStatus(DEFAULT_COUNTY);
       console.log("[v0] Cockpit: County status exists:", !!countyStatus);
-      
+
       if (!countyStatus) {
         const countyInfo = WA_COUNTIES[DEFAULT_COUNTY];
         console.log("[v0] Cockpit: Initializing demo for", countyInfo?.name);
@@ -128,10 +128,7 @@ export default function CockpitPage() {
   // Subscribe to routing events to auto-refresh when new data is delivered
   useEffect(() => {
     const unsubscribe = dataSuiteHub.subscribe((event) => {
-      if (
-        event.type === "routing.completed" &&
-        event.payload.subscriber === "cockpit-map"
-      ) {
+      if (event.type === "routing.completed" && event.payload.subscriber === "cockpit-map") {
         console.log("[v0] Cockpit received routing.completed, refreshing data");
         loadCockpitData();
       }
@@ -200,8 +197,8 @@ export default function CockpitPage() {
             <Database className="text-muted-foreground mx-auto mb-4 h-16 w-16" />
             <h2 className="text-foreground mb-2 text-2xl font-bold">No Data Delivered</h2>
             <p className="text-muted-foreground mb-6">
-              The Cockpit Map needs data to be delivered from the Data Suite. 
-              Go to the Data Suite to ingest and publish your county roll data.
+              The Cockpit Map needs data to be delivered from the Data Suite. Go to the Data Suite
+              to ingest and publish your county roll data.
             </p>
             <div className="flex flex-col gap-3 sm:flex-row sm:justify-center">
               <Button asChild className="tf-glass-btn tf-glass-btn--primary">
@@ -217,7 +214,8 @@ export default function CockpitPage() {
               </Button>
             </div>
             <p className="text-muted-foreground mt-6 text-xs">
-              After publishing data in the Data Suite, it will be automatically routed to the Cockpit.
+              After publishing data in the Data Suite, it will be automatically routed to the
+              Cockpit.
             </p>
 
             {/* Data Plane Status (Dev Debug) */}
@@ -266,12 +264,16 @@ export default function CockpitPage() {
           {/* Map Area */}
           <div className="relative flex-1">
             {/* Data Version Badge */}
-            <div className="absolute left-4 top-4 z-20">
+            <div className="absolute top-4 left-4 z-20">
               <div className="tf-glass flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs">
                 <span className="text-muted-foreground">Version:</span>
-                <span className="text-foreground font-mono">{dataState.versionId?.slice(0, 12)}</span>
+                <span className="text-foreground font-mono">
+                  {dataState.versionId?.slice(0, 12)}
+                </span>
                 <span className="text-muted-foreground">|</span>
-                <span className="text-foreground">{dataState.rowCount.toLocaleString()} parcels</span>
+                <span className="text-foreground">
+                  {dataState.rowCount.toLocaleString()} parcels
+                </span>
               </div>
             </div>
 
@@ -290,7 +292,7 @@ export default function CockpitPage() {
 
             {/* Data Plane Status (Dev Debug) */}
             {process.env.NODE_ENV !== "production" && (
-              <div className="absolute bottom-4 right-4 z-20 w-64">
+              <div className="absolute right-4 bottom-4 z-20 w-64">
                 <DataPlaneStatus
                   countyFips={DEFAULT_COUNTY}
                   subscriber="cockpit-map"
@@ -320,7 +322,11 @@ function generateParcelsForVersion(versionId: string, count: number): Parcel[] {
 
   const neighborhoods = ["Downtown", "Westside", "Eastgate", "Northgate", "Southend"];
   const propertyClasses = ["Single Family", "Condo", "Multi-Family", "Commercial"];
-  const equityStatuses: Array<"fair" | "progressive" | "regressive"> = ["fair", "progressive", "regressive"];
+  const equityStatuses: Array<"fair" | "progressive" | "regressive"> = [
+    "fair",
+    "progressive",
+    "regressive",
+  ];
 
   const parcels: Parcel[] = [];
   const parcelCount = Math.min(count, 50); // Cap at 50 for demo
@@ -329,7 +335,7 @@ function generateParcelsForVersion(versionId: string, count: number): Parcel[] {
     const baseValue = 150000 + random(i) * 500000;
     const salePrice = Math.random() > 0.2 ? baseValue * (0.9 + random(i + 1000) * 0.2) : null;
     const ratio = salePrice ? baseValue / salePrice : null;
-    
+
     let equityStatus: "fair" | "progressive" | "regressive" = "fair";
     if (ratio) {
       if (ratio < 0.95) equityStatus = "progressive";
@@ -344,7 +350,9 @@ function generateParcelsForVersion(versionId: string, count: number): Parcel[] {
       impValue: Math.round(baseValue * 0.7),
       totalValue: Math.round(baseValue),
       salePrice: salePrice ? Math.round(salePrice) : undefined,
-      saleDate: salePrice ? `2024-${String((i % 12) + 1).padStart(2, "0")}-${String((i % 28) + 1).padStart(2, "0")}` : undefined,
+      saleDate: salePrice
+        ? `2024-${String((i % 12) + 1).padStart(2, "0")}-${String((i % 28) + 1).padStart(2, "0")}`
+        : undefined,
       equityStatus,
       ratio: ratio ? Math.round(ratio * 100) / 100 : undefined,
       propertyClass: propertyClasses[Math.floor(random(i + 2000) * propertyClasses.length)],

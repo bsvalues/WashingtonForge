@@ -61,7 +61,10 @@ export function PublishStep({ dataset, onComplete, onBack }: PublishStepProps) {
           </div>
         </div>
 
-        <Button onClick={onComplete} className="tf-glass-btn tf-glass-btn--primary text-foreground px-8 font-medium">
+        <Button
+          onClick={onComplete}
+          className="tf-glass-btn tf-glass-btn--primary text-foreground px-8 font-medium"
+        >
           Upload Another Dataset
         </Button>
       </div>

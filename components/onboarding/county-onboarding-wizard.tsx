@@ -28,16 +28,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { cn } from "@/lib/utils";
-import {
-  WA_COUNTIES,
-  type WACountyFips,
-  type OnboardingPath,
-} from "@/lib/wa-data/types";
-import {
-  loadWAParcelFabric,
-  startOnboarding,
-  getCountyDataStatus,
-} from "@/lib/wa-data/client";
+import { WA_COUNTIES, type WACountyFips, type OnboardingPath } from "@/lib/wa-data/types";
+import { loadWAParcelFabric, startOnboarding, getCountyDataStatus } from "@/lib/wa-data/client";
 
 interface CountyOnboardingWizardProps {
   onComplete?: (fips: WACountyFips, path: OnboardingPath) => void;
@@ -57,26 +49,20 @@ const ONBOARDING_PATHS: {
   {
     id: "public_quickstart",
     title: "Public Quick Start",
-    description: "Get started instantly with WA statewide parcel data. Add your county roll and sales later.",
+    description:
+      "Get started instantly with WA statewide parcel data. Add your county roll and sales later.",
     icon: Globe,
-    benefits: [
-      "No IT involvement needed",
-      "Working cockpit in minutes",
-      "Add county data anytime",
-    ],
+    benefits: ["No IT involvement needed", "Working cockpit in minutes", "Add county data anytime"],
     effort: "low",
     timeEstimate: "2 minutes",
   },
   {
     id: "file_drop",
     title: "File Upload",
-    description: "Upload your existing CSV, Excel, or GDB exports. AI will map fields automatically.",
+    description:
+      "Upload your existing CSV, Excel, or GDB exports. AI will map fields automatically.",
     icon: Upload,
-    benefits: [
-      "Works with standard exports",
-      "AI-powered field mapping",
-      "Full data control",
-    ],
+    benefits: ["Works with standard exports", "AI-powered field mapping", "Full data control"],
     effort: "medium",
     timeEstimate: "15-30 minutes",
   },
@@ -85,11 +71,7 @@ const ONBOARDING_PATHS: {
     title: "Connected Feed",
     description: "Connect to ArcGIS, SFTP, or API endpoints for automatic updates.",
     icon: Link2,
-    benefits: [
-      "Automatic updates",
-      "Always fresh data",
-      "Set and forget",
-    ],
+    benefits: ["Automatic updates", "Always fresh data", "Set and forget"],
     effort: "high",
     timeEstimate: "1-2 hours setup",
   },
@@ -117,28 +99,31 @@ export function CountyOnboardingWizard({ onComplete }: CountyOnboardingWizardPro
     setSelectedCounty(fips as WACountyFips);
   }, []);
 
-  const handlePathSelect = useCallback(async (path: OnboardingPath) => {
-    setSelectedPath(path);
-    
-    if (path === "public_quickstart" && selectedCounty) {
-      // Start loading WA parcel fabric immediately
-      setStep("loading_fabric");
-      setIsLoading(true);
-      
-      try {
-        await startOnboarding(selectedCounty, path);
-        const result = await loadWAParcelFabric(selectedCounty);
-        setFabricResult(result);
-        setStep("complete");
-      } catch (error) {
-        console.error("Failed to load fabric:", error);
-      } finally {
-        setIsLoading(false);
+  const handlePathSelect = useCallback(
+    async (path: OnboardingPath) => {
+      setSelectedPath(path);
+
+      if (path === "public_quickstart" && selectedCounty) {
+        // Start loading WA parcel fabric immediately
+        setStep("loading_fabric");
+        setIsLoading(true);
+
+        try {
+          await startOnboarding(selectedCounty, path);
+          const result = await loadWAParcelFabric(selectedCounty);
+          setFabricResult(result);
+          setStep("complete");
+        } catch (error) {
+          console.error("Failed to load fabric:", error);
+        } finally {
+          setIsLoading(false);
+        }
+      } else {
+        setStep("configure");
       }
-    } else {
-      setStep("configure");
-    }
-  }, [selectedCounty]);
+    },
+    [selectedCounty]
+  );
 
   const handleBack = useCallback(() => {
     if (step === "choose_path") {
@@ -166,14 +151,17 @@ export function CountyOnboardingWizard({ onComplete }: CountyOnboardingWizardPro
             <div
               className={cn(
                 "flex h-8 w-8 items-center justify-center rounded-full text-sm font-medium transition-colors",
-                step === s || (step === "loading_fabric" && s === "choose_path") || step === "complete"
+                step === s ||
+                  (step === "loading_fabric" && s === "choose_path") ||
+                  step === "complete"
                   ? "bg-primary text-primary-foreground"
                   : i < ["select_county", "choose_path", "configure"].indexOf(step)
-                  ? "bg-primary/20 text-primary"
-                  : "bg-muted text-muted-foreground"
+                    ? "bg-primary/20 text-primary"
+                    : "bg-muted text-muted-foreground"
               )}
             >
-              {i < ["select_county", "choose_path", "configure"].indexOf(step) || step === "complete" ? (
+              {i < ["select_county", "choose_path", "configure"].indexOf(step) ||
+              step === "complete" ? (
                 <CheckCircle2 className="h-4 w-4" />
               ) : (
                 i + 1
@@ -215,7 +203,7 @@ export function CountyOnboardingWizard({ onComplete }: CountyOnboardingWizardPro
                 {countyOptions.map((county) => (
                   <SelectItem key={county.value} value={county.value}>
                     <div className="flex items-center gap-2">
-                      <MapPin className="h-4 w-4 text-muted-foreground" />
+                      <MapPin className="text-muted-foreground h-4 w-4" />
                       <span>{county.label}</span>
                       <span className="text-muted-foreground text-xs">
                         ({county.population.toLocaleString()} pop)
@@ -235,8 +223,9 @@ export function CountyOnboardingWizard({ onComplete }: CountyOnboardingWizardPro
                   <div>
                     <p className="text-foreground font-medium">{selectedCountyData.name} County</p>
                     <p className="text-muted-foreground text-sm">
-                      {selectedCountyData.tier.charAt(0).toUpperCase() + selectedCountyData.tier.slice(1)} county with{" "}
-                      {selectedCountyData.population.toLocaleString()} residents
+                      {selectedCountyData.tier.charAt(0).toUpperCase() +
+                        selectedCountyData.tier.slice(1)}{" "}
+                      county with {selectedCountyData.population.toLocaleString()} residents
                     </p>
                   </div>
                 </div>
@@ -272,7 +261,7 @@ export function CountyOnboardingWizard({ onComplete }: CountyOnboardingWizardPro
               <Card
                 key={path.id}
                 className={cn(
-                  "tf-glass cursor-pointer p-6 transition-all hover:border-primary/50",
+                  "tf-glass hover:border-primary/50 cursor-pointer p-6 transition-all",
                   selectedPath === path.id && "border-primary ring-primary/20 ring-2"
                 )}
                 onClick={() => handlePathSelect(path.id)}
@@ -284,8 +273,8 @@ export function CountyOnboardingWizard({ onComplete }: CountyOnboardingWizardPro
                       path.effort === "low"
                         ? "bg-green-400/20 text-green-400"
                         : path.effort === "medium"
-                        ? "bg-amber-400/20 text-amber-400"
-                        : "bg-blue-400/20 text-blue-400"
+                          ? "bg-amber-400/20 text-amber-400"
+                          : "bg-blue-400/20 text-blue-400"
                     )}
                   >
                     <path.icon className="h-6 w-6" />
@@ -300,19 +289,19 @@ export function CountyOnboardingWizard({ onComplete }: CountyOnboardingWizardPro
                       )}
                     </div>
                     <p className="text-muted-foreground mt-1 text-sm">{path.description}</p>
-                    
+
                     <div className="mt-3 flex flex-wrap gap-4">
-                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                      <div className="text-muted-foreground flex items-center gap-1.5 text-xs">
                         <Clock className="h-3.5 w-3.5" />
                         {path.timeEstimate}
                       </div>
-                      <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                      <div className="text-muted-foreground flex items-center gap-1.5 text-xs">
                         <Zap className="h-3.5 w-3.5" />
                         {path.effort === "low"
                           ? "No IT needed"
                           : path.effort === "medium"
-                          ? "Self-service"
-                          : "IT coordination"}
+                            ? "Self-service"
+                            : "IT coordination"}
                       </div>
                     </div>
 
@@ -346,13 +335,14 @@ export function CountyOnboardingWizard({ onComplete }: CountyOnboardingWizardPro
       {/* Step: Loading Fabric (for Quick Start) */}
       {step === "loading_fabric" && (
         <div className="space-y-6 text-center">
-          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-primary/20">
-            <Loader2 className="h-10 w-10 animate-spin text-primary" />
+          <div className="bg-primary/20 mx-auto flex h-20 w-20 items-center justify-center rounded-full">
+            <Loader2 className="text-primary h-10 w-10 animate-spin" />
           </div>
           <div>
             <h2 className="text-foreground text-2xl font-bold">Loading WA Parcel Fabric</h2>
             <p className="text-muted-foreground mt-2">
-              Connecting {selectedCountyData?.name} County to the Washington statewide parcel database...
+              Connecting {selectedCountyData?.name} County to the Washington statewide parcel
+              database...
             </p>
           </div>
           <div className="mx-auto max-w-md space-y-3">
@@ -361,7 +351,7 @@ export function CountyOnboardingWizard({ onComplete }: CountyOnboardingWizardPro
               <span className="text-foreground text-sm">Connecting to WA Geo Portal</span>
             </div>
             <div className="flex items-center gap-3 text-left">
-              <Loader2 className="h-5 w-5 animate-spin text-primary" />
+              <Loader2 className="text-primary h-5 w-5 animate-spin" />
               <span className="text-muted-foreground text-sm">Loading parcel geometries...</span>
             </div>
             <div className="flex items-center gap-3 text-left">
@@ -473,21 +463,17 @@ export function CountyOnboardingWizard({ onComplete }: CountyOnboardingWizardPro
           <Card className="tf-glass p-6">
             <div className="grid gap-4 sm:grid-cols-3">
               <div className="text-center">
-                <p className="text-3xl font-bold text-primary">
+                <p className="text-primary text-3xl font-bold">
                   {fabricResult.parcelCount.toLocaleString()}
                 </p>
                 <p className="text-muted-foreground text-sm">Parcels Loaded</p>
               </div>
               <div className="text-center">
-                <p className="text-3xl font-bold text-green-400">
-                  {fabricResult.coveragePct}%
-                </p>
+                <p className="text-3xl font-bold text-green-400">{fabricResult.coveragePct}%</p>
                 <p className="text-muted-foreground text-sm">Coverage</p>
               </div>
               <div className="text-center">
-                <p className="text-foreground text-lg font-medium">
-                  {fabricResult.sourceVersion}
-                </p>
+                <p className="text-foreground text-lg font-medium">{fabricResult.sourceVersion}</p>
                 <p className="text-muted-foreground text-sm">Source Version</p>
               </div>
             </div>
@@ -497,7 +483,9 @@ export function CountyOnboardingWizard({ onComplete }: CountyOnboardingWizardPro
             <div className="flex items-start gap-3">
               <Sparkles className="mt-0.5 h-5 w-5 shrink-0 text-amber-400" />
               <div>
-                <p className="text-foreground text-sm font-medium">Next Step: Add Your County Data</p>
+                <p className="text-foreground text-sm font-medium">
+                  Next Step: Add Your County Data
+                </p>
                 <p className="text-muted-foreground mt-1 text-sm">
                   To unlock Ratio Studies, Comps Selection, and Model Calibration, upload your
                   county roll and sales data from the Data Ingest page.

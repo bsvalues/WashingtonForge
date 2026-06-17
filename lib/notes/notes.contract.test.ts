@@ -13,12 +13,7 @@ import { describe, it, expect, afterEach } from "vitest";
 import { promises as fs } from "fs";
 import os from "os";
 import path from "path";
-import {
-  getNotesForParcel,
-  upsertNote,
-  validateNotePayload,
-  MAX_NOTE_LENGTH,
-} from "./store";
+import { getNotesForParcel, upsertNote, validateNotePayload, MAX_NOTE_LENGTH } from "./store";
 
 const TEST_FILE = path.join(os.tmpdir(), `wf-notes-test-${process.pid}.json`);
 const PARCEL = "53005-000123";

@@ -23,12 +23,7 @@ import {
   Table2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { dataSuiteHub } from "@/lib/data-suite";
 import type { Dataset, DatasetType } from "@/lib/api";
 import type { DataProductType } from "@/lib/data-suite/types";
@@ -85,8 +80,18 @@ const acceptedFormats = [
   { ext: ".csv", icon: FileSpreadsheet, label: "CSV", desc: "Comma-separated values" },
   { ext: ".xlsx", icon: Table2, label: "Excel", desc: "Excel spreadsheets (.xlsx, .xls)" },
   { ext: ".geojson", icon: MapIcon, label: "GeoJSON", desc: "With geometry data" },
-  { ext: ".zip", icon: FolderArchive, label: "Bulk Package", desc: "ZIP with CSV, Excel, GeoJSON, Shapefiles" },
-  { ext: ".gdb", icon: Database, label: "Geodatabase", desc: "Esri File Geodatabase (.gdb folder)" },
+  {
+    ext: ".zip",
+    icon: FolderArchive,
+    label: "Bulk Package",
+    desc: "ZIP with CSV, Excel, GeoJSON, Shapefiles",
+  },
+  {
+    ext: ".gdb",
+    icon: Database,
+    label: "Geodatabase",
+    desc: "Esri File Geodatabase (.gdb folder)",
+  },
 ];
 
 // Bulk package detection patterns
@@ -130,13 +135,13 @@ export function SmartUploadStep({ onComplete }: SmartUploadStepProps) {
   const handleDrop = useCallback(async (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
-    
+
     // Check for .gdb folder drop first
     if (e.dataTransfer.items) {
       const isFolder = await handleFolderDrop(e.dataTransfer.items);
       if (isFolder) return;
     }
-    
+
     const droppedFile = e.dataTransfer.files[0];
     if (droppedFile) {
       validateAndSetFile(droppedFile);
@@ -155,7 +160,9 @@ export function SmartUploadStep({ onComplete }: SmartUploadStepProps) {
     const ext = f.name.toLowerCase().slice(f.name.lastIndexOf("."));
 
     if (!validExtensions.includes(ext)) {
-      setError("Invalid file type. Supported formats: CSV, Excel (.xlsx/.xls), GeoJSON, ZIP bundles.");
+      setError(
+        "Invalid file type. Supported formats: CSV, Excel (.xlsx/.xls), GeoJSON, ZIP bundles."
+      );
       return;
     }
 
@@ -202,7 +209,7 @@ export function SmartUploadStep({ onComplete }: SmartUploadStepProps) {
     // In production, use JSZip to actually read the ZIP
     // For now, simulate based on filename patterns
     const filename = zipFile.name.toLowerCase();
-    
+
     if (filename.includes("shapefile") || filename.includes("shp")) {
       return {
         type: "bulk",
@@ -211,7 +218,7 @@ export function SmartUploadStep({ onComplete }: SmartUploadStepProps) {
         containedFiles: ["parcels.shp", "parcels.dbf", "parcels.shx", "parcels.prj"],
       };
     }
-    
+
     if (filename.includes("gdb") || filename.includes("geodatabase")) {
       return {
         type: "bulk",
@@ -282,8 +289,8 @@ export function SmartUploadStep({ onComplete }: SmartUploadStepProps) {
         type: datasetType,
         status: ingestRun.status === "ready" ? "ready" : "validating",
         rowCount: ingestRun.row_counts_by_stage?.raw || 0,
-        errorCount: ingestRun.row_counts_by_stage?.raw 
-          ? ingestRun.row_counts_by_stage.raw - (ingestRun.row_counts_by_stage.valid || 0) 
+        errorCount: ingestRun.row_counts_by_stage?.raw
+          ? ingestRun.row_counts_by_stage.raw - (ingestRun.row_counts_by_stage.valid || 0)
           : 0,
         createdAt: ingestRun.started_at,
       };
@@ -311,11 +318,13 @@ export function SmartUploadStep({ onComplete }: SmartUploadStepProps) {
         {/* Step 1: Select Dataset Type */}
         <div className="tf-glass rounded-xl p-6">
           <div className="mb-4 flex items-center gap-3">
-            <div className="bg-primary/20 flex h-8 w-8 items-center justify-center rounded-lg text-sm font-bold text-primary">
+            <div className="bg-primary/20 text-primary flex h-8 w-8 items-center justify-center rounded-lg text-sm font-bold">
               1
             </div>
             <div>
-              <h3 className="text-foreground font-semibold">What type of data are you uploading?</h3>
+              <h3 className="text-foreground font-semibold">
+                What type of data are you uploading?
+              </h3>
               <p className="text-muted-foreground text-sm">
                 This helps us auto-map fields and apply the right validation rules
               </p>
@@ -343,7 +352,7 @@ export function SmartUploadStep({ onComplete }: SmartUploadStepProps) {
                   )}
                 >
                   {isDetected && !isSelected && (
-                    <div className="absolute -top-2 -right-2 flex items-center gap-1 rounded-full bg-primary/20 px-2 py-0.5 text-xs text-primary">
+                    <div className="bg-primary/20 text-primary absolute -top-2 -right-2 flex items-center gap-1 rounded-full px-2 py-0.5 text-xs">
                       <Sparkles className="h-3 w-3" />
                       Detected
                     </div>
@@ -374,7 +383,10 @@ export function SmartUploadStep({ onComplete }: SmartUploadStepProps) {
                   {/* Example fields on hover */}
                   <div className="text-muted-foreground/70 mt-3 flex flex-wrap gap-1">
                     {type.examples.slice(0, 3).map((ex) => (
-                      <span key={ex} className="bg-muted/30 rounded px-1.5 py-0.5 font-mono text-[10px]">
+                      <span
+                        key={ex}
+                        className="bg-muted/30 rounded px-1.5 py-0.5 font-mono text-[10px]"
+                      >
                         {ex}
                       </span>
                     ))}
@@ -398,9 +410,7 @@ export function SmartUploadStep({ onComplete }: SmartUploadStepProps) {
             </div>
             <div>
               <h3 className="text-foreground font-semibold">Upload your file</h3>
-              <p className="text-muted-foreground text-sm">
-                Drag and drop or click to browse
-              </p>
+              <p className="text-muted-foreground text-sm">Drag and drop or click to browse</p>
             </div>
           </div>
 
@@ -420,12 +430,14 @@ export function SmartUploadStep({ onComplete }: SmartUploadStepProps) {
               <div className="space-y-4">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-4">
-                    <div className={cn(
-                      "flex h-14 w-14 items-center justify-center rounded-xl",
-                      detectedContent?.type === "bulk" ? "bg-purple-400/20" : "bg-chart-1/20"
-                    )}>
+                    <div
+                      className={cn(
+                        "flex h-14 w-14 items-center justify-center rounded-xl",
+                        detectedContent?.type === "bulk" ? "bg-purple-400/20" : "bg-chart-1/20"
+                      )}
+                    >
                       {detectedContent?.type === "bulk" ? (
-                        <Package className="text-purple-400 h-7 w-7" />
+                        <Package className="h-7 w-7 text-purple-400" />
                       ) : (
                         <FileText className="text-chart-1 h-7 w-7" />
                       )}
@@ -455,10 +467,9 @@ export function SmartUploadStep({ onComplete }: SmartUploadStepProps) {
                     <div className="mb-3 flex items-center gap-2">
                       <Layers className="h-4 w-4 text-purple-400" />
                       <span className="text-sm font-medium text-purple-400">
-                        {detectedContent.layerCount 
+                        {detectedContent.layerCount
                           ? `${detectedContent.layerCount} layers detected`
-                          : `${detectedContent.containedFiles.length} files detected`
-                        }
+                          : `${detectedContent.containedFiles.length} files detected`}
                       </span>
                     </div>
                     <div className="flex flex-wrap gap-2">
@@ -469,7 +480,9 @@ export function SmartUploadStep({ onComplete }: SmartUploadStepProps) {
                         >
                           {name.endsWith(".csv") && <FileSpreadsheet className="h-3 w-3" />}
                           {name.endsWith(".xlsx") && <Table2 className="h-3 w-3" />}
-                          {(name.endsWith(".geojson") || name.endsWith(".shp")) && <MapIcon className="h-3 w-3" />}
+                          {(name.endsWith(".geojson") || name.endsWith(".shp")) && (
+                            <MapIcon className="h-3 w-3" />
+                          )}
                           {!name.includes(".") && <Database className="h-3 w-3" />}
                           {name}
                         </span>
@@ -509,14 +522,19 @@ export function SmartUploadStep({ onComplete }: SmartUploadStepProps) {
                   onChange={(e) => {
                     const files = Array.from(e.target.files || []);
                     if (files.length > 0 && files[0].webkitRelativePath.includes(".gdb")) {
-                      setFile(new File([], files[0].webkitRelativePath.split("/")[0], { 
-                        type: "application/x-esri-geodatabase" 
-                      }));
+                      setFile(
+                        new File([], files[0].webkitRelativePath.split("/")[0], {
+                          type: "application/x-esri-geodatabase",
+                        })
+                      );
                       setDetectedContent({
                         type: "bulk",
                         format: "Esri File Geodatabase",
-                        layerCount: new Set(files.map(f => f.webkitRelativePath.split("/")[1])).size,
-                        containedFiles: Array.from(new Set(files.map(f => f.webkitRelativePath.split("/")[1]))).slice(0, 8),
+                        layerCount: new Set(files.map((f) => f.webkitRelativePath.split("/")[1]))
+                          .size,
+                        containedFiles: Array.from(
+                          new Set(files.map((f) => f.webkitRelativePath.split("/")[1]))
+                        ).slice(0, 8),
                       });
                     }
                   }}
@@ -590,13 +608,16 @@ export function SmartUploadStep({ onComplete }: SmartUploadStepProps) {
                 <strong>Single Files:</strong> CSV, Excel (.xlsx/.xls), GeoJSON
               </p>
               <p>
-                <strong>Bulk Packages:</strong> ZIP files containing any combination of CSV, Excel, GeoJSON, or Shapefiles (.shp + .dbf + .shx + .prj)
+                <strong>Bulk Packages:</strong> ZIP files containing any combination of CSV, Excel,
+                GeoJSON, or Shapefiles (.shp + .dbf + .shx + .prj)
               </p>
               <p>
-                <strong>Geodatabases:</strong> Esri File Geodatabase folders (.gdb) - use the "Open .gdb Folder" button to select the entire folder
+                <strong>Geodatabases:</strong> Esri File Geodatabase folders (.gdb) - use the "Open
+                .gdb Folder" button to select the entire folder
               </p>
               <p className="text-xs text-blue-400/80">
-                Tip: ZIP files with multiple data types will be processed together and mapped to your selected category
+                Tip: ZIP files with multiple data types will be processed together and mapped to
+                your selected category
               </p>
             </div>
           </div>

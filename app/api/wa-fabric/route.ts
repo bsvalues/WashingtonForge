@@ -3,16 +3,16 @@ import { WA_COUNTIES, type WACountyFips } from "@/lib/wa-data/types";
 
 /**
  * WA Parcel Fabric API
- * 
+ *
  * This route provides access to Washington State parcel data.
  * In production, this would connect to PostgreSQL + PostGIS.
- * 
+ *
  * GET /api/wa-fabric?county=53005
  * GET /api/wa-fabric?county=53005&format=geojson&bbox=-119.5,46.1,-119.2,46.4
  * GET /api/wa-fabric?county=53005&limit=1000&simplify=0.0001
  * GET /api/wa-fabric?county=53005&since=2025-01-01T00:00:00Z
  * GET /api/wa-fabric/stats?county=53005
- * 
+ *
  * Query Parameters:
  * - county: FIPS code (required)
  * - format: "geojson" | "stats" (default: geojson)
@@ -21,7 +21,7 @@ import { WA_COUNTIES, type WACountyFips } from "@/lib/wa-data/types";
  * - simplify: tolerance for geometry simplification (optional, e.g., 0.0001)
  * - since: ISO timestamp, only return parcels updated since (optional)
  * - fields: comma-separated list of properties to include (optional)
- * 
+ *
  * PRODUCTION NOTES:
  * - County-wide GeoJSON can be hundreds of MB - always use bbox or limit
  * - For high-volume use, implement MVT (Mapbox Vector Tiles) endpoint
@@ -29,7 +29,10 @@ import { WA_COUNTIES, type WACountyFips } from "@/lib/wa-data/types";
  */
 
 // County approximate bounds for demo (production: computed from PostGIS)
-const COUNTY_BOUNDS: Record<string, { minLng: number; maxLng: number; minLat: number; maxLat: number }> = {
+const COUNTY_BOUNDS: Record<
+  string,
+  { minLng: number; maxLng: number; minLat: number; maxLat: number }
+> = {
   "53005": { minLng: -119.9, maxLng: -119.0, minLat: 46.0, maxLat: 46.6 }, // Benton
   "53033": { minLng: -122.5, maxLng: -121.0, minLat: 47.0, maxLat: 47.8 }, // King
   "53053": { minLng: -122.8, maxLng: -121.5, minLat: 46.8, maxLat: 47.4 }, // Pierce
@@ -77,12 +80,13 @@ function generateDemoParcelGeoJSON(
   const { limit = 100, bbox, simplify, since, fields } = options;
   const maxLimit = Math.min(limit, 10000); // Cap at 10k for demo
 
-  const countyBounds = bbox || COUNTY_BOUNDS[fips] || {
-    minLng: -123.0,
-    maxLng: -117.0,
-    minLat: 45.5,
-    maxLat: 49.0,
-  };
+  const countyBounds = bbox ||
+    COUNTY_BOUNDS[fips] || {
+      minLng: -123.0,
+      maxLng: -117.0,
+      minLat: 45.5,
+      maxLat: 49.0,
+    };
 
   const features = [];
   let attempts = 0;
@@ -90,39 +94,41 @@ function generateDemoParcelGeoJSON(
 
   while (features.length < maxLimit && attempts < maxAttempts) {
     attempts++;
-    
+
     const lng = countyBounds.minLng + Math.random() * (countyBounds.maxLng - countyBounds.minLng);
     const lat = countyBounds.minLat + Math.random() * (countyBounds.maxLat - countyBounds.minLat);
-    
+
     // Skip if outside requested bbox
     if (bbox && !isWithinBBox(lng, lat, bbox)) continue;
-    
+
     // Generate a simple polygon (small rectangle)
     let size = 0.001 + Math.random() * 0.002;
-    
+
     // Apply simplification (reduce polygon precision)
     if (simplify && simplify > 0) {
       size = Math.max(size, simplify * 10);
     }
-    
+
     const baseProperties: Record<string, string | number> = {
       parcel_uid: `${fips}-${String(features.length + 1).padStart(6, "0")}`,
       county_fips: fips,
       county_name: county.name,
-      original_parcel_id: `${Math.floor(Math.random() * 999999).toString().padStart(6, "0")}`,
+      original_parcel_id: `${Math.floor(Math.random() * 999999)
+        .toString()
+        .padStart(6, "0")}`,
       acreage: parseFloat((Math.random() * 5 + 0.1).toFixed(2)),
       source_version: "WA_Parcels_2025_Sept",
       updated_at: new Date(Date.now() - Math.random() * 365 * 24 * 60 * 60 * 1000).toISOString(),
     };
-    
+
     // Filter properties if fields specified
     const properties = fields
       ? Object.fromEntries(Object.entries(baseProperties).filter(([k]) => fields.includes(k)))
       : baseProperties;
-    
+
     // Skip if since filter and parcel is older
     if (since && baseProperties.updated_at < since) continue;
-    
+
     features.push({
       type: "Feature",
       id: features.length + 1,
@@ -160,9 +166,10 @@ function generateDemoParcelGeoJSON(
       },
       _links: {
         self: `/api/wa-fabric?county=${fips}&limit=${maxLimit}`,
-        next: features.length === maxLimit 
-          ? `/api/wa-fabric?county=${fips}&limit=${maxLimit}&offset=${maxLimit}` 
-          : null,
+        next:
+          features.length === maxLimit
+            ? `/api/wa-fabric?county=${fips}&limit=${maxLimit}&offset=${maxLimit}`
+            : null,
         mvt: `/api/wa-fabric/tiles/{z}/{x}/{y}.mvt?county=${fips}`, // Future MVT endpoint
       },
     },
@@ -181,7 +188,7 @@ export async function GET(request: NextRequest) {
 
   if (!county) {
     return NextResponse.json(
-      { 
+      {
         error: "Missing required parameter: county",
         usage: "GET /api/wa-fabric?county=53005&bbox=-119.5,46.1,-119.2,46.4&limit=1000",
       },
@@ -191,7 +198,7 @@ export async function GET(request: NextRequest) {
 
   if (!WA_COUNTIES[county]) {
     return NextResponse.json(
-      { 
+      {
         error: `Invalid county FIPS code: ${county}`,
         valid_counties: Object.keys(WA_COUNTIES).slice(0, 10).join(", ") + "...",
       },
@@ -216,7 +223,7 @@ export async function GET(request: NextRequest) {
     const headers = new Headers();
     headers.set("Cache-Control", "public, max-age=3600, stale-while-revalidate=86400");
     headers.set("Content-Type", "application/geo+json");
-    
+
     return NextResponse.json(geojson, { headers });
   }
 
@@ -244,10 +251,7 @@ export async function POST(request: NextRequest) {
     const { county_fips, options } = body;
 
     if (!county_fips || !WA_COUNTIES[county_fips as WACountyFips]) {
-      return NextResponse.json(
-        { error: "Invalid or missing county_fips" },
-        { status: 400 }
-      );
+      return NextResponse.json({ error: "Invalid or missing county_fips" }, { status: 400 });
     }
 
     const county = WA_COUNTIES[county_fips as WACountyFips];
@@ -282,9 +286,6 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch {
-    return NextResponse.json(
-      { error: "Invalid request body" },
-      { status: 400 }
-    );
+    return NextResponse.json({ error: "Invalid request body" }, { status: 400 });
   }
 }

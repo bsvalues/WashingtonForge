@@ -38,7 +38,7 @@ export function EnhancedIngestStepper({ steps, currentStep }: EnhancedIngestStep
                     className={cn(
                       "relative flex h-14 w-14 items-center justify-center rounded-2xl transition-all duration-300",
                       isCompleted
-                        ? "bg-chart-1/20 text-chart-1 shadow-lg shadow-chart-1/20"
+                        ? "bg-chart-1/20 text-chart-1 shadow-chart-1/20 shadow-lg"
                         : isCurrent
                           ? "bg-primary/20 text-primary ring-primary/30 ring-2 ring-offset-2 ring-offset-transparent"
                           : "bg-muted/30 text-muted-foreground"
@@ -49,7 +49,7 @@ export function EnhancedIngestStepper({ steps, currentStep }: EnhancedIngestStep
                     ) : (
                       <Icon className="h-6 w-6" />
                     )}
-                    
+
                     {/* Pulse animation for current step */}
                     {isCurrent && (
                       <span className="bg-primary/30 absolute inset-0 animate-ping rounded-2xl opacity-75" />
@@ -84,7 +84,7 @@ export function EnhancedIngestStepper({ steps, currentStep }: EnhancedIngestStep
                       className={cn(
                         "h-1 rounded-full transition-all duration-500",
                         index < currentIndex
-                          ? "bg-gradient-to-r from-chart-1/60 to-chart-1/40"
+                          ? "from-chart-1/60 to-chart-1/40 bg-gradient-to-r"
                           : "bg-border/50"
                       )}
                     />
@@ -129,12 +129,10 @@ export function EnhancedIngestStepper({ steps, currentStep }: EnhancedIngestStep
             );
           })}
         </div>
-        
+
         {/* Current step description on mobile */}
         <div className="mt-4 text-center">
-          <p className="text-muted-foreground text-sm">
-            {steps[currentIndex]?.description}
-          </p>
+          <p className="text-muted-foreground text-sm">{steps[currentIndex]?.description}</p>
         </div>
       </div>
     </div>

@@ -26,6 +26,7 @@ This document provides **reproducible proof excerpts** that map governance contr
 **Control:** `REQUIRED_APPROVALS=2` — All pilot actions require dual approval before execution.
 
 **Evidence Excerpt:**
+
 ```
 Approval Chain for SNAPSHOT_PUBLISH (sha256:snap_2025_q4)
 ─────────────────────────────────────────────────────────
@@ -35,12 +36,12 @@ Action Executed: 2025-12-15T14:25:18Z
 Execution Hash: sha256:exec_snap_publish_001
 ```
 
-| Field | Value |
-|-------|-------|
-| Evidence Hash | `sha256:dual_approval_snap_2025_q4` |
-| Generation Timestamp | 2025-12-15T14:25:18Z |
-| Source Table | `audit_events` |
-| Verification | `SELECT hash(approval_chain) WHERE resource_id = 'snap_2025_q4'` |
+| Field                | Value                                                            |
+| -------------------- | ---------------------------------------------------------------- |
+| Evidence Hash        | `sha256:dual_approval_snap_2025_q4`                              |
+| Generation Timestamp | 2025-12-15T14:25:18Z                                             |
+| Source Table         | `audit_events`                                                   |
+| Verification         | `SELECT hash(approval_chain) WHERE resource_id = 'snap_2025_q4'` |
 
 ---
 
@@ -49,6 +50,7 @@ Execution Hash: sha256:exec_snap_publish_001
 **Control:** System enters safe-mode if availability drops below 99.5% for 15 consecutive minutes.
 
 **Evidence Excerpt:**
+
 ```
 Availability Monitor Log (2025-Q4)
 ──────────────────────────────────
@@ -61,12 +63,12 @@ Minimum Observed: 99.62% @ 2025-11-03T03:14:00Z
 Recovery: Automatic (no intervention required)
 ```
 
-| Field | Value |
-|-------|-------|
-| Evidence Hash | `sha256:avail_monitor_2025_q4` |
-| Generation Timestamp | 2026-01-01T00:00:00Z |
-| Source Table | `availability_metrics` |
-| Verification | `SELECT hash(metrics) WHERE period = '2025-Q4' AND metric = 'availability'` |
+| Field                | Value                                                                       |
+| -------------------- | --------------------------------------------------------------------------- |
+| Evidence Hash        | `sha256:avail_monitor_2025_q4`                                              |
+| Generation Timestamp | 2026-01-01T00:00:00Z                                                        |
+| Source Table         | `availability_metrics`                                                      |
+| Verification         | `SELECT hash(metrics) WHERE period = '2025-Q4' AND metric = 'availability'` |
 
 ---
 
@@ -75,6 +77,7 @@ Recovery: Automatic (no intervention required)
 **Control:** War room escalation triggered if MTTR exceeds 30 minutes.
 
 **Evidence Excerpt:**
+
 ```
 Incident Response Log (2025 Full Year)
 ──────────────────────────────────────
@@ -89,12 +92,12 @@ Threshold Breaches: 0
 Escalations Triggered: 0
 ```
 
-| Field | Value |
-|-------|-------|
-| Evidence Hash | `sha256:mttr_log_2025_full` |
-| Generation Timestamp | 2026-01-01T00:00:00Z |
-| Source Table | `incident_log` |
-| Verification | `SELECT hash(mttr_stats) WHERE year = 2025` |
+| Field                | Value                                       |
+| -------------------- | ------------------------------------------- |
+| Evidence Hash        | `sha256:mttr_log_2025_full`                 |
+| Generation Timestamp | 2026-01-01T00:00:00Z                        |
+| Source Table         | `incident_log`                              |
+| Verification         | `SELECT hash(mttr_stats) WHERE year = 2025` |
 
 ---
 
@@ -103,6 +106,7 @@ Escalations Triggered: 0
 **Control:** New deployments halted if rollback success rate falls below 95%.
 
 **Evidence Excerpt:**
+
 ```
 Deployment Rollback Log (2025 Full Year)
 ────────────────────────────────────────
@@ -115,12 +119,12 @@ Threshold: 95%
 Status: COMPLIANT
 ```
 
-| Field | Value |
-|-------|-------|
-| Evidence Hash | `sha256:rollback_log_2025_full` |
-| Generation Timestamp | 2026-01-01T00:00:00Z |
-| Source Table | `deployment_log` |
-| Verification | `SELECT hash(rollback_stats) WHERE year = 2025` |
+| Field                | Value                                           |
+| -------------------- | ----------------------------------------------- |
+| Evidence Hash        | `sha256:rollback_log_2025_full`                 |
+| Generation Timestamp | 2026-01-01T00:00:00Z                            |
+| Source Table         | `deployment_log`                                |
+| Verification         | `SELECT hash(rollback_stats) WHERE year = 2025` |
 
 ---
 
@@ -129,6 +133,7 @@ Status: COMPLIANT
 **Control:** Production writes blocked if DR backup exceeds 90 days age.
 
 **Evidence Excerpt:**
+
 ```
 Disaster Recovery Validation Log
 ────────────────────────────────
@@ -145,12 +150,12 @@ Validation Test Results:
   - Record Count Match: PASS (847,293 records)
 ```
 
-| Field | Value |
-|-------|-------|
-| Evidence Hash | `sha256:dr_validation_2025_12_20` |
-| Generation Timestamp | 2025-12-20T04:15:33Z |
-| Source Table | `dr_validation_log` |
-| Verification | `SELECT hash(validation_result) WHERE backup_date = '2025-12-20'` |
+| Field                | Value                                                             |
+| -------------------- | ----------------------------------------------------------------- |
+| Evidence Hash        | `sha256:dr_validation_2025_12_20`                                 |
+| Generation Timestamp | 2025-12-20T04:15:33Z                                              |
+| Source Table         | `dr_validation_log`                                               |
+| Verification         | `SELECT hash(validation_result) WHERE backup_date = '2025-12-20'` |
 
 ---
 
@@ -159,6 +164,7 @@ Validation Test Results:
 **Control:** Immediate freeze and audit if compliance breach detected.
 
 **Evidence Excerpt:**
+
 ```
 Compliance Monitor Log (2025 Full Year)
 ───────────────────────────────────────
@@ -173,12 +179,12 @@ Warning Details:
 Freeze Events: 0
 ```
 
-| Field | Value |
-|-------|-------|
-| Evidence Hash | `sha256:compliance_monitor_2025` |
-| Generation Timestamp | 2026-01-01T00:00:00Z |
-| Source Table | `compliance_checks` |
-| Verification | `SELECT hash(check_results) WHERE year = 2025` |
+| Field                | Value                                          |
+| -------------------- | ---------------------------------------------- |
+| Evidence Hash        | `sha256:compliance_monitor_2025`               |
+| Generation Timestamp | 2026-01-01T00:00:00Z                           |
+| Source Table         | `compliance_checks`                            |
+| Verification         | `SELECT hash(check_results) WHERE year = 2025` |
 
 ---
 
@@ -187,6 +193,7 @@ Freeze Events: 0
 **Control:** Assessment ratios must meet IAAO standards (Median 0.90-1.10, COD ≤15%, PRD 0.98-1.03, PRB ±0.05).
 
 **Evidence Excerpt:**
+
 ```
 IAAO Compliance Summary (Roll Year 2025)
 ────────────────────────────────────────
@@ -202,12 +209,12 @@ Metrics:
 Overall Status: COMPLIANT
 ```
 
-| Field | Value |
-|-------|-------|
-| Evidence Hash | `sha256:iaao_compliance_2025_benton` |
-| Generation Timestamp | 2025-12-31T23:59:59Z |
-| Source Table | `ratio_study_results` |
-| Verification | `SELECT hash(iaao_metrics) WHERE roll_year = 2025 AND agency = 'benton'` |
+| Field                | Value                                                                    |
+| -------------------- | ------------------------------------------------------------------------ |
+| Evidence Hash        | `sha256:iaao_compliance_2025_benton`                                     |
+| Generation Timestamp | 2025-12-31T23:59:59Z                                                     |
+| Source Table         | `ratio_study_results`                                                    |
+| Verification         | `SELECT hash(iaao_metrics) WHERE roll_year = 2025 AND agency = 'benton'` |
 
 ---
 
@@ -216,6 +223,7 @@ Overall Status: COMPLIANT
 **Control:** All trace payloads must be PII-safe with `sha256:` prefixed identifiers.
 
 **Evidence Excerpt:**
+
 ```
 PII Sanitization Audit (Sample)
 ───────────────────────────────
@@ -230,12 +238,12 @@ Sanitization Method: lib/pilot/pii.ts::sanitizeText()
 Regex Patterns Applied: SSN, EMAIL, PHONE
 ```
 
-| Field | Value |
-|-------|-------|
-| Evidence Hash | `sha256:pii_audit_sample_001` |
-| Generation Timestamp | 2026-02-03T12:00:00Z |
-| Source Function | `lib/pilot/pii.ts::sanitizeText()` |
-| Verification | `grep -E "(REDACTED|sha256:)" trace_output.log` |
+| Field                | Value                              |
+| -------------------- | ---------------------------------- | --------------------------- |
+| Evidence Hash        | `sha256:pii_audit_sample_001`      |
+| Generation Timestamp | 2026-02-03T12:00:00Z               |
+| Source Function      | `lib/pilot/pii.ts::sanitizeText()` |
+| Verification         | `grep -E "(REDACTED                | sha256:)" trace_output.log` |
 
 ---
 
@@ -268,12 +276,12 @@ If hashes do not match, the evidence has been modified since generation.
 
 ## 4. Attestation
 
-| Field | Value |
-|-------|-------|
-| Document Generated By | TerraFusion Governance Engine v2.1.0 |
-| Generation Timestamp | 2026-02-03T12:00:00Z |
-| Total Evidence Hashes | 8 |
-| Cross-References Validated | Yes |
+| Field                      | Value                                |
+| -------------------------- | ------------------------------------ |
+| Document Generated By      | TerraFusion Governance Engine v2.1.0 |
+| Generation Timestamp       | 2026-02-03T12:00:00Z                 |
+| Total Evidence Hashes      | 8                                    |
+| Cross-References Validated | Yes                                  |
 
 ---
 

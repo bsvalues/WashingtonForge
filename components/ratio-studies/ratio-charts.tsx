@@ -120,69 +120,67 @@ export function RatioCharts({
             className="h-64"
           >
             <BarChart
-                data={neighborhoodData}
-                layout="vertical"
-                margin={{ top: 5, right: 30, left: 80, bottom: 5 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.3 0.02 260 / 0.3)" />
-                <XAxis
-                  type="number"
-                  domain={[thresholds.ratioMin - 0.05, thresholds.ratioMax + 0.05]}
-                  tick={{ fill: "oklch(0.65 0.02 260)" }}
-                  tickLine={{ stroke: "oklch(0.3 0.02 260)" }}
-                />
-                <YAxis
-                  type="category"
-                  dataKey="name"
-                  tick={{ fill: "oklch(0.65 0.02 260)", fontSize: 12 }}
-                  tickLine={{ stroke: "oklch(0.3 0.02 260)" }}
-                  width={70}
-                />
-                <ChartTooltip
-                  content={({ payload }) => {
-                    if (!payload?.[0]) return null;
-                    const data = payload[0].payload;
-                    return (
-                      <div className="tf-glass border-border/50 rounded-lg border p-2 text-xs">
-                        <p className="text-foreground font-medium">{data.name}</p>
-                        <p className="text-muted-foreground">
-                          Median Ratio: {data.ratio.toFixed(3)}
-                        </p>
-                        <p className="text-muted-foreground">COD: {data.cod.toFixed(1)}%</p>
-                        <p className="text-muted-foreground">Sample: {data.count}</p>
-                      </div>
-                    );
-                  }}
-                  cursor={{ fill: "oklch(0.2 0.02 260 / 0.3)" }}
-                />
-                {/* IAAO Compliance Reference Lines */}
-                <ReferenceLine
-                  x={ratioTarget}
-                  stroke="oklch(0.65 0.02 260)"
-                  strokeDasharray="3 3"
-                  label={{
-                    value: "1.00",
-                    fill: "oklch(0.65 0.02 260)",
-                    fontSize: 10,
-                    position: "top",
-                  }}
-                />
-                <ReferenceLine
-                  x={fairBandMin}
-                  stroke="oklch(0.65 0.2 150 / 0.5)"
-                  strokeDasharray="2 2"
-                />
-                <ReferenceLine
-                  x={fairBandMax}
-                  stroke="oklch(0.65 0.2 150 / 0.5)"
-                  strokeDasharray="2 2"
-                />
-                <Bar dataKey="ratio" radius={[0, 4, 4, 0]}>
-                  {neighborhoodData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={getRatioBarColor(entry.ratio, thresholds)} />
-                  ))}
-                </Bar>
-              </BarChart>
+              data={neighborhoodData}
+              layout="vertical"
+              margin={{ top: 5, right: 30, left: 80, bottom: 5 }}
+            >
+              <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.3 0.02 260 / 0.3)" />
+              <XAxis
+                type="number"
+                domain={[thresholds.ratioMin - 0.05, thresholds.ratioMax + 0.05]}
+                tick={{ fill: "oklch(0.65 0.02 260)" }}
+                tickLine={{ stroke: "oklch(0.3 0.02 260)" }}
+              />
+              <YAxis
+                type="category"
+                dataKey="name"
+                tick={{ fill: "oklch(0.65 0.02 260)", fontSize: 12 }}
+                tickLine={{ stroke: "oklch(0.3 0.02 260)" }}
+                width={70}
+              />
+              <ChartTooltip
+                content={({ payload }) => {
+                  if (!payload?.[0]) return null;
+                  const data = payload[0].payload;
+                  return (
+                    <div className="tf-glass border-border/50 rounded-lg border p-2 text-xs">
+                      <p className="text-foreground font-medium">{data.name}</p>
+                      <p className="text-muted-foreground">Median Ratio: {data.ratio.toFixed(3)}</p>
+                      <p className="text-muted-foreground">COD: {data.cod.toFixed(1)}%</p>
+                      <p className="text-muted-foreground">Sample: {data.count}</p>
+                    </div>
+                  );
+                }}
+                cursor={{ fill: "oklch(0.2 0.02 260 / 0.3)" }}
+              />
+              {/* IAAO Compliance Reference Lines */}
+              <ReferenceLine
+                x={ratioTarget}
+                stroke="oklch(0.65 0.02 260)"
+                strokeDasharray="3 3"
+                label={{
+                  value: "1.00",
+                  fill: "oklch(0.65 0.02 260)",
+                  fontSize: 10,
+                  position: "top",
+                }}
+              />
+              <ReferenceLine
+                x={fairBandMin}
+                stroke="oklch(0.65 0.2 150 / 0.5)"
+                strokeDasharray="2 2"
+              />
+              <ReferenceLine
+                x={fairBandMax}
+                stroke="oklch(0.65 0.2 150 / 0.5)"
+                strokeDasharray="2 2"
+              />
+              <Bar dataKey="ratio" radius={[0, 4, 4, 0]}>
+                {neighborhoodData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={getRatioBarColor(entry.ratio, thresholds)} />
+                ))}
+              </Bar>
+            </BarChart>
           </ChartContainer>
         </div>
       )}
@@ -202,62 +200,53 @@ export function RatioCharts({
             }}
             className="h-64"
           >
-            <BarChart
-              data={propertyClassData}
-                margin={{ top: 5, right: 30, left: 20, bottom: 40 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.3 0.02 260 / 0.3)" />
-                <XAxis
-                  dataKey="name"
-                  tick={{ fill: "oklch(0.65 0.02 260)", fontSize: 11 }}
-                  tickLine={{ stroke: "oklch(0.3 0.02 260)" }}
-                  angle={-20}
-                  textAnchor="end"
-                  height={60}
-                />
-                <YAxis
-                  domain={[thresholds.ratioMin - 0.05, thresholds.ratioMax + 0.05]}
-                  tick={{ fill: "oklch(0.65 0.02 260)" }}
-                  tickLine={{ stroke: "oklch(0.3 0.02 260)" }}
-                />
-                <ChartTooltip
-                  content={({ payload }) => {
-                    if (!payload?.[0]) return null;
-                    const data = payload[0].payload;
-                    return (
-                      <div className="tf-glass border-border/50 rounded-lg border p-2 text-xs">
-                        <p className="text-foreground font-medium">{data.name}</p>
-                        <p className="text-muted-foreground">
-                          Median Ratio: {data.ratio.toFixed(3)}
-                        </p>
-                        <p className="text-muted-foreground">COD: {data.cod.toFixed(1)}%</p>
-                        <p className="text-muted-foreground">Sample: {data.count}</p>
-                      </div>
-                    );
-                  }}
-                  cursor={{ fill: "oklch(0.2 0.02 260 / 0.3)" }}
-                />
-                <ReferenceLine
-                  y={ratioTarget}
-                  stroke="oklch(0.65 0.02 260)"
-                  strokeDasharray="3 3"
-                />
-                <ReferenceLine
-                  y={fairBandMin}
-                  stroke="oklch(0.65 0.2 150 / 0.5)"
-                  strokeDasharray="2 2"
-                />
-                <ReferenceLine
-                  y={fairBandMax}
-                  stroke="oklch(0.65 0.2 150 / 0.5)"
-                  strokeDasharray="2 2"
-                />
-                <Bar dataKey="ratio" radius={[4, 4, 0, 0]}>
-                  {propertyClassData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={getRatioBarColor(entry.ratio, thresholds)} />
-                  ))}
-                </Bar>
-              </BarChart>
+            <BarChart data={propertyClassData} margin={{ top: 5, right: 30, left: 20, bottom: 40 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.3 0.02 260 / 0.3)" />
+              <XAxis
+                dataKey="name"
+                tick={{ fill: "oklch(0.65 0.02 260)", fontSize: 11 }}
+                tickLine={{ stroke: "oklch(0.3 0.02 260)" }}
+                angle={-20}
+                textAnchor="end"
+                height={60}
+              />
+              <YAxis
+                domain={[thresholds.ratioMin - 0.05, thresholds.ratioMax + 0.05]}
+                tick={{ fill: "oklch(0.65 0.02 260)" }}
+                tickLine={{ stroke: "oklch(0.3 0.02 260)" }}
+              />
+              <ChartTooltip
+                content={({ payload }) => {
+                  if (!payload?.[0]) return null;
+                  const data = payload[0].payload;
+                  return (
+                    <div className="tf-glass border-border/50 rounded-lg border p-2 text-xs">
+                      <p className="text-foreground font-medium">{data.name}</p>
+                      <p className="text-muted-foreground">Median Ratio: {data.ratio.toFixed(3)}</p>
+                      <p className="text-muted-foreground">COD: {data.cod.toFixed(1)}%</p>
+                      <p className="text-muted-foreground">Sample: {data.count}</p>
+                    </div>
+                  );
+                }}
+                cursor={{ fill: "oklch(0.2 0.02 260 / 0.3)" }}
+              />
+              <ReferenceLine y={ratioTarget} stroke="oklch(0.65 0.02 260)" strokeDasharray="3 3" />
+              <ReferenceLine
+                y={fairBandMin}
+                stroke="oklch(0.65 0.2 150 / 0.5)"
+                strokeDasharray="2 2"
+              />
+              <ReferenceLine
+                y={fairBandMax}
+                stroke="oklch(0.65 0.2 150 / 0.5)"
+                strokeDasharray="2 2"
+              />
+              <Bar dataKey="ratio" radius={[4, 4, 0, 0]}>
+                {propertyClassData.map((entry, index) => (
+                  <Cell key={`cell-${index}`} fill={getRatioBarColor(entry.ratio, thresholds)} />
+                ))}
+              </Bar>
+            </BarChart>
           </ChartContainer>
         </div>
       )}
@@ -276,93 +265,93 @@ export function RatioCharts({
           className="h-64"
         >
           <ComposedChart data={trendData} margin={{ top: 5, right: 50, left: 20, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.3 0.02 260 / 0.3)" />
-              <XAxis
-                dataKey="year"
-                tick={{ fill: "oklch(0.65 0.02 260)" }}
-                tickLine={{ stroke: "oklch(0.3 0.02 260)" }}
-              />
-              <YAxis
-                yAxisId="left"
-                domain={[0.85, 1.05]}
-                tick={{ fill: "oklch(0.65 0.02 260)" }}
-                tickLine={{ stroke: "oklch(0.3 0.02 260)" }}
-              />
-              <YAxis
-                yAxisId="right"
-                orientation="right"
-                domain={[8, 20]}
-                tick={{ fill: "oklch(0.65 0.02 260)" }}
-                tickLine={{ stroke: "oklch(0.3 0.02 260)" }}
-                label={{
-                  value: "COD %",
-                  angle: 90,
-                  position: "insideRight",
-                  fill: "oklch(0.65 0.02 260)",
-                  fontSize: 10,
-                }}
-              />
-              <ChartTooltip
-                content={({ payload, label }) => {
-                  if (!payload?.length) return null;
-                  return (
-                    <div className="tf-glass border-border/50 rounded-lg border p-2 text-xs">
-                      <p className="text-foreground mb-1 font-medium">{label}</p>
-                      {payload.map((p, i) => (
-                        <p key={i} className="text-muted-foreground">
-                          {p.name}: {typeof p.value === "number" ? p.value.toFixed(3) : p.value}
-                          {p.name === "COD" ? "%" : ""}
-                        </p>
-                      ))}
-                    </div>
-                  );
-                }}
-              />
-              {/* IAAO Compliance Band Area */}
-              <Area
-                yAxisId="left"
-                type="monotone"
-                dataKey="complianceBandMax"
-                fill="oklch(0.65 0.2 150 / 0.1)"
-                stroke="none"
-              />
-              <ReferenceLine
-                yAxisId="left"
-                y={ratioTarget}
-                stroke="oklch(0.65 0.02 260 / 0.5)"
-                strokeDasharray="3 3"
-              />
-              <ReferenceLine
-                yAxisId="right"
-                y={thresholds.codMax}
-                stroke="oklch(0.6 0.22 25 / 0.5)"
-                strokeDasharray="3 3"
-                label={{
-                  value: `COD Max: ${thresholds.codMax}%`,
-                  fill: "oklch(0.65 0.02 260)",
-                  fontSize: 9,
-                  position: "right",
-                }}
-              />
-              <Line
-                yAxisId="left"
-                type="monotone"
-                dataKey="ratio"
-                stroke="oklch(0.65 0.2 150)"
-                strokeWidth={2}
-                dot={{ fill: "oklch(0.65 0.2 150)", r: 4 }}
-                name="Median Ratio"
-              />
-              <Line
-                yAxisId="right"
-                type="monotone"
-                dataKey="cod"
-                stroke="oklch(0.7 0.15 200)"
-                strokeWidth={2}
-                dot={{ fill: "oklch(0.7 0.15 200)", r: 4 }}
-                name="COD"
-              />
-            </ComposedChart>
+            <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.3 0.02 260 / 0.3)" />
+            <XAxis
+              dataKey="year"
+              tick={{ fill: "oklch(0.65 0.02 260)" }}
+              tickLine={{ stroke: "oklch(0.3 0.02 260)" }}
+            />
+            <YAxis
+              yAxisId="left"
+              domain={[0.85, 1.05]}
+              tick={{ fill: "oklch(0.65 0.02 260)" }}
+              tickLine={{ stroke: "oklch(0.3 0.02 260)" }}
+            />
+            <YAxis
+              yAxisId="right"
+              orientation="right"
+              domain={[8, 20]}
+              tick={{ fill: "oklch(0.65 0.02 260)" }}
+              tickLine={{ stroke: "oklch(0.3 0.02 260)" }}
+              label={{
+                value: "COD %",
+                angle: 90,
+                position: "insideRight",
+                fill: "oklch(0.65 0.02 260)",
+                fontSize: 10,
+              }}
+            />
+            <ChartTooltip
+              content={({ payload, label }) => {
+                if (!payload?.length) return null;
+                return (
+                  <div className="tf-glass border-border/50 rounded-lg border p-2 text-xs">
+                    <p className="text-foreground mb-1 font-medium">{label}</p>
+                    {payload.map((p, i) => (
+                      <p key={i} className="text-muted-foreground">
+                        {p.name}: {typeof p.value === "number" ? p.value.toFixed(3) : p.value}
+                        {p.name === "COD" ? "%" : ""}
+                      </p>
+                    ))}
+                  </div>
+                );
+              }}
+            />
+            {/* IAAO Compliance Band Area */}
+            <Area
+              yAxisId="left"
+              type="monotone"
+              dataKey="complianceBandMax"
+              fill="oklch(0.65 0.2 150 / 0.1)"
+              stroke="none"
+            />
+            <ReferenceLine
+              yAxisId="left"
+              y={ratioTarget}
+              stroke="oklch(0.65 0.02 260 / 0.5)"
+              strokeDasharray="3 3"
+            />
+            <ReferenceLine
+              yAxisId="right"
+              y={thresholds.codMax}
+              stroke="oklch(0.6 0.22 25 / 0.5)"
+              strokeDasharray="3 3"
+              label={{
+                value: `COD Max: ${thresholds.codMax}%`,
+                fill: "oklch(0.65 0.02 260)",
+                fontSize: 9,
+                position: "right",
+              }}
+            />
+            <Line
+              yAxisId="left"
+              type="monotone"
+              dataKey="ratio"
+              stroke="oklch(0.65 0.2 150)"
+              strokeWidth={2}
+              dot={{ fill: "oklch(0.65 0.2 150)", r: 4 }}
+              name="Median Ratio"
+            />
+            <Line
+              yAxisId="right"
+              type="monotone"
+              dataKey="cod"
+              stroke="oklch(0.7 0.15 200)"
+              strokeWidth={2}
+              dot={{ fill: "oklch(0.7 0.15 200)", r: 4 }}
+              name="COD"
+            />
+          </ComposedChart>
         </ChartContainer>
         <div className="mt-3 flex justify-center gap-6 text-xs">
           <div className="flex items-center gap-2">
@@ -398,75 +387,72 @@ export function RatioCharts({
           className="h-64"
         >
           <ScatterChart margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.3 0.02 260 / 0.3)" />
-              <XAxis
-                type="number"
-                dataKey="salePrice"
-                name="Sale Price"
-                tick={{ fill: "oklch(0.65 0.02 260)", fontSize: 11 }}
-                tickLine={{ stroke: "oklch(0.3 0.02 260)" }}
-                tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
-              />
-              <YAxis
-                type="number"
-                dataKey="ratio"
-                name="Ratio"
-                domain={[thresholds.ratioMin - 0.1, thresholds.ratioMax + 0.1]}
-                tick={{ fill: "oklch(0.65 0.02 260)" }}
-                tickLine={{ stroke: "oklch(0.3 0.02 260)" }}
-              />
-              <ZAxis type="number" dataKey="size" range={[20, 80]} />
-              <ChartTooltip
-                content={({ payload }) => {
-                  if (!payload?.[0]) return null;
-                  const data = payload[0].payload;
-                  return (
-                    <div className="tf-glass border-border/50 rounded-lg border p-2 text-xs">
-                      <p className="text-foreground">Sale: ${data.salePrice.toLocaleString()}</p>
-                      <p className="text-foreground">Ratio: {data.ratio.toFixed(3)}</p>
-                      <p className="text-muted-foreground">
-                        Status:{" "}
-                        {data.ratio >= 0.95 && data.ratio <= 1.05
-                          ? "Fair"
-                          : data.ratio < 0.95
-                            ? "Progressive"
-                            : "Regressive"}
-                      </p>
-                    </div>
-                  );
-                }}
-              />
-              {/* IAAO Reference Lines */}
-              <ReferenceLine y={ratioTarget} stroke="oklch(0.65 0.02 260)" strokeDasharray="3 3" />
-              <ReferenceLine
-                y={fairBandMin}
-                stroke="oklch(0.65 0.2 150 / 0.5)"
-                strokeDasharray="2 2"
-              />
-              <ReferenceLine
-                y={fairBandMax}
-                stroke="oklch(0.65 0.2 150 / 0.5)"
-                strokeDasharray="2 2"
-              />
-              <ReferenceLine
-                y={thresholds.ratioMin}
-                stroke="oklch(0.6 0.22 25 / 0.3)"
-                strokeDasharray="4 4"
-              />
-              <ReferenceLine
-                y={thresholds.ratioMax}
-                stroke="oklch(0.6 0.22 25 / 0.3)"
-                strokeDasharray="4 4"
-              />
-              <Scatter data={scatterData}>
-                {scatterData.map((entry, index) => (
-                  <Cell
-                    key={`cell-${index}`}
-                    fill={getScatterPointColor(entry.ratio, thresholds)}
-                  />
-                ))}
-              </Scatter>
-            </ScatterChart>
+            <CartesianGrid strokeDasharray="3 3" stroke="oklch(0.3 0.02 260 / 0.3)" />
+            <XAxis
+              type="number"
+              dataKey="salePrice"
+              name="Sale Price"
+              tick={{ fill: "oklch(0.65 0.02 260)", fontSize: 11 }}
+              tickLine={{ stroke: "oklch(0.3 0.02 260)" }}
+              tickFormatter={(value) => `$${(value / 1000).toFixed(0)}k`}
+            />
+            <YAxis
+              type="number"
+              dataKey="ratio"
+              name="Ratio"
+              domain={[thresholds.ratioMin - 0.1, thresholds.ratioMax + 0.1]}
+              tick={{ fill: "oklch(0.65 0.02 260)" }}
+              tickLine={{ stroke: "oklch(0.3 0.02 260)" }}
+            />
+            <ZAxis type="number" dataKey="size" range={[20, 80]} />
+            <ChartTooltip
+              content={({ payload }) => {
+                if (!payload?.[0]) return null;
+                const data = payload[0].payload;
+                return (
+                  <div className="tf-glass border-border/50 rounded-lg border p-2 text-xs">
+                    <p className="text-foreground">Sale: ${data.salePrice.toLocaleString()}</p>
+                    <p className="text-foreground">Ratio: {data.ratio.toFixed(3)}</p>
+                    <p className="text-muted-foreground">
+                      Status:{" "}
+                      {data.ratio >= 0.95 && data.ratio <= 1.05
+                        ? "Fair"
+                        : data.ratio < 0.95
+                          ? "Progressive"
+                          : "Regressive"}
+                    </p>
+                  </div>
+                );
+              }}
+            />
+            {/* IAAO Reference Lines */}
+            <ReferenceLine y={ratioTarget} stroke="oklch(0.65 0.02 260)" strokeDasharray="3 3" />
+            <ReferenceLine
+              y={fairBandMin}
+              stroke="oklch(0.65 0.2 150 / 0.5)"
+              strokeDasharray="2 2"
+            />
+            <ReferenceLine
+              y={fairBandMax}
+              stroke="oklch(0.65 0.2 150 / 0.5)"
+              strokeDasharray="2 2"
+            />
+            <ReferenceLine
+              y={thresholds.ratioMin}
+              stroke="oklch(0.6 0.22 25 / 0.3)"
+              strokeDasharray="4 4"
+            />
+            <ReferenceLine
+              y={thresholds.ratioMax}
+              stroke="oklch(0.6 0.22 25 / 0.3)"
+              strokeDasharray="4 4"
+            />
+            <Scatter data={scatterData}>
+              {scatterData.map((entry, index) => (
+                <Cell key={`cell-${index}`} fill={getScatterPointColor(entry.ratio, thresholds)} />
+              ))}
+            </Scatter>
+          </ScatterChart>
         </ChartContainer>
         <div className="mt-3 flex justify-center gap-4 text-xs">
           <div className="flex items-center gap-1">

@@ -22,27 +22,32 @@ const quickStartSteps = [
   {
     icon: FileSpreadsheet,
     title: "Choose Data Type & Upload",
-    description: "Select what kind of data you're uploading (Parcel, Sales, Building, or Assessment), then drag and drop your file.",
+    description:
+      "Select what kind of data you're uploading (Parcel, Sales, Building, or Assessment), then drag and drop your file.",
   },
   {
     icon: Link2,
     title: "Map Your Fields",
-    description: "TerraFusion auto-maps common column names. Review the mappings and adjust any that need correction.",
+    description:
+      "TerraFusion auto-maps common column names. Review the mappings and adjust any that need correction.",
   },
   {
     icon: ShieldCheck,
     title: "Validate Data Quality",
-    description: "Our validation engine checks for missing values, format issues, and data ranges. Fix errors or proceed with warnings.",
+    description:
+      "Our validation engine checks for missing values, format issues, and data ranges. Fix errors or proceed with warnings.",
   },
   {
     icon: Eye,
     title: "Preview Results",
-    description: "Review a sample of your mapped data to ensure everything looks correct before publishing.",
+    description:
+      "Review a sample of your mapped data to ensure everything looks correct before publishing.",
   },
   {
     icon: Rocket,
     title: "Publish to Pipeline",
-    description: "Once published, your data enters the FusionCore pipeline for ratio studies and compliance analysis.",
+    description:
+      "Once published, your data enters the FusionCore pipeline for ratio studies and compliance analysis.",
   },
 ];
 
@@ -61,7 +66,7 @@ export function IngestQuickStart({ onDismiss }: IngestQuickStartProps) {
       {/* Dismiss button */}
       <button
         onClick={handleDismiss}
-        className="text-muted-foreground hover:text-foreground absolute right-4 top-4 transition-colors"
+        className="text-muted-foreground hover:text-foreground absolute top-4 right-4 transition-colors"
         aria-label="Dismiss quick start guide"
       >
         <X className="h-5 w-5" />
@@ -74,9 +79,7 @@ export function IngestQuickStart({ onDismiss }: IngestQuickStartProps) {
         </div>
         <div>
           <h3 className="text-foreground font-semibold">Quick Start Guide</h3>
-          <p className="text-muted-foreground text-sm">
-            New to data ingest? Here's how it works:
-          </p>
+          <p className="text-muted-foreground text-sm">New to data ingest? Here's how it works:</p>
         </div>
       </div>
 
@@ -86,7 +89,7 @@ export function IngestQuickStart({ onDismiss }: IngestQuickStartProps) {
           const Icon = step.icon;
           return (
             <div key={step.title} className="flex items-start gap-3">
-              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-muted/30">
+              <div className="bg-muted/30 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
                 <Icon className="text-muted-foreground h-4 w-4" />
               </div>
               <div className="min-w-0 flex-1">
@@ -108,13 +111,13 @@ export function IngestQuickStart({ onDismiss }: IngestQuickStartProps) {
       {/* Tips */}
       <div className="mt-6 flex flex-wrap gap-2 border-t border-amber-400/20 pt-4">
         <span className="text-muted-foreground text-xs">Tips:</span>
-        <span className="rounded-full bg-muted/20 px-2 py-0.5 text-xs text-muted-foreground">
+        <span className="bg-muted/20 text-muted-foreground rounded-full px-2 py-0.5 text-xs">
           CSV files should have headers
         </span>
-        <span className="rounded-full bg-muted/20 px-2 py-0.5 text-xs text-muted-foreground">
+        <span className="bg-muted/20 text-muted-foreground rounded-full px-2 py-0.5 text-xs">
           Geometry can be WKT or GeoJSON
         </span>
-        <span className="rounded-full bg-muted/20 px-2 py-0.5 text-xs text-muted-foreground">
+        <span className="bg-muted/20 text-muted-foreground rounded-full px-2 py-0.5 text-xs">
           Max file size: 100MB
         </span>
       </div>

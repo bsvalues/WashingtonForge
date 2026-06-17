@@ -15,14 +15,19 @@ import {
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { eventBus, type DataSuiteEvent, type DataProductType, DATA_PRODUCTS } from "@/lib/data-suite";
+import {
+  eventBus,
+  type DataSuiteEvent,
+  type DataProductType,
+  DATA_PRODUCTS,
+} from "@/lib/data-suite";
 
 /**
  * RoutingFlowDiagram - Visual representation of data flow through TerraFusion
- * 
+ *
  * Shows:
  * - Data products (sources)
- * - Module subscribers (targets)  
+ * - Module subscribers (targets)
  * - Real-time routing activity
  * - Success/failure status
  */
@@ -50,7 +55,12 @@ const MODULES = [
     color: "text-emerald-400",
     bgColor: "bg-emerald-400/10",
     borderColor: "border-emerald-400/30",
-    subscribesTo: ["PARCEL_FABRIC", "COUNTY_ROLL", "SALES_STREAM", "BUILDINGS"] as DataProductType[],
+    subscribesTo: [
+      "PARCEL_FABRIC",
+      "COUNTY_ROLL",
+      "SALES_STREAM",
+      "BUILDINGS",
+    ] as DataProductType[],
   },
   {
     id: "ratio-studies",
@@ -101,8 +111,11 @@ export function RoutingFlowDiagram({ countyFips, showLegend = true }: RoutingFlo
   useEffect(() => {
     const unsubscribe = eventBus.subscribe((event) => {
       if (event.type === "product.published") {
-        const payload = event.payload as { product: DataProductType; routingResults: Array<{ subscriber: string; success: boolean }> };
-        
+        const payload = event.payload as {
+          product: DataProductType;
+          routingResults: Array<{ subscriber: string; success: boolean }>;
+        };
+
         // Mark all connections for this product as routing
         const updates: Record<string, { status: RoutingStatus; timestamp?: string }> = {};
         for (const dataModule of MODULES) {
@@ -144,13 +157,13 @@ export function RoutingFlowDiagram({ countyFips, showLegend = true }: RoutingFlo
       {/* Flow Diagram */}
       <Card className="tf-glass p-6">
         <h3 className="text-foreground mb-6 text-lg font-semibold">Data Routing Flow</h3>
-        
+
         <div className="relative">
           {/* Products Column */}
           <div className="grid grid-cols-3 gap-8">
             {/* Left: Products */}
             <div className="space-y-4">
-              <p className="text-muted-foreground mb-2 text-xs font-medium uppercase tracking-wider">
+              <p className="text-muted-foreground mb-2 text-xs font-medium tracking-wider uppercase">
                 Data Products
               </p>
               {PRODUCTS.map((product) => (
@@ -174,7 +187,7 @@ export function RoutingFlowDiagram({ countyFips, showLegend = true }: RoutingFlo
 
             {/* Right: Modules */}
             <div className="space-y-4">
-              <p className="text-muted-foreground mb-2 text-xs font-medium uppercase tracking-wider">
+              <p className="text-muted-foreground mb-2 text-xs font-medium tracking-wider uppercase">
                 Module Subscribers
               </p>
               {MODULES.map((module) => {
@@ -197,10 +210,10 @@ export function RoutingFlowDiagram({ countyFips, showLegend = true }: RoutingFlo
                     )}
                   >
                     <module.icon className={cn("h-5 w-5", module.color)} />
-                    <span className="text-foreground flex-1 text-sm font-medium">{module.name}</span>
-                    {isReceiving && (
-                      <Clock className="h-4 w-4 animate-pulse text-blue-400" />
-                    )}
+                    <span className="text-foreground flex-1 text-sm font-medium">
+                      {module.name}
+                    </span>
+                    {isReceiving && <Clock className="h-4 w-4 animate-pulse text-blue-400" />}
                     {hasSuccess && !isReceiving && (
                       <CheckCircle2 className="h-4 w-4 text-emerald-400" />
                     )}
@@ -224,9 +237,7 @@ export function RoutingFlowDiagram({ countyFips, showLegend = true }: RoutingFlo
           <table className="w-full">
             <thead>
               <tr className="border-border/50 border-b">
-                <th className="text-muted-foreground p-3 text-left text-xs font-medium">
-                  Product
-                </th>
+                <th className="text-muted-foreground p-3 text-left text-xs font-medium">Product</th>
                 {MODULES.map((m) => (
                   <th key={m.id} className="p-3 text-center">
                     <m.icon className={cn("mx-auto h-4 w-4", m.color)} />
@@ -239,9 +250,7 @@ export function RoutingFlowDiagram({ countyFips, showLegend = true }: RoutingFlo
               {PRODUCTS.map((product) => (
                 <tr key={product.type} className="border-border/50 border-b last:border-0">
                   <td className="p-3">
-                    <span className={cn("text-sm font-medium", product.color)}>
-                      {product.name}
-                    </span>
+                    <span className={cn("text-sm font-medium", product.color)}>{product.name}</span>
                   </td>
                   {MODULES.map((dataModule) => {
                     const isSubscribed = dataModule.subscribesTo.includes(product.type);
@@ -254,7 +263,7 @@ export function RoutingFlowDiagram({ countyFips, showLegend = true }: RoutingFlo
                             className={cn(
                               "mx-auto flex h-6 w-6 items-center justify-center rounded-full transition-all",
                               status === "idle" && "bg-emerald-400/20",
-                              status === "routing" && "bg-blue-400/20 animate-pulse",
+                              status === "routing" && "animate-pulse bg-blue-400/20",
                               status === "success" && "bg-emerald-400/30",
                               status === "error" && "bg-red-400/20"
                             )}
@@ -291,10 +300,7 @@ export function RoutingFlowDiagram({ countyFips, showLegend = true }: RoutingFlo
           <h4 className="text-foreground mb-3 text-sm font-medium">Recent Routing Activity</h4>
           <div className="space-y-2">
             {recentEvents.map((event, i) => (
-              <div
-                key={i}
-                className="bg-muted/20 flex items-center gap-3 rounded-lg p-2 text-sm"
-              >
+              <div key={i} className="bg-muted/20 flex items-center gap-3 rounded-lg p-2 text-sm">
                 <CheckCircle2 className="h-4 w-4 text-emerald-400" />
                 <span className="text-foreground">
                   {event.type === "product.published"

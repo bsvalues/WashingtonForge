@@ -679,10 +679,7 @@ describe("Phase XXIV-A Reference Documents (Cross-Reference Validation)", () => 
   });
 
   it("all XXIV-A docs reference stop conditions", () => {
-    const docs = [
-      loadDocument("WAR_ROOM_CADENCE.md")!,
-      loadDocument("EXIT_CRITERIA_MATRIX.md")!,
-    ];
+    const docs = [loadDocument("WAR_ROOM_CADENCE.md")!, loadDocument("EXIT_CRITERIA_MATRIX.md")!];
     for (const doc of docs) {
       for (const code of STOP_CONDITION_CODES) {
         expect(doc.content).toContain(code);

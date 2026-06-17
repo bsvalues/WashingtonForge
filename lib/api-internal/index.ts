@@ -28,11 +28,11 @@ export {
   login,
   logout,
   getCurrentUser,
-  
+
   // Counties
   getCounties,
   selectCounty,
-  
+
   // Data Ingestion
   uploadDataset,
   validateDataset,
@@ -42,7 +42,7 @@ export {
   saveFieldMapping,
   previewDataset,
   publishDataset,
-  
+
   // Parcels & Map
   getParcels,
   getParcelById,
@@ -52,38 +52,38 @@ export {
   getMapLayers,
   getNeighborhoods,
   getPropertyClasses,
-  
+
   // Ratio Studies
   getRatioStudies,
   getRatioStudyById,
   runRatioStudy,
   exportRatioStudyReport,
-  
+
   // Audit Log
   getAuditLog,
-  
+
   // Roll Year Snapshots
   getRollYearSnapshots,
   createRollYearSnapshot,
   publishSnapshot,
-  
+
   // Dataset Versions
   getDatasetVersions,
   getDatasetVersionById,
-  
+
   // VEI Findings
   getVEIFindings,
   getDriftHotspots,
-  
+
   // Calibration (Benton Method)
   getCalibrationLevers,
   getCalibrationHistory,
   simulateCalibration,
   applyCalibration,
-  
+
   // Export Snapshot
   exportRatioSnapshot,
-  
+
   // Data Sources & Freshness
   loadCountyDataFreshness,
 } from "./demo-client";

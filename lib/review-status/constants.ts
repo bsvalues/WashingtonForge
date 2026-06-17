@@ -1,11 +1,6 @@
 /** Shared review-status constants — safe to import from client and server. */
 
-export const REVIEW_STATUSES = [
-  "unreviewed",
-  "in_review",
-  "needs_followup",
-  "reviewed",
-] as const;
+export const REVIEW_STATUSES = ["unreviewed", "in_review", "needs_followup", "reviewed"] as const;
 
 export type ReviewStatus = (typeof REVIEW_STATUSES)[number];
 

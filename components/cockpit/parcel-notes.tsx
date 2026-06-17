@@ -69,11 +69,9 @@ export function ParcelNotes({ parcelId, parcelSitus }: ParcelNotesProps) {
 
   return (
     <div className="flex h-full flex-col gap-2 px-4 py-3">
-      {parcelSitus && (
-        <p className="text-muted-foreground truncate text-xs">{parcelSitus}</p>
-      )}
+      {parcelSitus && <p className="text-muted-foreground truncate text-xs">{parcelSitus}</p>}
       <textarea
-        className="border-border/50 bg-muted/20 text-foreground placeholder:text-muted-foreground flex-1 resize-none rounded border p-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+        className="border-border/50 bg-muted/20 text-foreground placeholder:text-muted-foreground flex-1 resize-none rounded border p-2 text-sm focus:ring-1 focus:ring-blue-500 focus:outline-none"
         placeholder="Assessor notes for this parcel…"
         maxLength={MAX_NOTE_LENGTH}
         value={text}
@@ -82,20 +80,18 @@ export function ParcelNotes({ parcelId, parcelSitus }: ParcelNotesProps) {
           setSaveState("idle");
         }}
       />
-      <p className="text-muted-foreground text-[10px] uppercase tracking-wide">
+      <p className="text-muted-foreground text-[10px] tracking-wide uppercase">
         Local server storage · not enterprise-durable
       </p>
       <div className="flex items-center justify-between gap-2">
         <span className="text-muted-foreground text-xs">
-          {lastSaved
-            ? `Last saved ${new Date(lastSaved).toLocaleString()}`
-            : "Unsaved"}
+          {lastSaved ? `Last saved ${new Date(lastSaved).toLocaleString()}` : "Unsaved"}
         </span>
         <button
           type="button"
           onClick={() => void handleSave()}
           disabled={saveState === "saving"}
-          className="bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 rounded px-3 py-1 text-xs font-medium transition-colors"
+          className="bg-primary text-primary-foreground hover:bg-primary/90 rounded px-3 py-1 text-xs font-medium transition-colors disabled:opacity-50"
         >
           {saveState === "saving"
             ? "Saving…"

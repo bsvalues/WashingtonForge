@@ -1,11 +1,11 @@
 /**
  * Data Plane Contract Tests
- * 
+ *
  * These tests prove the data delivery contract is real:
  * 1. Routing persists a RouteRecord BEFORE emitting events
  * 2. Routing sets an ActiveDatasetPointer
  * 3. getActiveDataset returns null when missing
- * 
+ *
  * Run: pnpm test __tests__/data-plane.contract.test.ts
  */
 
@@ -28,7 +28,7 @@ describe("Data Plane Contract", () => {
     it("should persist RouteRecord before emitting routing.completed event", async () => {
       // Track event timing
       let routeRecordExistedWhenEventEmitted = false;
-      
+
       // Subscribe to events and check if route record exists
       const unsubscribe = eventBus.subscribe(async (event) => {
         if (event.type === "routing.completed") {
@@ -63,7 +63,12 @@ describe("Data Plane Contract", () => {
       });
 
       // Execute routing
-      await dataSuiteHub.routeToSubscribers(TEST_COUNTY, TEST_PRODUCT, TEST_VERSION, "test@test.com");
+      await dataSuiteHub.routeToSubscribers(
+        TEST_COUNTY,
+        TEST_PRODUCT,
+        TEST_VERSION,
+        "test@test.com"
+      );
 
       unsubscribe();
 
@@ -90,10 +95,15 @@ describe("Data Plane Contract", () => {
         source_filename: "test.csv",
       });
 
-      await dataSuiteHub.routeToSubscribers(TEST_COUNTY, TEST_PRODUCT, TEST_VERSION, "test@test.com");
+      await dataSuiteHub.routeToSubscribers(
+        TEST_COUNTY,
+        TEST_PRODUCT,
+        TEST_VERSION,
+        "test@test.com"
+      );
 
       const records = await repository.getRouteRecords("cockpit-map", TEST_COUNTY, TEST_PRODUCT, 1);
-      
+
       expect(records.length).toBe(1);
       expect(records[0].status).toBe("delivered");
       expect(records[0].version_id).toBe(TEST_VERSION);
@@ -121,7 +131,12 @@ describe("Data Plane Contract", () => {
         source_filename: "test.csv",
       });
 
-      await dataSuiteHub.routeToSubscribers(TEST_COUNTY, TEST_PRODUCT, TEST_VERSION, "test@test.com");
+      await dataSuiteHub.routeToSubscribers(
+        TEST_COUNTY,
+        TEST_PRODUCT,
+        TEST_VERSION,
+        "test@test.com"
+      );
 
       const pointer = await repository.getActiveDataset("cockpit-map", TEST_COUNTY, TEST_PRODUCT);
 
@@ -162,7 +177,12 @@ describe("Data Plane Contract", () => {
         source_filename: "test.csv",
       });
 
-      await dataSuiteHub.routeToSubscribers(TEST_COUNTY, TEST_PRODUCT, TEST_VERSION, "test@test.com");
+      await dataSuiteHub.routeToSubscribers(
+        TEST_COUNTY,
+        TEST_PRODUCT,
+        TEST_VERSION,
+        "test@test.com"
+      );
 
       unsubscribe();
 
@@ -178,15 +198,29 @@ describe("Data Plane Contract", () => {
 
     it("should return null for undelivered subscriber", async () => {
       // Deliver to cockpit-map only
-      await repository.setActiveDataset("cockpit-map", TEST_COUNTY, TEST_PRODUCT, TEST_VERSION, "test@test.com");
+      await repository.setActiveDataset(
+        "cockpit-map",
+        TEST_COUNTY,
+        TEST_PRODUCT,
+        TEST_VERSION,
+        "test@test.com"
+      );
 
       // Check a different subscriber that wasn't delivered to
-      const pointer = await repository.getActiveDataset("non-existent-subscriber", TEST_COUNTY, TEST_PRODUCT);
+      const pointer = await repository.getActiveDataset(
+        "non-existent-subscriber",
+        TEST_COUNTY,
+        TEST_PRODUCT
+      );
       expect(pointer).toBeNull();
     });
 
     it("hub.getActiveDatasetForSubscriber should return null when missing", async () => {
-      const result = await dataSuiteHub.getActiveDatasetForSubscriber("cockpit-map", TEST_COUNTY, TEST_PRODUCT);
+      const result = await dataSuiteHub.getActiveDatasetForSubscriber(
+        "cockpit-map",
+        TEST_COUNTY,
+        TEST_PRODUCT
+      );
       expect(result).toBeNull();
     });
   });
@@ -223,7 +257,7 @@ describe("Data Plane Contract", () => {
 
       // Verify routing succeeded
       expect(routingResults.length).toBeGreaterThan(0);
-      expect(routingResults.every(r => r.success)).toBe(true);
+      expect(routingResults.every((r) => r.success)).toBe(true);
 
       // 4. Verify cockpit can read the delivered data
       const activeDataset = await dataSuiteHub.getActiveDatasetForSubscriber(

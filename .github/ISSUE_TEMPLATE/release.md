@@ -12,13 +12,9 @@ assignees: ""
 
 **Release scope:**
 
--
+- **Target release date:**
 
-**Target release date:**
-
--
-
----
+- ***
 
 ## Pre-Release Checklist (on `dev`)
 

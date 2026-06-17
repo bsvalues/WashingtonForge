@@ -7,7 +7,7 @@ export type IngestStep = "upload" | "map" | "validate" | "preview" | "publish";
 
 /**
  * HARD REDIRECT: /ingest → /data-suite?tab=ingest
- * 
+ *
  * The Data Suite is the SINGLE AUTHORITY for all data operations.
  * This route exists only for backwards compatibility and immediately redirects.
  * No legacy components mount here - fail-closed architecture.

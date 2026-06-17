@@ -128,8 +128,8 @@ export function AppShell({ children, user }: AppShellProps) {
                     variant="ghost"
                     className={cn(
                       "gap-2",
-                      isPrimary 
-                        ? "text-primary border-primary/30 border bg-primary/10 hover:bg-primary/20"
+                      isPrimary
+                        ? "text-primary border-primary/30 bg-primary/10 hover:bg-primary/20 border"
                         : "text-muted-foreground hover:text-foreground hover:bg-secondary/50",
                       isActive && !isPrimary && "bg-secondary/50 text-foreground",
                       isActive && isPrimary && "bg-primary/20"

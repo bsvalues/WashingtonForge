@@ -98,7 +98,7 @@ export function ParcelReviewStatus({ parcelId }: ParcelReviewStatusProps) {
     <div className="flex h-full flex-col gap-3 overflow-auto px-4 py-3">
       {/* Current status + selector */}
       <div className="flex flex-col gap-1.5">
-        <label className="text-muted-foreground text-[10px] uppercase tracking-wide">
+        <label className="text-muted-foreground text-[10px] tracking-wide uppercase">
           Review status
         </label>
         <Select
@@ -124,7 +124,7 @@ export function ParcelReviewStatus({ parcelId }: ParcelReviewStatusProps) {
       {/* Change note — shown when changing status */}
       {pendingStatus !== record.status && (
         <textarea
-          className="border-border/50 bg-muted/20 text-foreground placeholder:text-muted-foreground resize-none rounded border p-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="border-border/50 bg-muted/20 text-foreground placeholder:text-muted-foreground resize-none rounded border p-2 text-sm focus:ring-1 focus:ring-blue-500 focus:outline-none"
           rows={2}
           maxLength={MAX_CHANGE_NOTE_LENGTH}
           placeholder="Reason / change note (optional)…"
@@ -143,7 +143,7 @@ export function ParcelReviewStatus({ parcelId }: ParcelReviewStatusProps) {
           type="button"
           onClick={() => void handleSave()}
           disabled={!dirty || saveState === "saving"}
-          className="bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-50 rounded px-3 py-1 text-xs font-medium transition-colors"
+          className="bg-primary text-primary-foreground hover:bg-primary/90 rounded px-3 py-1 text-xs font-medium transition-colors disabled:opacity-50"
         >
           {saveState === "saving"
             ? "Saving…"
@@ -155,16 +155,14 @@ export function ParcelReviewStatus({ parcelId }: ParcelReviewStatusProps) {
         </button>
       </div>
 
-      <p className="text-muted-foreground text-[10px] uppercase tracking-wide">
+      <p className="text-muted-foreground text-[10px] tracking-wide uppercase">
         Local server storage · not enterprise-durable
       </p>
 
       {/* Transition history, newest first */}
       {record.history.length > 0 && (
         <div className="border-border/30 mt-1 flex flex-col gap-2 border-t pt-2">
-          <span className="text-muted-foreground text-[10px] uppercase tracking-wide">
-            History
-          </span>
+          <span className="text-muted-foreground text-[10px] tracking-wide uppercase">History</span>
           <ul className="flex flex-col gap-1.5">
             {[...record.history].reverse().map((t, i) => (
               <li key={`${t.at}-${i}`} className="text-xs">

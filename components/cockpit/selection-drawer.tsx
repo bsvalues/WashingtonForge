@@ -1,7 +1,17 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { ChevronUp, ChevronDown, Download, X, Sliders, List, BarChart3, FileText, ClipboardCheck } from "lucide-react";
+import {
+  ChevronUp,
+  ChevronDown,
+  Download,
+  X,
+  Sliders,
+  List,
+  BarChart3,
+  FileText,
+  ClipboardCheck,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SelectionTable } from "./selection-table";

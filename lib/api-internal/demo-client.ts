@@ -107,16 +107,17 @@ export async function selectCounty(countyId: string, role: UserRole): Promise<Us
 
 export async function uploadDataset(file: File, datasetType: DatasetType): Promise<Dataset> {
   await delay(500);
-  
+
   // Detect bulk packages and geodatabases
   const ext = file.name.toLowerCase().slice(file.name.lastIndexOf("."));
-  const isGeoDatabase = file.type === "application/x-esri-geodatabase" || file.name.endsWith(".gdb");
+  const isGeoDatabase =
+    file.type === "application/x-esri-geodatabase" || file.name.endsWith(".gdb");
   const isBulkPackage = ext === ".zip" || isGeoDatabase;
-  
+
   // Simulate higher row counts for bulk packages
   const baseRowCount = isBulkPackage ? 15000 : 1500;
   const rowCount = Math.floor(baseRowCount + Math.random() * 5000);
-  
+
   return {
     id: `ds-${Date.now()}`,
     name: file.name,

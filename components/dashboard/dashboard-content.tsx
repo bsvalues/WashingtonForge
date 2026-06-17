@@ -226,7 +226,10 @@ export function DashboardContent({ datasetVersionId }: DashboardContentProps) {
               </GlassButton>
             </Link>
             <Link href="/ratio-studies">
-              <GlassButton variant="outline" className="border-border/50 text-foreground bg-transparent">
+              <GlassButton
+                variant="outline"
+                className="border-border/50 text-foreground bg-transparent"
+              >
                 <BarChart3 className="mr-2 h-4 w-4" />
                 Run Study
               </GlassButton>

@@ -1,6 +1,6 @@
 /**
  * TerraFusion Court-Ready Export API
- * 
+ *
  * Generates comprehensive valuation defense packages with full data provenance.
  * All exports include cryptographic hashes for court admissibility.
  */
@@ -48,12 +48,12 @@ function generatePackageHash(data: ExportRequest): string {
     ...data,
     timestamp: new Date().toISOString(),
   });
-  
+
   // Simulated hash for demo
   let hash = 0;
   for (let i = 0; i < input.length; i++) {
     const char = input.charCodeAt(i);
-    hash = ((hash << 5) - hash) + char;
+    hash = (hash << 5) - hash + char;
     hash = hash & hash;
   }
   return `sha256:${Math.abs(hash).toString(16).padStart(16, "0")}${Date.now().toString(16)}`;
@@ -70,7 +70,7 @@ function generateExportId(): string {
 export async function POST(request: NextRequest) {
   try {
     const body: ExportRequest = await request.json();
-    
+
     // Validate required fields
     if (!body.parcel_id || !body.county_fips || !body.roll_year || !body.sections?.length) {
       return NextResponse.json(
@@ -89,8 +89,8 @@ export async function POST(request: NextRequest) {
       "methodology_statement",
       "certification",
     ];
-    
-    const invalidSections = body.sections.filter(s => !validSections.includes(s));
+
+    const invalidSections = body.sections.filter((s) => !validSections.includes(s));
     if (invalidSections.length > 0) {
       return NextResponse.json(
         { error: `Invalid sections: ${invalidSections.join(", ")}` },
@@ -99,8 +99,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Ensure required sections are included
-    const requiredSections = ["property_summary", "valuation_history", "data_lineage", "certification"];
-    const missingSections = requiredSections.filter(s => !body.sections.includes(s));
+    const requiredSections = [
+      "property_summary",
+      "valuation_history",
+      "data_lineage",
+      "certification",
+    ];
+    const missingSections = requiredSections.filter((s) => !body.sections.includes(s));
     if (missingSections.length > 0) {
       return NextResponse.json(
         { error: `Required sections missing: ${missingSections.join(", ")}` },
@@ -144,10 +149,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(response, { status: 201, headers });
   } catch (error) {
     console.error("[ExportAPI] Error generating export:", error);
-    return NextResponse.json(
-      { error: "Failed to generate export package" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to generate export package" }, { status: 500 });
   }
 }
 

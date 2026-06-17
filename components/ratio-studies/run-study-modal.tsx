@@ -138,7 +138,12 @@ export function RunStudyModal({ isOpen, onClose, onStudyCreated }: RunStudyModal
             >
               Cancel
             </GlassButton>
-            <GlassButton type="submit" tone="primary" disabled={isRunning} className="text-foreground">
+            <GlassButton
+              type="submit"
+              tone="primary"
+              disabled={isRunning}
+              className="text-foreground"
+            >
               {isRunning ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />

@@ -163,11 +163,7 @@ export function PreviewStep({ dataset, fieldMappings, onComplete, onBack }: Prev
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back
         </Button>
-        <GlassButton
-          onClick={onComplete}
-          tone="primary"
-          className="text-foreground font-medium"
-        >
+        <GlassButton onClick={onComplete} tone="primary" className="text-foreground font-medium">
           Continue to Publish
           <ArrowRight className="ml-2 h-4 w-4" />
         </GlassButton>

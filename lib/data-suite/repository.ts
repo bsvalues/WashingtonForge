@@ -1,8 +1,8 @@
 /**
  * DataSuite Repository
- * 
+ *
  * Abstracts data storage. Demo uses in-memory Map, production uses Postgres.
- * 
+ *
  * Responsibilities:
  * - saveIngestRun / updateIngestRun / getIngestRun
  * - writeProductVersion / getVersions
@@ -34,24 +34,57 @@ export interface IDataSuiteRepository {
 
   // County Status
   getCountyStatus(countyFips: WACountyFips): Promise<CountyDataStatus | null>;
-  updateCountyStatus(countyFips: WACountyFips, status: Partial<CountyDataStatus>): Promise<CountyDataStatus>;
+  updateCountyStatus(
+    countyFips: WACountyFips,
+    status: Partial<CountyDataStatus>
+  ): Promise<CountyDataStatus>;
 
   // Versions
-  createVersion(countyFips: WACountyFips, product: DataProductType, version: ProductVersion): Promise<ProductVersion>;
-  getVersions(countyFips: WACountyFips, product: DataProductType, limit?: number): Promise<ProductVersion[]>;
-  getCurrentVersion(countyFips: WACountyFips, product: DataProductType): Promise<ProductVersion | null>;
+  createVersion(
+    countyFips: WACountyFips,
+    product: DataProductType,
+    version: ProductVersion
+  ): Promise<ProductVersion>;
+  getVersions(
+    countyFips: WACountyFips,
+    product: DataProductType,
+    limit?: number
+  ): Promise<ProductVersion[]>;
+  getCurrentVersion(
+    countyFips: WACountyFips,
+    product: DataProductType
+  ): Promise<ProductVersion | null>;
 
   // Lineage Events
   createLineageEvent(event: LineageEvent): Promise<LineageEvent>;
-  getLineageEvents(countyFips: WACountyFips, product?: DataProductType, limit?: number): Promise<LineageEvent[]>;
+  getLineageEvents(
+    countyFips: WACountyFips,
+    product?: DataProductType,
+    limit?: number
+  ): Promise<LineageEvent[]>;
 
   // Route Records (delivery receipts)
   createRouteRecord(record: RouteRecord): Promise<RouteRecord>;
-  getRouteRecords(subscriber: string, countyFips: WACountyFips, product: DataProductType, limit?: number): Promise<RouteRecord[]>;
-  
+  getRouteRecords(
+    subscriber: string,
+    countyFips: WACountyFips,
+    product: DataProductType,
+    limit?: number
+  ): Promise<RouteRecord[]>;
+
   // Active Dataset Pointers (what subscribers should read)
-  setActiveDataset(subscriber: string, countyFips: WACountyFips, product: DataProductType, versionId: string | null, activatedBy: string): Promise<ActiveDatasetPointer>;
-  getActiveDataset(subscriber: string, countyFips: WACountyFips, product: DataProductType): Promise<ActiveDatasetPointer | null>;
+  setActiveDataset(
+    subscriber: string,
+    countyFips: WACountyFips,
+    product: DataProductType,
+    versionId: string | null,
+    activatedBy: string
+  ): Promise<ActiveDatasetPointer>;
+  getActiveDataset(
+    subscriber: string,
+    countyFips: WACountyFips,
+    product: DataProductType
+  ): Promise<ActiveDatasetPointer | null>;
   getAllActiveDatasets(countyFips: WACountyFips): Promise<ActiveDatasetPointer[]>;
 }
 
@@ -68,17 +101,23 @@ class DemoRepository implements IDataSuiteRepository {
   private lineageEvents: Map<string, LineageEvent[]>; // key: countyFips
   private routeRecords: Map<string, RouteRecord[]>; // key: `${subscriber}:${countyFips}:${product}`
   private activePointers: Map<string, ActiveDatasetPointer>; // key: `${subscriber}:${countyFips}:${product}`
-  
+
   private _initialized = false;
 
   constructor() {
     // Initialize from localStorage if available
     this.ingestRuns = loadFromStorage("ingestRuns", new Map<string, IngestRun>());
-    this.countyStatuses = loadFromStorage("countyStatuses", new Map<WACountyFips, CountyDataStatus>());
+    this.countyStatuses = loadFromStorage(
+      "countyStatuses",
+      new Map<WACountyFips, CountyDataStatus>()
+    );
     this.versions = loadFromStorage("versions", new Map<string, ProductVersion[]>());
     this.lineageEvents = loadFromStorage("lineageEvents", new Map<string, LineageEvent[]>());
     this.routeRecords = loadFromStorage("routeRecords", new Map<string, RouteRecord[]>());
-    this.activePointers = loadFromStorage("activePointers", new Map<string, ActiveDatasetPointer>());
+    this.activePointers = loadFromStorage(
+      "activePointers",
+      new Map<string, ActiveDatasetPointer>()
+    );
     this._initialized = hasStorageData();
   }
 
@@ -161,22 +200,25 @@ class DemoRepository implements IDataSuiteRepository {
       county_name: status.county_name || existing?.county_name || "Unknown",
       onboarding_path: status.onboarding_path || existing?.onboarding_path || "quick-start",
       overall_readiness_pct: status.overall_readiness_pct ?? existing?.overall_readiness_pct ?? 0,
-      parcel_fabric: status.parcel_fabric || existing?.parcel_fabric || {
-        status: "not_started",
-        source: "wa_geo_portal",
-        coverage_pct: 0,
-      },
-      county_roll: status.county_roll || existing?.county_roll || {
-        status: "not_started",
-        join_rate_pct: 0,
-        total_records: 0,
-      },
-      sales_stream: status.sales_stream || existing?.sales_stream || {
-        status: "not_started",
-        total_sales: 0,
-        valid_sales: 0,
-        arms_length_pct: 0,
-      },
+      parcel_fabric: status.parcel_fabric ||
+        existing?.parcel_fabric || {
+          status: "not_started",
+          source: "wa_geo_portal",
+          coverage_pct: 0,
+        },
+      county_roll: status.county_roll ||
+        existing?.county_roll || {
+          status: "not_started",
+          join_rate_pct: 0,
+          total_records: 0,
+        },
+      sales_stream: status.sales_stream ||
+        existing?.sales_stream || {
+          status: "not_started",
+          total_sales: 0,
+          valid_sales: 0,
+          arms_length_pct: 0,
+        },
       capabilities_unlocked: status.capabilities_unlocked || existing?.capabilities_unlocked || [],
       last_updated: new Date().toISOString(),
     };
@@ -424,7 +466,7 @@ class DemoRepository implements IDataSuiteRepository {
     // This is what makes Cockpit actually have data to show
     const currentVersionId = `v-${Date.now()}`;
     const subscribers = ["cockpit-map", "comps-engine", "ratio-studies", "calibration", "appeals"];
-    
+
     for (const subscriber of subscribers) {
       // Create route record (delivery receipt)
       await this.createRouteRecord({

@@ -6,14 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { repository, getStorageStats, clearStorage } from "@/lib/data-suite";
 import type { WACountyFips, DataProductType } from "@/lib/data-suite";
-import { 
-  Database, 
-  CheckCircle2, 
-  XCircle, 
-  RefreshCw, 
-  Trash2,
-  HardDrive,
-} from "lucide-react";
+import { Database, CheckCircle2, XCircle, RefreshCw, Trash2, HardDrive } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface DataPlaneStatusProps {
@@ -25,7 +18,7 @@ interface DataPlaneStatusProps {
 
 /**
  * Data Plane Status Component
- * 
+ *
  * Shows the real state of data delivery for debugging and verification.
  * This is the "receipt checker" - it proves data was actually delivered.
  */
@@ -52,7 +45,7 @@ export function DataPlaneStatus({
     try {
       const repoStats = repository.getStats();
       const storageStats = getStorageStats();
-      
+
       const pointer = await repository.getActiveDataset(subscriber, countyFips, product);
       const records = await repository.getRouteRecords(subscriber, countyFips, product, 100);
 
@@ -87,26 +80,21 @@ export function DataPlaneStatus({
 
   if (!status) {
     return (
-      <Card className={cn("p-4 animate-pulse", className)}>
-        <div className="h-20 bg-muted rounded" />
+      <Card className={cn("animate-pulse p-4", className)}>
+        <div className="bg-muted h-20 rounded" />
       </Card>
     );
   }
 
   return (
     <Card className={cn("p-4", className)}>
-      <div className="flex items-center justify-between mb-3">
+      <div className="mb-3 flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Database className="h-4 w-4 text-muted-foreground" />
-          <span className="font-medium text-sm">Data Plane Status</span>
+          <Database className="text-muted-foreground h-4 w-4" />
+          <span className="text-sm font-medium">Data Plane Status</span>
         </div>
         <div className="flex items-center gap-2">
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={loadStatus}
-            disabled={isRefreshing}
-          >
+          <Button variant="ghost" size="sm" onClick={loadStatus} disabled={isRefreshing}>
             <RefreshCw className={cn("h-3 w-3", isRefreshing && "animate-spin")} />
           </Button>
           <Button
@@ -128,7 +116,9 @@ export function DataPlaneStatus({
             {status.hasPointer ? (
               <>
                 <CheckCircle2 className="h-3 w-3 text-emerald-500" />
-                <span className="text-emerald-500 font-mono">{status.versionId?.slice(0, 12)}...</span>
+                <span className="font-mono text-emerald-500">
+                  {status.versionId?.slice(0, 12)}...
+                </span>
               </>
             ) : (
               <>
@@ -164,8 +154,8 @@ export function DataPlaneStatus({
         )}
 
         {/* Storage Stats */}
-        <div className="pt-2 mt-2 border-t border-border/50">
-          <div className="flex items-center gap-1 text-muted-foreground mb-1">
+        <div className="border-border/50 mt-2 border-t pt-2">
+          <div className="text-muted-foreground mb-1 flex items-center gap-1">
             <HardDrive className="h-3 w-3" />
             <span>Storage</span>
           </div>
@@ -180,7 +170,7 @@ export function DataPlaneStatus({
         </div>
 
         {/* Subscriber/Product Info */}
-        <div className="pt-2 mt-2 border-t border-border/50 text-muted-foreground">
+        <div className="border-border/50 text-muted-foreground mt-2 border-t pt-2">
           <div className="flex items-center justify-between">
             <span>Subscriber:</span>
             <span className="font-mono">{subscriber}</span>

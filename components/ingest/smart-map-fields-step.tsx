@@ -23,11 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   getSourceFields,
   saveFieldMapping,
@@ -59,7 +55,15 @@ const fieldDefinitions: FieldDefinition[] = [
     label: "Parcel ID",
     required: true,
     description: "Unique parcel identifier (APN, PIN, PARID)",
-    commonAliases: ["parid", "apn", "pin", "parcel_number", "parcel_no", "parcelnumber", "parcelid"],
+    commonAliases: [
+      "parid",
+      "apn",
+      "pin",
+      "parcel_number",
+      "parcel_no",
+      "parcelnumber",
+      "parcelid",
+    ],
     category: "identity",
   },
   {
@@ -67,7 +71,14 @@ const fieldDefinitions: FieldDefinition[] = [
     label: "Situs Address",
     required: true,
     description: "Property street address",
-    commonAliases: ["situs_addr", "address", "property_address", "street_address", "situsaddress", "prop_addr"],
+    commonAliases: [
+      "situs_addr",
+      "address",
+      "property_address",
+      "street_address",
+      "situsaddress",
+      "prop_addr",
+    ],
     category: "identity",
   },
   // Value
@@ -84,7 +95,15 @@ const fieldDefinitions: FieldDefinition[] = [
     label: "Improvement Value",
     required: true,
     description: "Assessed improvement/structure value",
-    commonAliases: ["imp_val", "impvalue", "impr_value", "bldg_value", "improvement", "impval", "bldgval"],
+    commonAliases: [
+      "imp_val",
+      "impvalue",
+      "impr_value",
+      "bldg_value",
+      "improvement",
+      "impval",
+      "bldgval",
+    ],
     category: "value",
   },
   // Sales
@@ -110,7 +129,15 @@ const fieldDefinitions: FieldDefinition[] = [
     label: "Property Class",
     required: false,
     description: "Property use classification code",
-    commonAliases: ["propclass", "prop_class", "class_code", "use_code", "land_use", "usecode", "classcd"],
+    commonAliases: [
+      "propclass",
+      "prop_class",
+      "class_code",
+      "use_code",
+      "land_use",
+      "usecode",
+      "classcd",
+    ],
     category: "property",
   },
   {
@@ -134,7 +161,15 @@ const fieldDefinitions: FieldDefinition[] = [
     label: "Square Feet",
     required: false,
     description: "Building square footage",
-    commonAliases: ["sqft", "sq_ft", "squarefeet", "bldg_sqft", "living_area", "gross_area", "sfla"],
+    commonAliases: [
+      "sqft",
+      "sq_ft",
+      "squarefeet",
+      "bldg_sqft",
+      "living_area",
+      "gross_area",
+      "sfla",
+    ],
     category: "property",
   },
   // Geometry
@@ -158,7 +193,9 @@ const categoryLabels: Record<string, string> = {
 
 export function SmartMapFieldsStep({ dataset, onComplete, onBack }: SmartMapFieldsStepProps) {
   const [sourceFields, setSourceFields] = useState<string[]>([]);
-  const [mappings, setMappings] = useState<Record<TargetField, string>>({} as Record<TargetField, string>);
+  const [mappings, setMappings] = useState<Record<TargetField, string>>(
+    {} as Record<TargetField, string>
+  );
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -290,7 +327,9 @@ export function SmartMapFieldsStep({ dataset, onComplete, onBack }: SmartMapFiel
       <div className="tf-glass rounded-xl p-12 text-center">
         <Loader2 className="text-primary mx-auto mb-4 h-12 w-12 animate-spin" />
         <h3 className="text-foreground mb-2 text-lg font-medium">Analyzing Your Data</h3>
-        <p className="text-muted-foreground">Detecting column structure and auto-mapping fields...</p>
+        <p className="text-muted-foreground">
+          Detecting column structure and auto-mapping fields...
+        </p>
       </div>
     );
   }
@@ -299,17 +338,15 @@ export function SmartMapFieldsStep({ dataset, onComplete, onBack }: SmartMapFiel
     <div className="space-y-6">
       {/* Auto-mapping success banner */}
       {autoMappedCount > 0 && (
-        <div className="tf-glass flex items-center gap-4 rounded-xl border border-chart-1/30 bg-chart-1/5 p-4">
+        <div className="tf-glass border-chart-1/30 bg-chart-1/5 flex items-center gap-4 rounded-xl border p-4">
           <div className="bg-chart-1/20 flex h-10 w-10 items-center justify-center rounded-lg">
             <Sparkles className="text-chart-1 h-5 w-5" />
           </div>
           <div className="flex-1">
-            <p className="text-foreground font-medium">
-              Smart Mapping Complete
-            </p>
+            <p className="text-foreground font-medium">Smart Mapping Complete</p>
             <p className="text-muted-foreground text-sm">
-              Auto-mapped {autoMappedCount} of {fieldDefinitions.length} fields based on column names.
-              Review and adjust as needed.
+              Auto-mapped {autoMappedCount} of {fieldDefinitions.length} fields based on column
+              names. Review and adjust as needed.
             </p>
           </div>
         </div>
@@ -334,7 +371,7 @@ export function SmartMapFieldsStep({ dataset, onComplete, onBack }: SmartMapFiel
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <div className="rounded-lg bg-chart-1/10 p-4">
+          <div className="bg-chart-1/10 rounded-lg p-4">
             <div className="mb-2 flex items-center justify-between">
               <span className="text-muted-foreground text-sm">Required Fields</span>
               <span className="text-chart-1 text-sm font-medium">
@@ -348,7 +385,7 @@ export function SmartMapFieldsStep({ dataset, onComplete, onBack }: SmartMapFiel
               />
             </div>
           </div>
-          <div className="rounded-lg bg-primary/10 p-4">
+          <div className="bg-primary/10 rounded-lg p-4">
             <div className="mb-2 flex items-center justify-between">
               <span className="text-muted-foreground text-sm">Optional Fields</span>
               <span className="text-primary text-sm font-medium">
@@ -398,13 +435,16 @@ export function SmartMapFieldsStep({ dataset, onComplete, onBack }: SmartMapFiel
                       {/* Target Field Info */}
                       <div className="min-w-[180px] flex-1">
                         <div className="flex items-center gap-2">
-                          <p className={cn("font-medium", field.required ? "text-foreground" : "text-muted-foreground")}>
+                          <p
+                            className={cn(
+                              "font-medium",
+                              field.required ? "text-foreground" : "text-muted-foreground"
+                            )}
+                          >
                             {field.label}
                             {field.required && <span className="text-destructive ml-1">*</span>}
                           </p>
-                          {mappings[field.field] && (
-                            <Check className="text-chart-1 h-4 w-4" />
-                          )}
+                          {mappings[field.field] && <Check className="text-chart-1 h-4 w-4" />}
                         </div>
                         <p className="text-muted-foreground/70 text-xs">{field.description}</p>
                       </div>

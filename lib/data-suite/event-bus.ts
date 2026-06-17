@@ -1,8 +1,8 @@
 /**
  * DataSuite Event Bus
- * 
+ *
  * In-process pub/sub for demo. Production: table-backed + worker.
- * 
+ *
  * Events emitted:
  * - ingest.started / ingest.fingerprinted / ingest.ready / ingest.failed
  * - product.published / product.rolledback / product.stale

@@ -1,13 +1,13 @@
 /**
  * DataSuiteHub - The central authority for all data operations in TerraFusion
- * 
+ *
  * This is the SINGLE entry point for:
  * - Ingestion (upload/connect, fingerprint, map, validate, publish)
  * - Quality (join match rate, validation rules, anomaly detection)
  * - Versions (roll snapshots, revisions, diffs, time travel)
  * - Routing (where data feeds inside the OS)
  * - Audit (lineage, approvals, court-ready exports)
- * 
+ *
  * No other module should call ingest functions directly.
  */
 
@@ -301,7 +301,11 @@ export const dataSuiteHub = {
     });
 
     // Route to subscribers
-    const routingResults = await this.routeToSubscribers(run.county_fips, run.product_type as DataProductType, versionId);
+    const routingResults = await this.routeToSubscribers(
+      run.county_fips,
+      run.product_type as DataProductType,
+      versionId
+    );
 
     // Emit event
     eventBus.emit({
@@ -321,7 +325,7 @@ export const dataSuiteHub = {
 
   /**
    * Route published data to module subscribers
-   * 
+   *
    * THIS IS THE CRITICAL DELIVERY CONTRACT:
    * 1. Persist RouteRecord FIRST (receipt before ACK)
    * 2. Set ActiveDatasetPointer (what subscriber will read)
@@ -351,7 +355,7 @@ export const dataSuiteHub = {
 
     for (const subscriber of subscribers) {
       const routeRecordId = `rr-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
-      
+
       try {
         // STEP 1: Persist RouteRecord BEFORE anything else (receipt-first)
         await repository.createRouteRecord({
@@ -367,13 +371,7 @@ export const dataSuiteHub = {
         });
 
         // STEP 2: Set ActiveDatasetPointer (this is what Cockpit reads!)
-        await repository.setActiveDataset(
-          subscriber,
-          countyFips,
-          product,
-          versionId,
-          deliveredBy
-        );
+        await repository.setActiveDataset(subscriber, countyFips, product, versionId, deliveredBy);
 
         // STEP 3: Only NOW emit success event (ACK-gated)
         results.push({
@@ -386,10 +384,10 @@ export const dataSuiteHub = {
 
         eventBus.emit({
           type: "routing.completed",
-          payload: { 
-            countyFips, 
-            product, 
-            versionId, 
+          payload: {
+            countyFips,
+            product,
+            versionId,
             subscriber,
             routeRecordId,
             rowCount,
@@ -419,7 +417,13 @@ export const dataSuiteHub = {
 
         eventBus.emit({
           type: "routing.failed",
-          payload: { countyFips, product, versionId, subscriber, error: results[results.length - 1].error },
+          payload: {
+            countyFips,
+            product,
+            versionId,
+            subscriber,
+            error: results[results.length - 1].error,
+          },
           timestamp: new Date().toISOString(),
         });
       }
@@ -434,7 +438,7 @@ export const dataSuiteHub = {
 
   /**
    * Get active dataset for a subscriber
-   * 
+   *
    * THIS IS THE READ PATH FOR COCKPIT (and other subscribers).
    * Returns null if no data has been delivered yet.
    */
@@ -452,7 +456,7 @@ export const dataSuiteHub = {
     if (!pointer?.active_version_id) return null;
 
     const version = await repository.getCurrentVersion(countyFips, product);
-    
+
     return {
       versionId: pointer.active_version_id,
       activatedAt: pointer.activated_at || new Date().toISOString(),

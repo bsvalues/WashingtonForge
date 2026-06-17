@@ -1,10 +1,10 @@
 /**
  * Cockpit Integration Tests
- * 
+ *
  * These tests prove the Cockpit reads from the canonical data path:
  * 1. Shows empty state when no pointer exists
  * 2. Renders parcels when pointer exists
- * 
+ *
  * Run: pnpm test __tests__/cockpit.integration.test.tsx
  */
 
@@ -37,7 +37,12 @@ describe("Cockpit Data Integration", () => {
     });
 
     it("should have no route records when not delivered", async () => {
-      const records = await repository.getRouteRecords("cockpit-map", TEST_COUNTY, "COUNTY_ROLL", 1);
+      const records = await repository.getRouteRecords(
+        "cockpit-map",
+        TEST_COUNTY,
+        "COUNTY_ROLL",
+        1
+      );
       expect(records.length).toBe(0);
     });
   });
@@ -55,7 +60,7 @@ describe("Cockpit Data Integration", () => {
 
       // Verify pointer exists
       const pointer = await repository.getActiveDataset("cockpit-map", TEST_COUNTY, "COUNTY_ROLL");
-      
+
       expect(pointer).not.toBeNull();
       expect(pointer?.active_version_id).toBe("v-test-123");
     });
@@ -74,8 +79,13 @@ describe("Cockpit Data Integration", () => {
         row_count: 1000,
       });
 
-      const records = await repository.getRouteRecords("cockpit-map", TEST_COUNTY, "COUNTY_ROLL", 1);
-      
+      const records = await repository.getRouteRecords(
+        "cockpit-map",
+        TEST_COUNTY,
+        "COUNTY_ROLL",
+        1
+      );
+
       expect(records.length).toBe(1);
       expect(records[0].row_count).toBe(1000);
       expect(records[0].status).toBe("delivered");
@@ -106,13 +116,43 @@ describe("Cockpit Data Integration", () => {
   describe("multiple subscribers", () => {
     it("should track separate pointers for different subscribers", async () => {
       // Deliver to multiple subscribers
-      await repository.setActiveDataset("cockpit-map", TEST_COUNTY, "COUNTY_ROLL", "v-cockpit", "test@test.com");
-      await repository.setActiveDataset("ratio-studies", TEST_COUNTY, "COUNTY_ROLL", "v-ratio", "test@test.com");
-      await repository.setActiveDataset("comps-engine", TEST_COUNTY, "COUNTY_ROLL", "v-comps", "test@test.com");
+      await repository.setActiveDataset(
+        "cockpit-map",
+        TEST_COUNTY,
+        "COUNTY_ROLL",
+        "v-cockpit",
+        "test@test.com"
+      );
+      await repository.setActiveDataset(
+        "ratio-studies",
+        TEST_COUNTY,
+        "COUNTY_ROLL",
+        "v-ratio",
+        "test@test.com"
+      );
+      await repository.setActiveDataset(
+        "comps-engine",
+        TEST_COUNTY,
+        "COUNTY_ROLL",
+        "v-comps",
+        "test@test.com"
+      );
 
-      const cockpitPointer = await repository.getActiveDataset("cockpit-map", TEST_COUNTY, "COUNTY_ROLL");
-      const ratioPointer = await repository.getActiveDataset("ratio-studies", TEST_COUNTY, "COUNTY_ROLL");
-      const compsPointer = await repository.getActiveDataset("comps-engine", TEST_COUNTY, "COUNTY_ROLL");
+      const cockpitPointer = await repository.getActiveDataset(
+        "cockpit-map",
+        TEST_COUNTY,
+        "COUNTY_ROLL"
+      );
+      const ratioPointer = await repository.getActiveDataset(
+        "ratio-studies",
+        TEST_COUNTY,
+        "COUNTY_ROLL"
+      );
+      const compsPointer = await repository.getActiveDataset(
+        "comps-engine",
+        TEST_COUNTY,
+        "COUNTY_ROLL"
+      );
 
       expect(cockpitPointer?.active_version_id).toBe("v-cockpit");
       expect(ratioPointer?.active_version_id).toBe("v-ratio");
@@ -121,14 +161,26 @@ describe("Cockpit Data Integration", () => {
 
     it("should get all active datasets for a county", async () => {
       // Deliver to multiple subscribers
-      await repository.setActiveDataset("cockpit-map", TEST_COUNTY, "COUNTY_ROLL", "v-1", "test@test.com");
-      await repository.setActiveDataset("ratio-studies", TEST_COUNTY, "COUNTY_ROLL", "v-2", "test@test.com");
+      await repository.setActiveDataset(
+        "cockpit-map",
+        TEST_COUNTY,
+        "COUNTY_ROLL",
+        "v-1",
+        "test@test.com"
+      );
+      await repository.setActiveDataset(
+        "ratio-studies",
+        TEST_COUNTY,
+        "COUNTY_ROLL",
+        "v-2",
+        "test@test.com"
+      );
 
       const allPointers = await repository.getAllActiveDatasets(TEST_COUNTY);
 
       expect(allPointers.length).toBe(2);
-      expect(allPointers.map(p => p.subscriber)).toContain("cockpit-map");
-      expect(allPointers.map(p => p.subscriber)).toContain("ratio-studies");
+      expect(allPointers.map((p) => p.subscriber)).toContain("cockpit-map");
+      expect(allPointers.map((p) => p.subscriber)).toContain("ratio-studies");
     });
   });
 });

@@ -1,20 +1,20 @@
 /**
  * @deprecated ARCHITECTURAL BOUNDARY - COMPATIBILITY SHIM
- * 
+ *
  * This module exists ONLY for backwards compatibility during migration.
- * 
+ *
  * DO NOT import from here in new code.
  * All data operations MUST go through the DataSuiteHub:
- * 
+ *
  *   import { dataSuiteHub } from "@/lib/data-suite";
  *   await dataSuiteHub.ingest({ ... });
- * 
+ *
  * This shim:
  * 1. Warns once per function (dev only)
  * 2. Can throw in CI/dev when ENFORCE_NO_LEGACY_API=true
  * 3. Forwards mutators to DataSuiteHub (sovereign model)
  * 4. Preserves types for compile compatibility
- * 
+ *
  * For read-only queries, prefer: import { ... } from "@/lib/api/query"
  */
 
@@ -56,9 +56,10 @@ interface CallRecord {
 
 const warned = new Set<string>();
 const callRecords = new Map<string, CallRecord>();
-const sessionId = typeof crypto !== "undefined" && crypto.randomUUID 
-  ? crypto.randomUUID() 
-  : `session-${Date.now()}`;
+const sessionId =
+  typeof crypto !== "undefined" && crypto.randomUUID
+    ? crypto.randomUUID()
+    : `session-${Date.now()}`;
 const sessionStart = Date.now();
 const appVersion = process.env.NEXT_PUBLIC_APP_VERSION || "dev";
 
@@ -67,7 +68,8 @@ function classifyMutator(fnName: string): MutatorClass {
   if (fnName.includes("upload") || fnName.includes("ingest")) return "ingest";
   if (fnName.includes("validate")) return "validate";
   if (fnName.includes("publish")) return "publish";
-  if (fnName.includes("login") || fnName.includes("logout") || fnName.includes("User")) return "auth";
+  if (fnName.includes("login") || fnName.includes("logout") || fnName.includes("User"))
+    return "auth";
   return "query";
 }
 
@@ -84,7 +86,7 @@ function warnOnce(fnName: string, replacement: string) {
   const callSite = hashCallSite(new Error().stack);
   const mutatorClass = classifyMutator(fnName);
   const isMutator = mutatorClass !== "query" && mutatorClass !== "auth";
-  
+
   // Track call record with assessor-grade metadata
   const existing = callRecords.get(fnName);
   if (existing) {
@@ -100,9 +102,9 @@ function warnOnce(fnName: string, replacement: string) {
       mutatorClass,
     });
   }
-  
+
   const record = callRecords.get(fnName)!;
-  
+
   // Emit COURT-READY audit event with full chain-of-custody fields
   eventBus.emit({
     type: "deprecated.api_call",
@@ -110,51 +112,51 @@ function warnOnce(fnName: string, replacement: string) {
       // Identity
       functionName: fnName,
       replacement,
-      
+
       // Classification (for alert severity)
       isMutator,
       mutatorClass,
-      
+
       // Session context
       sessionId,
       environment: process.env.NODE_ENV || "unknown",
       appVersion,
-      
+
       // Temporal (for burn-down tracking)
       firstSeen: new Date(record.firstSeen).toISOString(),
       lastSeen: new Date(record.lastSeen).toISOString(),
       count: record.count,
-      
+
       // Callsite attribution (dev only for stack, always count)
       uniqueCallSites: record.callSites.size,
       ...(process.env.NODE_ENV !== "production" && {
         sampledCallSite: callSite.slice(0, 200),
       }),
-      
+
       // Actor (placeholder - wire to auth context when available)
       actor: "system", // TODO: inject from auth context
     },
     timestamp: new Date().toISOString(),
   });
-  
+
   // Kill switch: throw in CI/dev when enforcement is enabled
   if (ENFORCE_NO_LEGACY) {
     throw new Error(
       `[LEGACY_API_BLOCKED] "${fnName}" is blocked.\n` +
-      `Use: ${replacement}\n` +
-      `Set ENFORCE_NO_LEGACY_API=false to allow deprecated calls.`
+        `Use: ${replacement}\n` +
+        `Set ENFORCE_NO_LEGACY_API=false to allow deprecated calls.`
     );
   }
-  
+
   // Only warn in development, and only once per function
   if (process.env.NODE_ENV === "production") return;
   if (warned.has(fnName)) return;
-  
+
   warned.add(fnName);
   console.warn(
     `[DEPRECATED] @/lib/api → "${fnName}" is deprecated.\n` +
-    `  Use: ${replacement}\n` +
-    `  Import: import { dataSuiteHub } from "@/lib/data-suite";`
+      `  Use: ${replacement}\n` +
+      `  Import: import { dataSuiteHub } from "@/lib/data-suite";`
   );
 }
 
@@ -186,9 +188,9 @@ export function resetDeprecatedCallCounts(): void {
   warned.clear();
 }
 
-/** 
+/**
  * Get full migration report - ASSESSOR-GRADE AUDIT MATERIAL
- * 
+ *
  * This report is suitable for:
  * - CI enforcement checks
  * - Operational audits
@@ -205,15 +207,15 @@ export function getMigrationReport() {
     mutatorClass: MutatorClass;
     isMutator: boolean;
   }> = [];
-  
+
   let totalCalls = 0;
   let mutatorCalls = 0;
-  
+
   callRecords.forEach((record, fn) => {
     totalCalls += record.count;
     const isMutator = record.mutatorClass !== "query" && record.mutatorClass !== "auth";
     if (isMutator) mutatorCalls += record.count;
-    
+
     functions.push({
       name: fn,
       calls: record.count,
@@ -224,9 +226,9 @@ export function getMigrationReport() {
       isMutator,
     });
   });
-  
-  const mutatorFunctions = functions.filter(f => f.isMutator);
-  
+
+  const mutatorFunctions = functions.filter((f) => f.isMutator);
+
   return {
     // Summary
     totalCalls,
@@ -235,25 +237,25 @@ export function getMigrationReport() {
     uniqueFunctions: functions.length,
     uniqueMutators: mutatorFunctions.length,
     enforcementEnabled: ENFORCE_NO_LEGACY,
-    
+
     // Session metadata (for audit correlation)
     sessionId,
     sessionStarted: new Date(sessionStart).toISOString(),
     reportGenerated: new Date().toISOString(),
     environment: process.env.NODE_ENV || "unknown",
     appVersion,
-    
+
     // Detailed function breakdown (sorted by calls descending)
     functions: functions.sort((a, b) => b.calls - a.calls),
-    
+
     // CI helpers
     hasMutatorCalls: mutatorCalls > 0,
-    
+
     // Top offenders (for weekly burn-down reports)
     topOffenders: mutatorFunctions
       .sort((a, b) => b.calls - a.calls)
       .slice(0, 5)
-      .map(f => ({
+      .map((f) => ({
         name: f.name,
         calls: f.calls,
         lastSeen: f.lastSeen,
@@ -264,29 +266,29 @@ export function getMigrationReport() {
 
 /**
  * CI ASSERTION HELPER
- * 
+ *
  * Usage in E2E tests:
  *   import { assertNoLegacyMutators } from "@/lib/api";
  *   afterAll(() => assertNoLegacyMutators());
- * 
+ *
  * Throws if any deprecated mutator was called during the test.
  */
 export function assertNoLegacyMutators(): void {
   const report = getMigrationReport();
   if (report.hasMutatorCalls) {
     const mutators = report.topOffenders
-      .map(f => `  - ${f.name}: ${f.calls} calls from ${f.uniqueCallSites} sites`)
+      .map((f) => `  - ${f.name}: ${f.calls} calls from ${f.uniqueCallSites} sites`)
       .join("\n");
     throw new Error(
       `[CI_ASSERTION_FAILED] Legacy mutator calls detected:\n${mutators}\n\n` +
-      `Migrate to dataSuiteHub before merging.`
+        `Migrate to dataSuiteHub before merging.`
     );
   }
 }
 
 /**
  * OBSERVABILITY HELPER - Get deprecation events for alerting
- * 
+ *
  * Usage in monitoring:
  *   const events = getDeprecatedEvents();
  *   if (events.length > 0) sendAlert(events);
@@ -297,7 +299,7 @@ export function getDeprecatedEvents() {
 
 /**
  * DELETE-THE-SHIM PATHWAY CHECKER
- * 
+ *
  * Returns true when safe to remove mutator exports:
  * - No mutator calls in current session
  * - Enforcement mode ready
@@ -321,14 +323,14 @@ export * from "@/lib/api-internal";
 /**
  * @deprecated Use dataSuiteHub.ingest() instead
  */
-export async function uploadDataset(
-  file: File,
-  datasetType: DatasetType
-) {
+export async function uploadDataset(file: File, datasetType: DatasetType) {
   warnOnce("uploadDataset", "dataSuiteHub.ingest({ file, product })");
-  
+
   // Map old DatasetType to new DataProductType
-  const productMap: Record<DatasetType, "PARCEL_FABRIC" | "SALES_STREAM" | "BUILDINGS" | "COUNTY_ROLL"> = {
+  const productMap: Record<
+    DatasetType,
+    "PARCEL_FABRIC" | "SALES_STREAM" | "BUILDINGS" | "COUNTY_ROLL"
+  > = {
     parcel: "PARCEL_FABRIC",
     sales: "SALES_STREAM",
     building: "BUILDINGS",
@@ -391,7 +393,7 @@ export async function getIngestStatus(runId: string) {
 // ============================================
 
 // Aliases for backwards compatibility (original names already exported via *)
-export { 
+export {
   getRollYearSnapshots as getSnapshots,
   createRollYearSnapshot as createSnapshot,
   loadCountyDataFreshness as getDataSources,

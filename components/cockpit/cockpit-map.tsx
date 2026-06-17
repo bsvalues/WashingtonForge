@@ -33,8 +33,8 @@ function parcelsToGeoJSON(parcels: Parcel[]): GeoJSON.FeatureCollection {
       const col = index % gridSize;
 
       // Normalize to -0.5 to 0.5 range, then scale by spread
-      const baseLng = centerLng + ((col / gridSize) - 0.5) * spread * 2;
-      const baseLat = centerLat + ((row / gridSize) - 0.5) * spread * 2;
+      const baseLng = centerLng + (col / gridSize - 0.5) * spread * 2;
+      const baseLat = centerLat + (row / gridSize - 0.5) * spread * 2;
 
       // Add small random offset
       const lng = baseLng + (Math.random() - 0.5) * 0.01;
@@ -200,16 +200,21 @@ export function CockpitMap({ filters, parcels, onZoomToParcel }: CockpitMapProps
           "fill-color": [
             "match",
             ["get", "equityStatus"],
-            "fair", "rgba(16, 185, 129, 0.35)",
-            "progressive", "rgba(14, 165, 233, 0.35)",
-            "regressive", "rgba(245, 158, 11, 0.35)",
-            "rgba(100, 100, 100, 0.25)"
+            "fair",
+            "rgba(16, 185, 129, 0.35)",
+            "progressive",
+            "rgba(14, 165, 233, 0.35)",
+            "regressive",
+            "rgba(245, 158, 11, 0.35)",
+            "rgba(100, 100, 100, 0.25)",
           ],
           "fill-opacity": [
             "case",
-            ["boolean", ["feature-state", "selected"], false], 0.7,
-            ["boolean", ["feature-state", "hover"], false], 0.55,
-            0.4
+            ["boolean", ["feature-state", "selected"], false],
+            0.7,
+            ["boolean", ["feature-state", "hover"], false],
+            0.55,
+            0.4,
           ],
         },
       });
@@ -223,22 +228,29 @@ export function CockpitMap({ filters, parcels, onZoomToParcel }: CockpitMapProps
           "line-color": [
             "match",
             ["get", "equityStatus"],
-            "fair", "rgba(16, 185, 129, 1)",
-            "progressive", "rgba(14, 165, 233, 1)",
-            "regressive", "rgba(245, 158, 11, 1)",
-            "rgba(100, 100, 100, 1)"
+            "fair",
+            "rgba(16, 185, 129, 1)",
+            "progressive",
+            "rgba(14, 165, 233, 1)",
+            "regressive",
+            "rgba(245, 158, 11, 1)",
+            "rgba(100, 100, 100, 1)",
           ],
           "line-width": [
             "case",
-            ["boolean", ["feature-state", "selected"], false], 2.5,
-            ["boolean", ["feature-state", "hover"], false], 1.5,
-            0.8
+            ["boolean", ["feature-state", "selected"], false],
+            2.5,
+            ["boolean", ["feature-state", "hover"], false],
+            1.5,
+            0.8,
           ],
           "line-opacity": [
             "case",
-            ["boolean", ["feature-state", "selected"], false], 1,
-            ["boolean", ["feature-state", "hover"], false], 0.9,
-            0.6
+            ["boolean", ["feature-state", "selected"], false],
+            1,
+            ["boolean", ["feature-state", "hover"], false],
+            0.9,
+            0.6,
           ],
         },
       });
@@ -252,11 +264,7 @@ export function CockpitMap({ filters, parcels, onZoomToParcel }: CockpitMapProps
           "line-color": "rgba(59, 130, 246, 0.6)", // primary blue
           "line-width": 4,
           "line-blur": 3,
-          "line-opacity": [
-            "case",
-            ["boolean", ["feature-state", "selected"], false], 1,
-            0
-          ],
+          "line-opacity": ["case", ["boolean", ["feature-state", "selected"], false], 1, 0],
         },
       });
 
@@ -324,21 +332,15 @@ export function CockpitMap({ filters, parcels, onZoomToParcel }: CockpitMapProps
     // Clear all selection states first
     for (const feature of geoJSON.features) {
       if (feature.id) {
-        map.setFeatureState(
-          { source: "parcels", id: feature.id },
-          { selected: false }
-        );
+        map.setFeatureState({ source: "parcels", id: feature.id }, { selected: false });
       }
     }
 
     // Set selected states
     for (const id of selectedParcelIds) {
-      const feature = geoJSON.features.find(f => f.properties?.id === id);
+      const feature = geoJSON.features.find((f) => f.properties?.id === id);
       if (feature?.id) {
-        map.setFeatureState(
-          { source: "parcels", id: feature.id },
-          { selected: true }
-        );
+        map.setFeatureState({ source: "parcels", id: feature.id }, { selected: true });
       }
     }
   }, [selectedParcelIds, geoJSON, mapReady]);
@@ -352,21 +354,15 @@ export function CockpitMap({ filters, parcels, onZoomToParcel }: CockpitMapProps
     // Clear all hover states
     for (const feature of geoJSON.features) {
       if (feature.id) {
-        map.setFeatureState(
-          { source: "parcels", id: feature.id },
-          { hover: false }
-        );
+        map.setFeatureState({ source: "parcels", id: feature.id }, { hover: false });
       }
     }
 
     // Set hovered state
     if (hoveredParcelId) {
-      const feature = geoJSON.features.find(f => f.properties?.id === hoveredParcelId);
+      const feature = geoJSON.features.find((f) => f.properties?.id === hoveredParcelId);
       if (feature?.id) {
-        map.setFeatureState(
-          { source: "parcels", id: feature.id },
-          { hover: true }
-        );
+        map.setFeatureState({ source: "parcels", id: feature.id }, { hover: true });
       }
     }
   }, [hoveredParcelId, geoJSON, mapReady]);
@@ -475,12 +471,15 @@ export function CockpitMap({ filters, parcels, onZoomToParcel }: CockpitMapProps
     const maxY = Math.max(boxSelectStart.y, boxSelectEnd.y);
 
     const features = map.queryRenderedFeatures(
-      [[minX, minY], [maxX, maxY]],
+      [
+        [minX, minY],
+        [maxX, maxY],
+      ],
       { layers: ["parcels-fill"] }
     );
 
     const selectedParcelIds = features
-      .map(f => f.properties?.id)
+      .map((f) => f.properties?.id)
       .filter((id): id is string => !!id);
 
     if (selectedParcelIds.length > 0) {
@@ -504,7 +503,7 @@ export function CockpitMap({ filters, parcels, onZoomToParcel }: CockpitMapProps
     const shuffled = features.sort(() => Math.random() - 0.5);
     const selectedIds = shuffled
       .slice(0, count)
-      .map(f => f.properties?.id)
+      .map((f) => f.properties?.id)
       .filter((id): id is string => !!id);
 
     selectParcels(selectedIds);
@@ -635,9 +634,7 @@ export function CockpitMap({ filters, parcels, onZoomToParcel }: CockpitMapProps
             </div>
           </div>
           <div className="border-border/30 mt-3 border-t pt-2">
-            <p className="text-muted-foreground text-xs">
-              {parcels.length} parcels loaded
-            </p>
+            <p className="text-muted-foreground text-xs">{parcels.length} parcels loaded</p>
           </div>
         </GlassCard>
 

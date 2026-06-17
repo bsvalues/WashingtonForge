@@ -1,6 +1,6 @@
 /**
  * TerraFusion MapLibre Style Definitions
- * 
+ *
  * Known-good raster style for OSM tile rendering.
  * This style includes BOTH the source AND a layer that references it,
  * which is required for MapLibre to actually fetch tiles.
@@ -10,11 +10,11 @@ import type { StyleSpecification } from "maplibre-gl";
 
 /**
  * Minimal raster style for OpenStreetMap tiles.
- * 
+ *
  * IMPORTANT: A MapLibre style must contain:
  * 1. A source definition (type: "raster", tiles: [...])
  * 2. A layer that USES that source (type: "raster", source: "osm")
- * 
+ *
  * If the layer is missing, MapLibre will NOT request tiles.
  */
 export const RASTER_STYLE: StyleSpecification = {
@@ -82,5 +82,8 @@ export const DEFAULT_ZOOM = 10;
 export function logMapStyle(map: maplibregl.Map): void {
   const style = map.getStyle();
   console.log("[MapLibre] sources:", Object.keys(style?.sources ?? {}));
-  console.log("[MapLibre] layers:", (style?.layers ?? []).map((l) => l.id));
+  console.log(
+    "[MapLibre] layers:",
+    (style?.layers ?? []).map((l) => l.id)
+  );
 }

@@ -447,7 +447,10 @@ export function ValidateStep({ dataset, onComplete, onBack }: ValidateStepProps)
           <ArrowLeft className="mr-2 h-4 w-4" />
           Back
         </Button>
-        <Button onClick={handleContinue} className="tf-glass-btn tf-glass-btn--primary text-foreground font-medium">
+        <Button
+          onClick={handleContinue}
+          className="tf-glass-btn tf-glass-btn--primary text-foreground font-medium"
+        >
           Continue to Preview
           <ArrowRight className="ml-2 h-4 w-4" />
         </Button>

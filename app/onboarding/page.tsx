@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 
 /**
  * HARD REDIRECT: /onboarding → /data-suite?tab=onboarding
- * 
+ *
  * The Data Suite is the SINGLE AUTHORITY for all data operations.
  * This route exists only for backwards compatibility and immediately redirects.
  * No legacy components mount here - fail-closed architecture.

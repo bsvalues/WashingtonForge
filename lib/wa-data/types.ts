@@ -1,9 +1,9 @@
 /**
  * TerraFusion WA Data Precursor - Core Types
- * 
+ *
  * This module defines the data foundation for Washington State county integration.
  * Designed for PostgreSQL + PostGIS backend with court-ready audit trails.
- * 
+ *
  * PRODUCTION NOTES:
  * - All confidence values are 0-100 (not 0-1) for UX consistency
  * - Parcel IDs include both raw and normalized forms for join quality tracking
@@ -82,16 +82,16 @@ export function normalizeParcelId(raw: string): string {
 // ============================================
 
 export interface ParcelBaseWA_Dto {
-  parcel_uid: string;           // Stable internal key (UUID)
-  county_fips: WACountyFips;    // WA county FIPS code
-  original_parcel_id: string;   // Original APN/PARID from source
-  geom_wkt?: string;            // WKT geometry (for transfer only)
+  parcel_uid: string; // Stable internal key (UUID)
+  county_fips: WACountyFips; // WA county FIPS code
+  original_parcel_id: string; // Original APN/PARID from source
+  geom_wkt?: string; // WKT geometry (for transfer only)
   geom_geojson?: GeoJSON.Geometry; // GeoJSON geometry (for transfer only)
   centroid_lat?: number;
   centroid_lng?: number;
   acreage?: number;
-  source_version: string;       // e.g., "WA_Parcels_2025_Sept"
-  ingested_at: string;          // ISO timestamp
+  source_version: string; // e.g., "WA_Parcels_2025_Sept"
+  ingested_at: string; // ISO timestamp
 }
 
 // Alias for backwards compatibility
@@ -104,45 +104,45 @@ export type ParcelBaseWA = ParcelBaseWA_Dto;
 export interface CountyParcelRoll {
   id: string;
   county_fips: WACountyFips;
-  
+
   // Parcel ID with normalization for join quality
-  county_parcel_id_raw: string;     // Original APN/PARID exactly as received
-  county_parcel_id_norm: string;    // Normalized (strip punctuation, pad, uppercase)
-  parcel_uid?: string;              // Link to WA base layer
+  county_parcel_id_raw: string; // Original APN/PARID exactly as received
+  county_parcel_id_norm: string; // Normalized (strip punctuation, pad, uppercase)
+  parcel_uid?: string; // Link to WA base layer
   join_confidence?: JoinConfidence; // How confident the join is
-  join_method?: JoinMethod;         // How the join was established
-  
+  join_method?: JoinMethod; // How the join was established
+
   // Situs (Property Address)
   situs_address?: string;
   situs_city?: string;
   situs_zip?: string;
-  
+
   // Classification
-  property_class?: string;      // e.g., "R1", "C2", "A1"
+  property_class?: string; // e.g., "R1", "C2", "A1"
   property_class_desc?: string; // "Single Family Residential"
   land_use_code?: string;
   zoning?: string;
-  
+
   // Valuation
   land_value?: number;
   improvement_value?: number;
   total_value?: number;
   taxable_value?: number;
-  
+
   // Building Info
   year_built?: number;
   building_sqft?: number;
   lot_sqft?: number;
   bedrooms?: number;
   bathrooms?: number;
-  
+
   // Roll Metadata
   roll_year: number;
   effective_date?: string;
   certified_date?: string;
-  
+
   // Change Detection
-  hash_row: string;             // SHA256 of key fields for delta detection
+  hash_row: string; // SHA256 of key fields for delta detection
   updated_at: string;
 }
 
@@ -153,32 +153,32 @@ export interface CountyParcelRoll {
 export interface SaleRecord {
   id: string;
   county_fips: WACountyFips;
-  
+
   // Parcel ID with normalization for join quality
   county_parcel_id_raw: string;
   county_parcel_id_norm: string;
   parcel_uid?: string;
   join_confidence?: JoinConfidence;
   join_method?: JoinMethod;
-  
+
   sale_date: string;
   sale_price: number;
-  
+
   // Sale Validity
   is_arms_length: boolean;
-  validity_code?: string;       // County-specific validity codes
+  validity_code?: string; // County-specific validity codes
   validity_reason?: string;
-  
+
   // Transaction Details
   instrument_number?: string;
-  document_type?: string;       // "Warranty Deed", "Quit Claim", etc.
+  document_type?: string; // "Warranty Deed", "Quit Claim", etc.
   grantor?: string;
   grantee?: string;
-  
+
   // For Ratio Studies
   assessed_value_at_sale?: number;
-  sale_ratio?: number;          // assessed / sale price
-  
+  sale_ratio?: number; // assessed / sale price
+
   ingested_at: string;
 }
 
@@ -186,7 +186,7 @@ export interface SaleRecord {
 // Ingest Runs & Lineage (Court-Ready Audit)
 // ============================================
 
-export type IngestSource = 
+export type IngestSource =
   | "wa_statewide_parcels"
   | "county_file_upload"
   | "county_api_pull"
@@ -212,20 +212,20 @@ export interface IngestRun {
   source?: IngestSource;
   source_url?: string;
   source_filename?: string;
-  source_fingerprint?: string;    // SHA256 of file/response for audit
-  transform_version?: string;      // Mapping ruleset ID, e.g., "mapping-template-v3"
-  
+  source_fingerprint?: string; // SHA256 of file/response for audit
+  transform_version?: string; // Mapping ruleset ID, e.g., "mapping-template-v3"
+
   status: IngestStatus;
   started_at: string;
   completed_at?: string;
-  
+
   // Row Metrics (overall)
   rows_received?: number;
   rows_inserted?: number;
   rows_updated?: number;
   rows_skipped?: number;
   rows_errored?: number;
-  
+
   // Row Counts by Stage (for pipeline debugging)
   row_counts_by_stage?: {
     raw?: number;
@@ -252,12 +252,12 @@ export interface IngestRun {
   second_approver?: string;
 
   // Audit
-  initiated_by?: string;        // User ID or "system"
-  approved_by?: string;         // For dual-approval workflows
+  initiated_by?: string; // User ID or "system"
+  approved_by?: string; // For dual-approval workflows
   change_memo?: string;
 
   // Rollback Support
-  snapshot_id?: string;         // Reference to pre-ingest snapshot
+  snapshot_id?: string; // Reference to pre-ingest snapshot
   can_rollback?: boolean;
 }
 
@@ -280,10 +280,10 @@ export interface LineageEvent {
 // ============================================
 
 export type OnboardingPath =
-  | "public_quickstart"    // WA baseline only, add roll later
-  | "file_drop"            // Upload CSV/DBF/GDB
-  | "connected_feed"       // ArcGIS/SFTP/API
-  | "quick-start";         // Alias used in repository
+  | "public_quickstart" // WA baseline only, add roll later
+  | "file_drop" // Upload CSV/DBF/GDB
+  | "connected_feed" // ArcGIS/SFTP/API
+  | "quick-start"; // Alias used in repository
 
 export type DataLayerStatus =
   | "not_configured"
@@ -297,7 +297,7 @@ export type DataLayerStatus =
 export interface CountyDataStatus {
   county_fips: WACountyFips;
   county_name: string;
-  
+
   // Layer Status with enhanced metadata
   parcel_fabric: {
     status: DataLayerStatus;
@@ -365,13 +365,13 @@ export interface CountyDataStatus {
 export interface FieldMappingMemory {
   id: string;
   county_fips: WACountyFips;
-  source_field: string;           // Original column name from county
-  target_field: string;           // TerraFusion canonical field
-  confidence_pct: number;         // 0-100 (NORMALIZED for UX)
+  source_field: string; // Original column name from county
+  target_field: string; // TerraFusion canonical field
+  confidence_pct: number; // 0-100 (NORMALIZED for UX)
   learned_at: string;
-  used_count: number;             // How many times this mapping was used
+  used_count: number; // How many times this mapping was used
   last_used_at: string;
-  source_fingerprint?: string;    // Which file/export this was learned from
+  source_fingerprint?: string; // Which file/export this was learned from
 }
 
 // ============================================
@@ -403,7 +403,7 @@ export interface CountyExportFingerprint {
     sample_patterns?: Record<string, string>;
   };
   recommended_template_id?: string;
-  confidence_pct: number;         // 0-100
+  confidence_pct: number; // 0-100
   created_at?: string;
   updated_at?: string;
 }
@@ -412,42 +412,36 @@ export interface CountyExportFingerprint {
 // Connected Feed Configuration
 // ============================================
 
-export type FeedType = 
+export type FeedType =
   | "arcgis_feature_service"
   | "arcgis_hub"
   | "sftp"
   | "https_download"
   | "api_rest";
 
-export type FeedSchedule = 
-  | "realtime"
-  | "hourly"
-  | "daily"
-  | "weekly"
-  | "monthly"
-  | "on_demand";
+export type FeedSchedule = "realtime" | "hourly" | "daily" | "weekly" | "monthly" | "on_demand";
 
 export interface ConnectedFeed {
   id: string;
   county_fips: WACountyFips;
   name: string;
   feed_type: FeedType;
-  
+
   // Connection Details
   endpoint_url: string;
   auth_type?: "none" | "api_key" | "oauth" | "basic";
   // Credentials stored separately in secure vault
-  
+
   // Schedule
   schedule: FeedSchedule;
   last_pull_at?: string;
   next_pull_at?: string;
-  
+
   // Data Mapping (simple config, not full memory objects)
   target_layer: "parcel" | "roll" | "sales" | "building";
-  field_mappings: Record<string, string>;  // { sourceField: targetField }
-  mapping_template_id?: string;            // Reference to learning template
-  
+  field_mappings: Record<string, string>; // { sourceField: targetField }
+  mapping_template_id?: string; // Reference to learning template
+
   // Status
   is_active: boolean;
   last_status: "success" | "partial" | "failed";
@@ -463,16 +457,16 @@ export interface RollVersion {
   county_fips: WACountyFips;
   roll_year: number;
   version_type: "certified" | "revision" | "preliminary" | "working";
-  version_number: number;       // e.g., revision 1, 2, 3...
-  
+  version_number: number; // e.g., revision 1, 2, 3...
+
   record_count: number;
   created_at: string;
   created_by: string;
-  
+
   // For certified rolls
   certification_date?: string;
   certification_authority?: string;
-  
+
   // Change Summary
   changes_from_previous?: {
     records_added: number;
@@ -480,36 +474,36 @@ export interface RollVersion {
     records_deleted: number;
     total_value_change: number;
   };
-  
+
   // Snapshot Reference
-  snapshot_table?: string;      // e.g., "roll_2026_certified_v1"
+  snapshot_table?: string; // e.g., "roll_2026_certified_v1"
 }
 
 // ============================================
 // Security & AI Mode Configuration
 // ============================================
 
-export type AIMode = 
-  | "sovereign_cloud"           // Azure Gov OpenAI
-  | "on_prem"                   // County-hosted AI
-  | "hybrid"                    // Metadata to cloud, rows stay local
-  | "disabled";                 // No AI features
+export type AIMode =
+  | "sovereign_cloud" // Azure Gov OpenAI
+  | "on_prem" // County-hosted AI
+  | "hybrid" // Metadata to cloud, rows stay local
+  | "disabled"; // No AI features
 
 export interface CountySecurityConfig {
   county_fips: WACountyFips;
-  
+
   // Data Residency
   data_residency: "azure_gov" | "county_hosted" | "hybrid";
-  
+
   // AI Configuration
   ai_mode: AIMode;
   ai_allowed_operations?: string[]; // e.g., ["field_mapping", "anomaly_detection"]
-  
+
   // Access Control
   require_dual_approval: boolean;
   require_mfa: boolean;
   session_timeout_minutes: number;
-  
+
   // Audit
   audit_retention_days: number;
   require_change_memo: boolean;

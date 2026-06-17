@@ -19,11 +19,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "@/components/ui/collapsible";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import {
   Table,
   TableBody,
@@ -32,12 +28,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import type { WACountyFips, JoinConfidence, JoinMethod } from "@/lib/wa-data/types";
 
@@ -148,25 +139,23 @@ export function JoinQualityDashboard({
         {/* Header */}
         <div className="flex items-start justify-between">
           <div>
-            <h2 className="text-foreground text-xl font-semibold">
-              Join Quality Report
-            </h2>
+            <h2 className="text-foreground text-xl font-semibold">Join Quality Report</h2>
             <p className="text-muted-foreground text-sm">
               {countyName} County parcel matching results
             </p>
           </div>
           {stats.match_rate_pct >= 99 ? (
-            <Badge className="bg-emerald-500/10 text-emerald-500 border-emerald-500/20">
+            <Badge className="border-emerald-500/20 bg-emerald-500/10 text-emerald-500">
               <CheckCircle2 className="mr-1 h-3 w-3" />
               Excellent Match Rate
             </Badge>
           ) : stats.match_rate_pct >= 95 ? (
-            <Badge className="bg-amber-500/10 text-amber-500 border-amber-500/20">
+            <Badge className="border-amber-500/20 bg-amber-500/10 text-amber-500">
               <AlertTriangle className="mr-1 h-3 w-3" />
               Good Match Rate
             </Badge>
           ) : (
-            <Badge className="bg-red-500/10 text-red-500 border-red-500/20">
+            <Badge className="border-red-500/20 bg-red-500/10 text-red-500">
               <XCircle className="mr-1 h-3 w-3" />
               Review Required
             </Badge>
@@ -179,7 +168,7 @@ export function JoinQualityDashboard({
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-muted-foreground text-xs uppercase tracking-wide">
+                  <p className="text-muted-foreground text-xs tracking-wide uppercase">
                     Match Rate
                   </p>
                   <p className="text-foreground mt-1 text-2xl font-bold">
@@ -197,7 +186,7 @@ export function JoinQualityDashboard({
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-muted-foreground text-xs uppercase tracking-wide">
+                  <p className="text-muted-foreground text-xs tracking-wide uppercase">
                     Matched Records
                   </p>
                   <p className="text-foreground mt-1 text-2xl font-bold">
@@ -215,7 +204,7 @@ export function JoinQualityDashboard({
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-muted-foreground text-xs uppercase tracking-wide">
+                  <p className="text-muted-foreground text-xs tracking-wide uppercase">
                     Unmatched Roll
                   </p>
                   <p className="text-foreground mt-1 text-2xl font-bold">
@@ -233,7 +222,7 @@ export function JoinQualityDashboard({
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-muted-foreground text-xs uppercase tracking-wide">
+                  <p className="text-muted-foreground text-xs tracking-wide uppercase">
                     Unmatched WA
                   </p>
                   <p className="text-foreground mt-1 text-2xl font-bold">
@@ -251,12 +240,8 @@ export function JoinQualityDashboard({
         {/* Confidence Distribution */}
         <Card className="bg-card/50 border-border/50">
           <CardHeader className="pb-2">
-            <CardTitle className="text-base font-medium">
-              Match Confidence Distribution
-            </CardTitle>
-            <CardDescription>
-              How confident we are in each parcel match
-            </CardDescription>
+            <CardTitle className="text-base font-medium">Match Confidence Distribution</CardTitle>
+            <CardDescription>How confident we are in each parcel match</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             {/* High Confidence */}
@@ -264,15 +249,13 @@ export function JoinQualityDashboard({
               <div className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-2">
                   <div className="h-3 w-3 rounded-full bg-emerald-500" />
-                  <span className="text-foreground font-medium">
-                    High Confidence (exact match)
-                  </span>
+                  <span className="text-foreground font-medium">High Confidence (exact match)</span>
                 </div>
                 <span className="text-muted-foreground">
                   {stats.matched_high.toLocaleString()} ({highConfidencePct.toFixed(1)}%)
                 </span>
               </div>
-              <Progress value={highConfidencePct} className="h-2 bg-muted" />
+              <Progress value={highConfidencePct} className="bg-muted h-2" />
             </div>
 
             {/* Medium Confidence */}
@@ -289,8 +272,8 @@ export function JoinQualityDashboard({
                     </TooltipTrigger>
                     <TooltipContent>
                       <p className="max-w-xs text-xs">
-                        Matched after normalizing parcel IDs (removing dashes, 
-                        stripping leading zeros, etc.)
+                        Matched after normalizing parcel IDs (removing dashes, stripping leading
+                        zeros, etc.)
                       </p>
                     </TooltipContent>
                   </Tooltip>
@@ -299,7 +282,7 @@ export function JoinQualityDashboard({
                   {stats.matched_med.toLocaleString()} ({medConfidencePct.toFixed(1)}%)
                 </span>
               </div>
-              <Progress value={medConfidencePct} className="h-2 bg-muted" />
+              <Progress value={medConfidencePct} className="bg-muted h-2" />
             </div>
 
             {/* Low Confidence */}
@@ -307,17 +290,15 @@ export function JoinQualityDashboard({
               <div className="flex items-center justify-between text-sm">
                 <div className="flex items-center gap-2">
                   <div className="h-3 w-3 rounded-full bg-red-500" />
-                  <span className="text-foreground font-medium">
-                    Low Confidence (fuzzy match)
-                  </span>
+                  <span className="text-foreground font-medium">Low Confidence (fuzzy match)</span>
                   <Tooltip>
                     <TooltipTrigger>
                       <Info className="text-muted-foreground h-3.5 w-3.5" />
                     </TooltipTrigger>
                     <TooltipContent>
                       <p className="max-w-xs text-xs">
-                        Matched using fuzzy algorithms. Review recommended 
-                        before using in official reports.
+                        Matched using fuzzy algorithms. Review recommended before using in official
+                        reports.
                       </p>
                     </TooltipContent>
                   </Tooltip>
@@ -326,7 +307,7 @@ export function JoinQualityDashboard({
                   {stats.matched_low.toLocaleString()} ({lowConfidencePct.toFixed(1)}%)
                 </span>
               </div>
-              <Progress value={lowConfidencePct} className="h-2 bg-muted" />
+              <Progress value={lowConfidencePct} className="bg-muted h-2" />
             </div>
           </CardContent>
         </Card>
@@ -341,9 +322,7 @@ export function JoinQualityDashboard({
                     <Sparkles className="h-4 w-4 text-purple-400" />
                     AI-Detected Mismatch Patterns
                   </CardTitle>
-                  <CardDescription>
-                    Common reasons why records didn&apos;t match
-                  </CardDescription>
+                  <CardDescription>Common reasons why records didn&apos;t match</CardDescription>
                 </div>
                 <CollapsibleTrigger asChild>
                   <Button variant="ghost" size="sm">
@@ -389,21 +368,15 @@ export function JoinQualityDashboard({
                       >
                         <TableCell>
                           <div>
-                            <p className="text-foreground font-medium">
-                              {pattern.pattern}
-                            </p>
-                            <p className="text-muted-foreground text-xs">
-                              {pattern.description}
-                            </p>
+                            <p className="text-foreground font-medium">{pattern.pattern}</p>
+                            <p className="text-muted-foreground text-xs">{pattern.description}</p>
                           </div>
                         </TableCell>
                         <TableCell>
-                          <Badge variant="secondary">
-                            {pattern.affected_count}
-                          </Badge>
+                          <Badge variant="secondary">{pattern.affected_count}</Badge>
                         </TableCell>
                         <TableCell>
-                          <code className="text-muted-foreground rounded bg-muted px-1.5 py-0.5 text-xs">
+                          <code className="text-muted-foreground bg-muted rounded px-1.5 py-0.5 text-xs">
                             {pattern.example_raw}
                           </code>
                           <span className="text-muted-foreground mx-1">→</span>
@@ -426,8 +399,7 @@ export function JoinQualityDashboard({
         {/* Actions */}
         <div className="flex items-center justify-between">
           <p className="text-muted-foreground text-sm">
-            Last analyzed: {new Date().toLocaleDateString()} at{" "}
-            {new Date().toLocaleTimeString()}
+            Last analyzed: {new Date().toLocaleDateString()} at {new Date().toLocaleTimeString()}
           </p>
           <div className="flex gap-2">
             <Button

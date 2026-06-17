@@ -54,10 +54,18 @@ export function IngestSummaryCard({
           </div>
           <div>
             <h3 className="text-foreground font-semibold">{dataset.name}</h3>
-            <p className="text-muted-foreground text-sm">{typeLabels[dataset.type] || dataset.type}</p>
+            <p className="text-muted-foreground text-sm">
+              {typeLabels[dataset.type] || dataset.type}
+            </p>
           </div>
         </div>
-        <div className={cn("flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium", status.bgColor, status.color)}>
+        <div
+          className={cn(
+            "flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium",
+            status.bgColor,
+            status.color
+          )}
+        >
           {dataset.status === "published" ? (
             <CheckCircle2 className="h-3 w-3" />
           ) : dataset.status === "failed" ? (
@@ -71,7 +79,7 @@ export function IngestSummaryCard({
 
       {/* Stats Grid */}
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
-        <div className="rounded-lg bg-muted/20 p-3 text-center">
+        <div className="bg-muted/20 rounded-lg p-3 text-center">
           <Hash className="text-muted-foreground mx-auto mb-1 h-4 w-4" />
           <p className="text-foreground text-lg font-semibold">
             {dataset.rowCount?.toLocaleString() || "—"}
@@ -80,7 +88,7 @@ export function IngestSummaryCard({
         </div>
 
         {mappedFieldsCount !== undefined && (
-          <div className="rounded-lg bg-muted/20 p-3 text-center">
+          <div className="bg-muted/20 rounded-lg p-3 text-center">
             <Database className="text-muted-foreground mx-auto mb-1 h-4 w-4" />
             <p className="text-foreground text-lg font-semibold">{mappedFieldsCount}</p>
             <p className="text-muted-foreground text-xs">Mapped Fields</p>
@@ -88,7 +96,7 @@ export function IngestSummaryCard({
         )}
 
         {validatedRowsCount !== undefined && (
-          <div className="rounded-lg bg-muted/20 p-3 text-center">
+          <div className="bg-muted/20 rounded-lg p-3 text-center">
             <CheckCircle2 className="text-chart-1 mx-auto mb-1 h-4 w-4" />
             <p className="text-chart-1 text-lg font-semibold">
               {validatedRowsCount.toLocaleString()}
@@ -98,14 +106,14 @@ export function IngestSummaryCard({
         )}
 
         {dataset.errorCount !== undefined && dataset.errorCount > 0 && (
-          <div className="rounded-lg bg-muted/20 p-3 text-center">
+          <div className="bg-muted/20 rounded-lg p-3 text-center">
             <XCircle className="text-destructive mx-auto mb-1 h-4 w-4" />
             <p className="text-destructive text-lg font-semibold">{dataset.errorCount}</p>
             <p className="text-muted-foreground text-xs">Errors</p>
           </div>
         )}
 
-        <div className="rounded-lg bg-muted/20 p-3 text-center">
+        <div className="bg-muted/20 rounded-lg p-3 text-center">
           <Calendar className="text-muted-foreground mx-auto mb-1 h-4 w-4" />
           <p className="text-foreground text-sm font-medium">
             {new Date(dataset.createdAt).toLocaleDateString()}
@@ -115,7 +123,7 @@ export function IngestSummaryCard({
       </div>
 
       {/* Data Flow Mini */}
-      <div className="mt-4 flex items-center justify-center gap-2 rounded-lg bg-muted/10 p-3">
+      <div className="bg-muted/10 mt-4 flex items-center justify-center gap-2 rounded-lg p-3">
         <span className="text-muted-foreground text-xs">Upload</span>
         <ArrowRight className="text-muted-foreground/50 h-3 w-3" />
         <span className="text-muted-foreground text-xs">Map</span>
@@ -124,10 +132,12 @@ export function IngestSummaryCard({
         <ArrowRight className="text-muted-foreground/50 h-3 w-3" />
         <span className="text-muted-foreground text-xs">Preview</span>
         <ArrowRight className="text-muted-foreground/50 h-3 w-3" />
-        <span className={cn(
-          "text-xs font-medium",
-          dataset.status === "published" ? "text-chart-1" : "text-muted-foreground"
-        )}>
+        <span
+          className={cn(
+            "text-xs font-medium",
+            dataset.status === "published" ? "text-chart-1" : "text-muted-foreground"
+          )}
+        >
           Publish
         </span>
       </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { AppShell } from "@/components/app-shell";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -76,21 +76,21 @@ const tabs: { id: IDSTab; label: string; icon: typeof Database }[] = [
   { id: "audit", label: "Audit", icon: ScrollText },
 ];
 
-export default function DataSuitePage() {
+function DataSuitePageInner() {
   const searchParams = useSearchParams();
   const tabParam = searchParams.get("tab") as IDSTab | null;
-  
+
   const [selectedCounty, setSelectedCounty] = useState<WACountyFips | null>("53005"); // Default: Benton
   const [activeTab, setActiveTab] = useState<IDSTab>(
-    tabParam && tabs.some(t => t.id === tabParam) ? tabParam : "inventory"
+    tabParam && tabs.some((t) => t.id === tabParam) ? tabParam : "inventory"
   );
   const [status, setStatus] = useState<CountyDataStatus | null>(null);
   const [events, setEvents] = useState<DataSuiteEvent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  
+
   // Sync tab with URL param
   useEffect(() => {
-    if (tabParam && tabs.some(t => t.id === tabParam) && tabParam !== activeTab) {
+    if (tabParam && tabs.some((t) => t.id === tabParam) && tabParam !== activeTab) {
       setActiveTab(tabParam);
     }
   }, [tabParam, activeTab]);
@@ -132,7 +132,13 @@ export default function DataSuitePage() {
   }));
 
   return (
-    <AppShell user={{ name: "Demo User", role: "Assessor", countyName: status?.county_name || "Select County" }}>
+    <AppShell
+      user={{
+        name: "Demo User",
+        role: "Assessor",
+        countyName: status?.county_name || "Select County",
+      }}
+    >
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -208,17 +214,38 @@ export default function DataSuitePage() {
               <div className="flex flex-wrap gap-2">
                 <ProductStatusPill
                   label="Fabric"
-                  status={status.parcel_fabric.status as "active" | "stale" | "loading" | "not_started" | "error"}
+                  status={
+                    status.parcel_fabric.status as
+                      | "active"
+                      | "stale"
+                      | "loading"
+                      | "not_started"
+                      | "error"
+                  }
                   count={status.parcel_fabric.parcel_count}
                 />
                 <ProductStatusPill
                   label="Roll"
-                  status={status.county_roll.status as "active" | "stale" | "loading" | "not_started" | "error"}
+                  status={
+                    status.county_roll.status as
+                      | "active"
+                      | "stale"
+                      | "loading"
+                      | "not_started"
+                      | "error"
+                  }
                   count={status.county_roll.total_records}
                 />
                 <ProductStatusPill
                   label="Sales"
-                  status={status.sales_stream.status as "active" | "stale" | "loading" | "not_started" | "error"}
+                  status={
+                    status.sales_stream.status as
+                      | "active"
+                      | "stale"
+                      | "loading"
+                      | "not_started"
+                      | "error"
+                  }
                   count={status.sales_stream.total_sales}
                 />
               </div>
@@ -230,7 +257,8 @@ export default function DataSuitePage() {
               <div className="flex items-center gap-2 text-sm">
                 <Clock className="text-muted-foreground h-4 w-4" />
                 <span className="text-muted-foreground">
-                  Last update: {status.last_updated ? new Date(status.last_updated).toLocaleString() : "—"}
+                  Last update:{" "}
+                  {status.last_updated ? new Date(status.last_updated).toLocaleString() : "—"}
                 </span>
               </div>
             </div>
@@ -255,13 +283,13 @@ export default function DataSuitePage() {
 
           {/* Onboarding Tab */}
           <TabsContent value="onboarding">
-            <OnboardingPanel 
-              countyFips={selectedCounty} 
+            <OnboardingPanel
+              countyFips={selectedCounty}
               onComplete={(fips) => {
                 setSelectedCounty(fips);
                 loadStatus();
                 setActiveTab("inventory");
-              }} 
+              }}
             />
           </TabsContent>
 
@@ -292,6 +320,17 @@ export default function DataSuitePage() {
         </Tabs>
       </div>
     </AppShell>
+  );
+}
+
+// useSearchParams() requires a Suspense boundary for static prerendering (Next.js).
+export default function DataSuitePage() {
+  return (
+    <Suspense
+      fallback={<div className="text-muted-foreground p-8 text-sm">Loading data suite…</div>}
+    >
+      <DataSuitePageInner />
+    </Suspense>
   );
 }
 
@@ -364,7 +403,12 @@ function InventoryPanel({
       type: "PARCEL_FABRIC",
       name: "Parcel Fabric",
       icon: Map,
-      status: status.parcel_fabric.status as "active" | "stale" | "loading" | "not_started" | "error",
+      status: status.parcel_fabric.status as
+        | "active"
+        | "stale"
+        | "loading"
+        | "not_started"
+        | "error",
       count: status.parcel_fabric.parcel_count || 0,
       coverage: status.parcel_fabric.coverage_pct || 0,
       lastSync: status.parcel_fabric.last_sync || null,
@@ -384,7 +428,12 @@ function InventoryPanel({
       type: "SALES_STREAM",
       name: "Sales Stream",
       icon: BarChart3,
-      status: status.sales_stream.status as "active" | "stale" | "loading" | "not_started" | "error",
+      status: status.sales_stream.status as
+        | "active"
+        | "stale"
+        | "loading"
+        | "not_started"
+        | "error",
       count: status.sales_stream.total_sales || 0,
       coverage: status.sales_stream.arms_length_pct || 0,
       lastSync: status.sales_stream.last_sync || null,
@@ -421,9 +470,7 @@ function InventoryPanel({
                 <span className="text-muted-foreground">
                   {product.type === "SALES_STREAM" ? "Arms-Length" : "Coverage"}
                 </span>
-                <span className="text-foreground font-medium">
-                  {product.coverage.toFixed(1)}%
-                </span>
+                <span className="text-foreground font-medium">{product.coverage.toFixed(1)}%</span>
               </div>
               {product.lastSync && (
                 <div className="flex justify-between text-sm">
@@ -470,8 +517,8 @@ function InventoryPanel({
                 {...(isUnlocked ? { href: cap.href } : {})}
                 className={cn(
                   "flex items-center gap-2 rounded-lg p-3 text-sm transition-colors",
-                  isUnlocked 
-                    ? "bg-emerald-400/10 text-emerald-400 hover:bg-emerald-400/20 cursor-pointer" 
+                  isUnlocked
+                    ? "cursor-pointer bg-emerald-400/10 text-emerald-400 hover:bg-emerald-400/20"
                     : "bg-muted/20 text-muted-foreground cursor-not-allowed"
                 )}
               >
@@ -499,7 +546,7 @@ function OnboardingPanel({
   onComplete: (fips: WACountyFips) => void;
 }) {
   return (
-    <CountyOnboardingWizard 
+    <CountyOnboardingWizard
       onComplete={async (fips, path) => {
         // Route through DataSuiteHub
         if (path === "public_quickstart") {
@@ -510,7 +557,7 @@ function OnboardingPanel({
           });
         }
         onComplete(fips);
-      }} 
+      }}
     />
   );
 }
@@ -583,10 +630,8 @@ function IngestPanel({
 
       {/* Step Content */}
       <div className="min-h-[400px]">
-        {currentStep === "upload" && (
-          <SmartUploadStep onComplete={handleUploadComplete} />
-        )}
-        
+        {currentStep === "upload" && <SmartUploadStep onComplete={handleUploadComplete} />}
+
         {currentStep === "map" && dataset && (
           <SmartMapFieldsStep
             dataset={dataset}
@@ -594,15 +639,11 @@ function IngestPanel({
             onBack={goBack}
           />
         )}
-        
+
         {currentStep === "validate" && dataset && (
-          <ValidateStep
-            dataset={dataset}
-            onComplete={handleValidationComplete}
-            onBack={goBack}
-          />
+          <ValidateStep dataset={dataset} onComplete={handleValidationComplete} onBack={goBack} />
         )}
-        
+
         {currentStep === "preview" && dataset && (
           <PreviewStep
             dataset={dataset}
@@ -611,13 +652,9 @@ function IngestPanel({
             onBack={goBack}
           />
         )}
-        
+
         {currentStep === "publish" && dataset && (
-          <PublishStep
-            dataset={dataset}
-            onComplete={handlePublishComplete}
-            onBack={goBack}
-          />
+          <PublishStep dataset={dataset} onComplete={handlePublishComplete} onBack={goBack} />
         )}
       </div>
     </div>
@@ -656,10 +693,16 @@ function QualityPanel({
             <Shield className="text-primary h-5 w-5" />
             <h4 className="text-foreground font-medium">Join Match Rate</h4>
           </div>
-          <p className={cn(
-            "text-3xl font-bold",
-            joinRate >= 95 ? "text-emerald-400" : joinRate >= 85 ? "text-amber-400" : "text-red-400"
-          )}>
+          <p
+            className={cn(
+              "text-3xl font-bold",
+              joinRate >= 95
+                ? "text-emerald-400"
+                : joinRate >= 85
+                  ? "text-amber-400"
+                  : "text-red-400"
+            )}
+          >
             {joinRate.toFixed(1)}%
           </p>
           <p className="text-muted-foreground mt-1 text-sm">
@@ -672,15 +715,19 @@ function QualityPanel({
             <BarChart3 className="text-primary h-5 w-5" />
             <h4 className="text-foreground font-medium">Arms-Length Sales</h4>
           </div>
-          <p className={cn(
-            "text-3xl font-bold",
-            armsLengthRate >= 80 ? "text-emerald-400" : armsLengthRate >= 60 ? "text-amber-400" : "text-red-400"
-          )}>
+          <p
+            className={cn(
+              "text-3xl font-bold",
+              armsLengthRate >= 80
+                ? "text-emerald-400"
+                : armsLengthRate >= 60
+                  ? "text-amber-400"
+                  : "text-red-400"
+            )}
+          >
             {armsLengthRate.toFixed(1)}%
           </p>
-          <p className="text-muted-foreground mt-1 text-sm">
-            Valid for ratio study inclusion
-          </p>
+          <p className="text-muted-foreground mt-1 text-sm">Valid for ratio study inclusion</p>
         </Card>
 
         <Card className="tf-glass p-5">
@@ -689,9 +736,7 @@ function QualityPanel({
             <h4 className="text-foreground font-medium">Validation Pass</h4>
           </div>
           <p className="text-3xl font-bold text-emerald-400">98.2%</p>
-          <p className="text-muted-foreground mt-1 text-sm">
-            Records passing all validation rules
-          </p>
+          <p className="text-muted-foreground mt-1 text-sm">Records passing all validation rules</p>
         </Card>
       </div>
 
@@ -821,13 +866,13 @@ function RoutingPanel({
 
   // Map routing targets to actual routes
   const targetRouteMap: Record<string, string> = {
-    "Cockpit": "/cockpit",
+    Cockpit: "/cockpit",
     "Ratio Studies": "/ratio-studies",
     "Comps Engine": "/calibration",
-    "Calibration": "/calibration",
-    "Appeals": "/audit",
-    "Audit": "/audit",
-    "Reports": "/snapshots",
+    Calibration: "/calibration",
+    Appeals: "/audit",
+    Audit: "/audit",
+    Reports: "/snapshots",
   };
 
   return (
@@ -839,41 +884,43 @@ function RoutingPanel({
           Click any destination to navigate there with your data ready.
         </p>
         <div className="grid gap-4 md:grid-cols-3">
-          {(["PARCEL_FABRIC", "COUNTY_ROLL", "SALES_STREAM"] as DataProductType[]).map((product) => {
-            const targets = DATA_PRODUCTS[product].routingTargets;
-            return (
-              <div key={product} className="space-y-2">
-                <div className="flex items-center gap-2 text-sm font-medium">
-                  <Database className="text-primary h-4 w-4" />
-                  {DATA_PRODUCTS[product].displayName}
-                </div>
-                <div className="flex flex-wrap gap-1.5">
-                  {targets.map((target) => {
-                    const route = targetRouteMap[target];
-                    if (route) {
+          {(["PARCEL_FABRIC", "COUNTY_ROLL", "SALES_STREAM"] as DataProductType[]).map(
+            (product) => {
+              const targets = DATA_PRODUCTS[product].routingTargets;
+              return (
+                <div key={product} className="space-y-2">
+                  <div className="flex items-center gap-2 text-sm font-medium">
+                    <Database className="text-primary h-4 w-4" />
+                    {DATA_PRODUCTS[product].displayName}
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {targets.map((target) => {
+                      const route = targetRouteMap[target];
+                      if (route) {
+                        return (
+                          <a
+                            key={target}
+                            href={route}
+                            className="bg-primary/10 text-primary hover:bg-primary/20 rounded-full px-2 py-1 text-xs font-medium transition-colors"
+                          >
+                            {target} →
+                          </a>
+                        );
+                      }
                       return (
-                        <a
+                        <span
                           key={target}
-                          href={route}
-                          className="bg-primary/10 text-primary hover:bg-primary/20 rounded-full px-2 py-1 text-xs font-medium transition-colors"
+                          className="bg-muted/30 text-muted-foreground rounded-full px-2 py-1 text-xs"
                         >
-                          {target} →
-                        </a>
+                          {target}
+                        </span>
                       );
-                    }
-                    return (
-                      <span
-                        key={target}
-                        className="bg-muted/30 text-muted-foreground rounded-full px-2 py-1 text-xs"
-                      >
-                        {target}
-                      </span>
-                    );
-                  })}
+                    })}
+                  </div>
                 </div>
-              </div>
-            );
-          })}
+              );
+            }
+          )}
         </div>
       </Card>
 
@@ -891,7 +938,7 @@ function RoutingPanel({
           ) : (
             routingEvents.map((event, i) => (
               <div key={i} className="flex items-center gap-4 p-4">
-                <div className="bg-emerald-400/20 flex h-8 w-8 items-center justify-center rounded-full">
+                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-emerald-400/20">
                   <CheckCircle2 className="h-4 w-4 text-emerald-400" />
                 </div>
                 <div>
@@ -968,12 +1015,14 @@ function AuditPanel({ countyFips }: { countyFips: WACountyFips | null }) {
               <AlertTriangle className="h-4 w-4 text-amber-400" />
               <h3 className="font-medium text-amber-400">Legacy API Migration</h3>
             </div>
-            <span className={cn(
-              "rounded px-2 py-0.5 text-xs font-medium",
-              migrationReport.enforcementEnabled 
-                ? "bg-red-400/20 text-red-400"
-                : "bg-amber-400/20 text-amber-400"
-            )}>
+            <span
+              className={cn(
+                "rounded px-2 py-0.5 text-xs font-medium",
+                migrationReport.enforcementEnabled
+                  ? "bg-red-400/20 text-red-400"
+                  : "bg-amber-400/20 text-amber-400"
+              )}
+            >
               {migrationReport.enforcementEnabled ? "ENFORCING" : "WARNING"}
             </span>
           </div>
@@ -984,12 +1033,17 @@ function AuditPanel({ countyFips }: { countyFips: WACountyFips | null }) {
             </div>
             <div>
               <p className="text-muted-foreground text-xs">Unique Functions</p>
-              <p className="text-foreground text-xl font-semibold">{migrationReport.uniqueFunctions}</p>
+              <p className="text-foreground text-xl font-semibold">
+                {migrationReport.uniqueFunctions}
+              </p>
             </div>
             <div>
               <p className="text-muted-foreground text-xs">Since Page Load</p>
-              <p className="text-foreground text-sm font-mono">
-                {migrationReport.functions.slice(0, 3).map(f => f.name).join(", ") || "None"}
+              <p className="text-foreground font-mono text-sm">
+                {migrationReport.functions
+                  .slice(0, 3)
+                  .map((f) => f.name)
+                  .join(", ") || "None"}
               </p>
             </div>
           </div>
@@ -1037,7 +1091,7 @@ function AuditPanel({ countyFips }: { countyFips: WACountyFips | null }) {
                 </p>
               </div>
               {event.version_id && (
-                <span className="bg-muted/30 text-muted-foreground rounded px-2 py-1 text-xs font-mono">
+                <span className="bg-muted/30 text-muted-foreground rounded px-2 py-1 font-mono text-xs">
                   {event.version_id.slice(0, 12)}
                 </span>
               )}

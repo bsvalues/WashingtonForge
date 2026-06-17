@@ -9,11 +9,7 @@ import {
   type ReactNode,
 } from "react";
 import { dataSuiteHub, eventBus, type DataSuiteEvent } from "./index";
-import type {
-  WACountyFips,
-  CountyDataStatus,
-  DataProductType,
-} from "./types";
+import type { WACountyFips, CountyDataStatus, DataProductType } from "./types";
 
 // ============================================
 // State Shape
@@ -23,13 +19,13 @@ interface DataSuiteState {
   // Active county context
   selectedCounty: WACountyFips | null;
   countyStatus: CountyDataStatus | null;
-  
+
   // Active jobs (keyed by job ID to prevent duplicates)
   activeJobs: Record<string, IngestJob>;
-  
+
   // Event stream (limited to last 50)
   events: DataSuiteEvent[];
-  
+
   // UI state
   isLoading: boolean;
   error: string | null;
@@ -69,22 +65,22 @@ function dataSuiteReducer(state: DataSuiteState, action: DataSuiteAction): DataS
   switch (action.type) {
     case "SET_COUNTY":
       return { ...state, selectedCounty: action.fips };
-    
+
     case "SET_STATUS":
       return { ...state, countyStatus: action.status, isLoading: false };
-    
+
     case "SET_LOADING":
       return { ...state, isLoading: action.loading };
-    
+
     case "SET_ERROR":
       return { ...state, error: action.error, isLoading: false };
-    
+
     case "ADD_JOB":
       return {
         ...state,
         activeJobs: { ...state.activeJobs, [action.job.id]: action.job },
       };
-    
+
     case "UPDATE_JOB":
       if (!state.activeJobs[action.jobId]) return state;
       return {
@@ -94,20 +90,20 @@ function dataSuiteReducer(state: DataSuiteState, action: DataSuiteAction): DataS
           [action.jobId]: { ...state.activeJobs[action.jobId], ...action.updates },
         },
       };
-    
+
     case "REMOVE_JOB":
       const { [action.jobId]: _, ...remainingJobs } = state.activeJobs;
       return { ...state, activeJobs: remainingJobs };
-    
+
     case "ADD_EVENT":
       return {
         ...state,
         events: [action.event, ...state.events].slice(0, 50),
       };
-    
+
     case "CLEAR_EVENTS":
       return { ...state, events: [] };
-    
+
     default:
       return state;
   }
@@ -119,11 +115,11 @@ function dataSuiteReducer(state: DataSuiteState, action: DataSuiteAction): DataS
 
 interface DataSuiteContextValue {
   state: DataSuiteState;
-  
+
   // County operations
   selectCounty: (fips: WACountyFips) => Promise<void>;
   refreshStatus: () => Promise<void>;
-  
+
   // Ingest operations (all route through hub)
   startIngest: (options: {
     countyFips: WACountyFips;
@@ -131,10 +127,10 @@ interface DataSuiteContextValue {
     source: "file" | "connected-feed" | "wa-fabric";
     file?: File;
   }) => Promise<string>;
-  
+
   // Job tracking
   getJob: (jobId: string) => IngestJob | undefined;
-  
+
   // Event stream
   clearEvents: () => void;
 }
@@ -204,7 +200,7 @@ export function DataSuiteProvider({ children }: { children: ReactNode }) {
   const selectCounty = useCallback(async (fips: WACountyFips) => {
     dispatch({ type: "SET_COUNTY", fips });
     dispatch({ type: "SET_LOADING", loading: true });
-    
+
     try {
       const status = await dataSuiteHub.getStatus(fips);
       if (status) {
@@ -220,7 +216,7 @@ export function DataSuiteProvider({ children }: { children: ReactNode }) {
   // Refresh current county status
   const refreshStatus = useCallback(async () => {
     if (!state.selectedCounty) return;
-    
+
     dispatch({ type: "SET_LOADING", loading: true });
     try {
       const status = await dataSuiteHub.getStatus(state.selectedCounty);
@@ -233,20 +229,26 @@ export function DataSuiteProvider({ children }: { children: ReactNode }) {
   }, [state.selectedCounty]);
 
   // Start ingest - ALWAYS through hub
-  const startIngest = useCallback(async (options: {
-    countyFips: WACountyFips;
-    product: DataProductType;
-    source: "file" | "connected-feed" | "wa-fabric";
-    file?: File;
-  }): Promise<string> => {
-    const ingestRun = await dataSuiteHub.ingest(options);
-    return ingestRun.id;
-  }, []);
+  const startIngest = useCallback(
+    async (options: {
+      countyFips: WACountyFips;
+      product: DataProductType;
+      source: "file" | "connected-feed" | "wa-fabric";
+      file?: File;
+    }): Promise<string> => {
+      const ingestRun = await dataSuiteHub.ingest(options);
+      return ingestRun.id;
+    },
+    []
+  );
 
   // Get job by ID
-  const getJob = useCallback((jobId: string) => {
-    return state.activeJobs[jobId];
-  }, [state.activeJobs]);
+  const getJob = useCallback(
+    (jobId: string) => {
+      return state.activeJobs[jobId];
+    },
+    [state.activeJobs]
+  );
 
   // Clear events
   const clearEvents = useCallback(() => {
@@ -262,11 +264,7 @@ export function DataSuiteProvider({ children }: { children: ReactNode }) {
     clearEvents,
   };
 
-  return (
-    <DataSuiteContext.Provider value={value}>
-      {children}
-    </DataSuiteContext.Provider>
-  );
+  return <DataSuiteContext.Provider value={value}>{children}</DataSuiteContext.Provider>;
 }
 
 // ============================================

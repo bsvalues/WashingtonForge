@@ -49,8 +49,16 @@ describe("Parcel Review Status Contract", () => {
     // First transition has no prior status (undefined `from` is dropped by JSON serialization).
     expect(record.history[0].from).toBeUndefined();
     expect(record.history[0].to).toBe("in_review");
-    expect(record.history[1]).toMatchObject({ from: "in_review", to: "needs_followup", note: "missing photos" });
-    expect(record.history[2]).toMatchObject({ from: "needs_followup", to: "reviewed", note: "resolved" });
+    expect(record.history[1]).toMatchObject({
+      from: "in_review",
+      to: "needs_followup",
+      note: "missing photos",
+    });
+    expect(record.history[2]).toMatchObject({
+      from: "needs_followup",
+      to: "reviewed",
+      note: "resolved",
+    });
   });
 
   it("keeps records for different parcels isolated", async () => {

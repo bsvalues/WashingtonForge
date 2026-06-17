@@ -21,12 +21,12 @@ pnpm dev
 
 ### Environment variables
 
-| Variable | Default | Purpose |
-|---|---|---|
-| `NEXT_PUBLIC_API_URL` | _(empty — uses local API routes)_ | Backend API base URL |
-| `NEXT_PUBLIC_APP_VERSION` | `dev` | Version string in audit events |
-| `NEXT_PUBLIC_DEMO_MODE` | `false` | Use demo data instead of real API |
-| `ENFORCE_NO_LEGACY_API` | `false` | Throw on deprecated `@/lib/api` shim calls (CI use) |
+| Variable                  | Default                           | Purpose                                             |
+| ------------------------- | --------------------------------- | --------------------------------------------------- |
+| `NEXT_PUBLIC_API_URL`     | _(empty — uses local API routes)_ | Backend API base URL                                |
+| `NEXT_PUBLIC_APP_VERSION` | `dev`                             | Version string in audit events                      |
+| `NEXT_PUBLIC_DEMO_MODE`   | `false`                           | Use demo data instead of real API                   |
+| `ENFORCE_NO_LEGACY_API`   | `false`                           | Throw on deprecated `@/lib/api` shim calls (CI use) |
 
 Set `NEXT_PUBLIC_DEMO_MODE=true` when working without a running backend.
 

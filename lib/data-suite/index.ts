@@ -1,12 +1,12 @@
 /**
  * Intelligent Data Suite (IDS)
- * 
+ *
  * The single hub for ingestion → quality → versioning → routing
  * across the full TerraFusion OS.
- * 
+ *
  * Usage:
  *   import { dataSuiteHub, eventBus, repository } from "@/lib/data-suite";
- *   
+ *
  *   // All data operations go through the hub
  *   const run = await dataSuiteHub.ingest({ ... });
  *   const status = await dataSuiteHub.getStatus(countyFips);
