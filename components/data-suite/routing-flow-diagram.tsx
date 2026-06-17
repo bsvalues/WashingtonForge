@@ -105,9 +105,9 @@ export function RoutingFlowDiagram({ countyFips, showLegend = true }: RoutingFlo
         
         // Mark all connections for this product as routing
         const updates: Record<string, { status: RoutingStatus; timestamp?: string }> = {};
-        for (const module of MODULES) {
-          if (module.subscribesTo.includes(payload.product)) {
-            const key = `${payload.product}-${module.id}`;
+        for (const dataModule of MODULES) {
+          if (dataModule.subscribesTo.includes(payload.product)) {
+            const key = `${payload.product}-${dataModule.id}`;
             updates[key] = { status: "routing" };
           }
         }
@@ -243,12 +243,12 @@ export function RoutingFlowDiagram({ countyFips, showLegend = true }: RoutingFlo
                       {product.name}
                     </span>
                   </td>
-                  {MODULES.map((module) => {
-                    const isSubscribed = module.subscribesTo.includes(product.type);
-                    const status = getConnectionStatus(product.type, module.id);
+                  {MODULES.map((dataModule) => {
+                    const isSubscribed = dataModule.subscribesTo.includes(product.type);
+                    const status = getConnectionStatus(product.type, dataModule.id);
 
                     return (
-                      <td key={module.id} className="p-3 text-center">
+                      <td key={dataModule.id} className="p-3 text-center">
                         {isSubscribed ? (
                           <div
                             className={cn(

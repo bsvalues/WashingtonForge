@@ -10,7 +10,7 @@ export default function DashboardPage() {
         name: "Demo Assessor",
         email: "demo@terrafusion.gov",
         role: "Assessor Admin",
-        county: "Benton County",
+        countyName: "Benton County",
       }}
     >
       <DashboardContent />

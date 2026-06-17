@@ -318,7 +318,23 @@
 
 ---
 
-## 7. Attestation
+## 7. Stop Condition Alignment (XXIV-C)
+
+Gates 1–4 map directly to the Phase XXIV-C stop conditions:
+
+| Stop Code | Condition | Linked Gate |
+|-----------|-----------|-------------|
+| **STOP-001** | Availability < 99.5% for 15+ min | Gate 1 |
+| **STOP-002** | MTTR > 30 minutes | Gate 2 |
+| **STOP-003** | Rollback success < 95% | Gate 3 |
+| **STOP-004** | DR backup > 90 days old | Gate 4 |
+| **STOP-005** | Compliance breach detected | Gate 5 |
+
+A triggered stop condition causes immediate gate failure, overriding all other scores.
+
+---
+
+## 8. Attestation
 
 | Field | Value |
 |-------|-------|

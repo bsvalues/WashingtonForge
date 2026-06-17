@@ -3,6 +3,8 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 
+export type IngestStep = "upload" | "map" | "validate" | "preview" | "publish";
+
 /**
  * HARD REDIRECT: /ingest → /data-suite?tab=ingest
  * 

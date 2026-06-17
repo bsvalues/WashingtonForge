@@ -105,7 +105,7 @@ function generateDemoParcelGeoJSON(
       size = Math.max(size, simplify * 10);
     }
     
-    const baseProperties = {
+    const baseProperties: Record<string, string | number> = {
       parcel_uid: `${fips}-${String(features.length + 1).padStart(6, "0")}`,
       county_fips: fips,
       county_name: county.name,

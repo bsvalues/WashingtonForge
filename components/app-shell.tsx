@@ -46,7 +46,8 @@ interface AppShellProps {
   user?: {
     name: string;
     role: string;
-    county: string;
+    countyName: string;
+    email?: string;
   };
 }
 
@@ -206,7 +207,7 @@ export function AppShell({ children, user }: AppShellProps) {
                 <div className="text-right">
                   <p className="text-foreground text-sm font-medium">{user.name}</p>
                   <p className="text-muted-foreground text-xs">
-                    {user.county} · {user.role}
+                    {user.countyName} · {user.role}
                   </p>
                 </div>
                 <Button

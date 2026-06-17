@@ -41,7 +41,7 @@ export default function RatioStudiesPage() {
   };
 
   return (
-    <AppShell user={{ name: "Jane Doe", role: "Assessor", county: "Benton County" }}>
+    <AppShell user={{ name: "Jane Doe", role: "Assessor", countyName: "Benton County" }}>
       <div className="mx-auto max-w-7xl p-4 md:p-6">
         {/* Header */}
         <div className="mb-8 flex items-center justify-between">

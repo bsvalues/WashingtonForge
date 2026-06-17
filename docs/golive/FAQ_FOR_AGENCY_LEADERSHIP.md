@@ -114,7 +114,11 @@ We run ratio studies monthly and flag warnings before breaches occur.
 **A: Safe mode is a protective state that prevents new changes while preserving existing operations.**
 
 **Safe mode activates when:**
-- Any stop condition is triggered (STOP-001 through STOP-005)
+- **STOP-001** — Availability drops below 99.5% for 15 consecutive minutes
+- **STOP-002** — Mean time to recovery exceeds 30 minutes
+- **STOP-003** — Rollback success rate drops below 95%
+- **STOP-004** — Disaster recovery backup exceeds 90-day freshness threshold
+- **STOP-005** — Compliance breach detected by automated audit
 - Manual activation by War Room lead
 - Executive override
 

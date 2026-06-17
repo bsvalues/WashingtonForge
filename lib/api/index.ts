@@ -21,14 +21,15 @@
 import { dataSuiteHub } from "@/lib/data-suite/hub";
 import { eventBus } from "@/lib/data-suite/event-bus";
 // Types imported from barrel to comply with barrel-only import rule
-import type { 
-  DatasetType, 
-  RollYearSnapshot, 
+import type {
+  DatasetType,
+  RollYearSnapshot,
   MapLayer,
   ParcelFilter,
   Parcel,
   EquityStatus,
 } from "@/lib/api-internal";
+import type { WACountyFips } from "@/lib/wa-data/types";
 
 // Types come through `export * from "@/lib/api-internal"` below
 
@@ -348,7 +349,8 @@ export async function uploadDataset(
     id: ingestRun.id,
     name: file.name,
     type: datasetType,
-    status: ingestRun.status === "ready" ? "ready" : "validating",
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    status: (ingestRun.status === "ready" ? "ready" : "validating") as any,
     rowCount: ingestRun.row_counts_by_stage?.raw || 0,
     errorCount: 0,
     createdAt: ingestRun.started_at,
@@ -360,7 +362,8 @@ export async function uploadDataset(
  */
 export async function validateDataset(datasetId: string) {
   warnOnce("validateDataset", "dataSuiteHub.validate(datasetId)");
-  return dataSuiteHub.validate(datasetId);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return dataSuiteHub.validate(datasetId as any) as any;
 }
 
 /**
@@ -368,7 +371,8 @@ export async function validateDataset(datasetId: string) {
  */
 export async function publishDataset(datasetId: string) {
   warnOnce("publishDataset", "dataSuiteHub.publish(datasetId)");
-  return dataSuiteHub.publish(datasetId);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  return dataSuiteHub.publish(datasetId as any);
 }
 
 /**
@@ -376,7 +380,7 @@ export async function publishDataset(datasetId: string) {
  */
 export async function getIngestStatus(runId: string) {
   warnOnce("getIngestStatus", "dataSuiteHub.getStatus(runId)");
-  const status = await dataSuiteHub.getStatus(runId as `53${string}`);
+  const status = await dataSuiteHub.getStatus(runId as WACountyFips);
   return status;
 }
 

@@ -61,15 +61,13 @@ function parcelsToGeoJSON(parcels: Parcel[]): GeoJSON.FeatureCollection {
         },
         properties: {
           id: parcel.id,
-          parcelNumber: parcel.parcelNumber,
-          address: parcel.address,
-          owner: parcel.owner,
-          assessedValue: parcel.assessedValue,
-          marketValue: parcel.marketValue,
+          parcelNumber: parcel.parcelId,
+          address: parcel.situs,
+          assessedValue: parcel.totalValue,
+          marketValue: parcel.totalValue,
           ratio: parcel.ratio,
           equityStatus: parcel.equityStatus,
-          propertyType: parcel.propertyType,
-          acreage: parcel.acreage,
+          propertyType: parcel.propertyClass,
           yearBuilt: parcel.yearBuilt,
           neighborhood: parcel.neighborhood,
         },
@@ -176,8 +174,9 @@ export function CockpitMap({ filters, parcels, onZoomToParcel }: CockpitMapProps
 
       // Debug: Check if tiles are loading
       map.on("data", (e) => {
-        if (e.dataType === "source" && e.sourceId === "osm") {
-          console.log("[v0] Tile data event:", e.isSourceLoaded ? "loaded" : "loading");
+        const dataEvent = e as typeof e & { sourceId?: string; isSourceLoaded?: boolean };
+        if (e.dataType === "source" && dataEvent.sourceId === "osm") {
+          console.log("[v0] Tile data event:", dataEvent.isSourceLoaded ? "loaded" : "loading");
         }
       });
 

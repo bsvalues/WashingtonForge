@@ -135,7 +135,7 @@ export default function DataSourcesPage() {
   }, [rows, q, status, lane, sort, dir]);
 
   return (
-    <AppShell user={{ name: "Demo User", role: "Assessor", county: "Benton County" }}>
+    <AppShell user={{ name: "Demo User", role: "Assessor", countyName: "Benton County" }}>
       <div className="mx-auto max-w-7xl p-6">
         {/* Header */}
         <div className="mb-6">

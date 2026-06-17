@@ -16,5 +16,7 @@
   "tailwindCSS.experimental.classRegex": [
     ["cva\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"],
     ["cn\\(([^)]*)\\)", "[\"'`]([^\"'`]*).*?[\"'`]"]
-  ]
+  ],
+  "snyk.advanced.organization": "eb49f25f-5461-407b-ab03-66c80869dc2e",
+  "snyk.advanced.autoSelectOrganization": true
 }

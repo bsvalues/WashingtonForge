@@ -301,7 +301,7 @@ export const dataSuiteHub = {
     });
 
     // Route to subscribers
-    const routingResults = await this.routeToSubscribers(run.county_fips, run.product_type, versionId);
+    const routingResults = await this.routeToSubscribers(run.county_fips, run.product_type as DataProductType, versionId);
 
     // Emit event
     eventBus.emit({
@@ -505,7 +505,7 @@ export const dataSuiteHub = {
       joinMatchRate: 0.94 + Math.random() * 0.05,
       validationPassRate: 0.97 + Math.random() * 0.02,
       dataCompleteness: 0.92 + Math.random() * 0.07,
-      freshnessScore: status.overall_readiness_pct / 100,
+      freshnessScore: (status.overall_readiness_pct ?? 0) / 100,
       topIssues: [
         { type: "missing_situs", count: 23, severity: "warning" },
         { type: "invalid_value", count: 5, severity: "error" },
@@ -677,8 +677,13 @@ export interface ProductVersion {
   version_label: string;
   created_at: string;
   row_count: number;
-  approved_by: string;
+  approved_by?: string;
   is_current: boolean;
+  county_fips?: WACountyFips;
+  product_type?: DataProductType;
+  created_by?: string;
+  status?: "draft" | "active" | "archived" | "published";
+  source_filename?: string;
   change_summary?: {
     rows_added: number;
     rows_modified: number;

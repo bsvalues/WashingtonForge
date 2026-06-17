@@ -194,19 +194,22 @@ export type IngestSource =
   | "sftp_scheduled"
   | "manual_entry";
 
-export type IngestStatus = 
+export type IngestStatus =
   | "pending"
-  | "validating"
+  | "fingerprinting"
   | "mapping"
+  | "validating"
   | "importing"
+  | "ready"
   | "completed"
+  | "published"
   | "failed"
   | "rolled_back";
 
 export interface IngestRun {
   id: string;
   county_fips: WACountyFips;
-  source: IngestSource;
+  source?: IngestSource;
   source_url?: string;
   source_filename?: string;
   source_fingerprint?: string;    // SHA256 of file/response for audit
@@ -217,55 +220,74 @@ export interface IngestRun {
   completed_at?: string;
   
   // Row Metrics (overall)
-  rows_received: number;
-  rows_inserted: number;
-  rows_updated: number;
-  rows_skipped: number;
-  rows_errored: number;
+  rows_received?: number;
+  rows_inserted?: number;
+  rows_updated?: number;
+  rows_skipped?: number;
+  rows_errored?: number;
   
   // Row Counts by Stage (for pipeline debugging)
   row_counts_by_stage?: {
-    raw: number;
-    mapped: number;
-    validated: number;
-    published: number;
+    raw?: number;
+    mapped?: number;
+    valid?: number;
+    validated?: number;
+    published?: number;
   };
-  
+
   // Error/Warning Summaries
   errors_top?: Array<{ message: string; count: number }>;
   warnings_top?: Array<{ message: string; count: number }>;
-  
+
+  // Extended pipeline fields
+  product_type?: string;
+  source_type?: "file" | "connected-feed" | "wa-fabric";
+  field_mappings?: Record<string, string>;
+  error_message?: string;
+  fingerprint_detected?: string;
+  fingerprint_confidence?: number;
+  validation_result?: unknown;
+  published_at?: string;
+  version_id?: string;
+  second_approver?: string;
+
   // Audit
-  initiated_by: string;         // User ID or "system"
+  initiated_by?: string;        // User ID or "system"
   approved_by?: string;         // For dual-approval workflows
   change_memo?: string;
-  
+
   // Rollback Support
   snapshot_id?: string;         // Reference to pre-ingest snapshot
-  can_rollback: boolean;
+  can_rollback?: boolean;
 }
 
 export interface LineageEvent {
   id: string;
-  ingest_run_id: string;
-  event_type: "info" | "warning" | "error" | "validation" | "transform";
+  ingest_run_id?: string;
+  event_type: "info" | "warning" | "error" | "validation" | "transform" | "published" | "rollback";
   timestamp: string;
-  message: string;
+  message?: string;
   details?: Record<string, unknown>;
   affected_rows?: number;
+  county_fips?: WACountyFips;
+  product_type?: string;
+  version_id?: string;
+  actor?: string;
 }
 
 // ============================================
 // County Onboarding State
 // ============================================
 
-export type OnboardingPath = 
+export type OnboardingPath =
   | "public_quickstart"    // WA baseline only, add roll later
   | "file_drop"            // Upload CSV/DBF/GDB
-  | "connected_feed";      // ArcGIS/SFTP/API
+  | "connected_feed"       // ArcGIS/SFTP/API
+  | "quick-start";         // Alias used in repository
 
-export type DataLayerStatus = 
+export type DataLayerStatus =
   | "not_configured"
+  | "not_started"
   | "pending"
   | "validating"
   | "active"
@@ -279,45 +301,60 @@ export interface CountyDataStatus {
   // Layer Status with enhanced metadata
   parcel_fabric: {
     status: DataLayerStatus;
-    source: "wa_statewide" | "county_provided" | "none";
+    source: "wa_statewide" | "county_provided" | "none" | "wa_geo_portal";
     parcel_count?: number;
     last_updated?: string;
-    next_refresh_at?: string;     // When will data refresh next
-    stale_reason?: string;        // Why is it marked stale
-    coverage_pct?: number;        // % of county area covered
+    last_sync?: string;
+    next_refresh_at?: string;
+    stale_reason?: string;
+    coverage_pct?: number;
   };
-  
+
   county_roll: {
     status: DataLayerStatus;
     roll_year?: number;
     record_count?: number;
+    total_records?: number;
+    join_rate_pct?: number;
+    certified_at?: string;
     last_updated?: string;
+    last_sync?: string;
     next_refresh_at?: string;
     stale_reason?: string;
-    mapping_confidence_pct?: number; // 0-100 (NORMALIZED)
+    mapping_confidence_pct?: number;
   };
-  
+
   sales_stream: {
     status: DataLayerStatus;
     record_count?: number;
+    total_sales?: number;
+    valid_sales?: number;
     date_range?: { from: string; to: string };
+    date_range_start?: string;
+    date_range_end?: string;
     last_updated?: string;
+    last_sync?: string;
     next_refresh_at?: string;
     stale_reason?: string;
-    arms_length_pct?: number;     // % of sales marked arms-length
+    arms_length_pct?: number;
   };
-  
+
   // Onboarding
   onboarding_path?: OnboardingPath;
   onboarding_completed_at?: string;
-  
+
+  // Summary fields
+  overall_readiness_pct?: number;
+  capabilities_unlocked?: string[];
+  last_updated?: string;
+
   // Capabilities Unlocked (computed from layer status, not stored)
-  capabilities: {
-    cockpit_map: boolean;       // Can show parcels on map
-    ratio_studies: boolean;     // Can run ratio analysis
-    comps_selection: boolean;   // Can select comparable sales
-    model_calibration: boolean; // Can calibrate valuation models
-    appeals_support: boolean;   // Can support appeal workflows
+  capabilities?: {
+    cockpit_map: boolean;
+    ratio_studies: boolean;
+    comps_selection: boolean;
+    model_calibration: boolean;
+    appeals_support: boolean;
   };
 }
 
@@ -341,21 +378,34 @@ export interface FieldMappingMemory {
 // County Export Fingerprint Templates (AI Power Feature)
 // ============================================
 
-export type VendorSystem = "Tyler" | "Schneider" | "Catalis" | "Thomson Reuters" | "DEVNET" | "Custom";
+export type VendorSystem =
+  | "Tyler"
+  | "Tyler Technologies"
+  | "Schneider"
+  | "Schneider Geospatial"
+  | "Catalis"
+  | "Thomson Reuters"
+  | "DEVNET"
+  | "Custom"
+  | "Unknown";
 
 export interface CountyExportFingerprint {
-  id: string;
+  id?: string;
   vendor?: VendorSystem;
-  county_fips?: WACountyFips;     // If county-specific
-  signature: {
-    columns: string[];            // Expected column names
-    key_fields_present: string[]; // Required fields that must exist
-    sample_patterns?: Record<string, string>; // Regex patterns for field content
+  product?: string;
+  county_fips?: WACountyFips;
+  template_name?: string;
+  detected_fields?: string[];
+  suggested_mappings?: Record<string, string>;
+  signature?: {
+    columns: string[];
+    key_fields_present: string[];
+    sample_patterns?: Record<string, string>;
   };
-  recommended_template_id: string;
+  recommended_template_id?: string;
   confidence_pct: number;         // 0-100
-  created_at: string;
-  updated_at: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
 // ============================================

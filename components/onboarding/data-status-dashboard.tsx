@@ -42,6 +42,7 @@ const STATUS_CONFIG: Record<
   stale: { icon: AlertTriangle, color: "text-amber-400", label: "Stale" },
   error: { icon: XCircle, color: "text-red-400", label: "Error" },
   not_configured: { icon: XCircle, color: "text-muted-foreground", label: "Not Configured" },
+  not_started: { icon: XCircle, color: "text-muted-foreground", label: "Not Started" },
 };
 
 function LayerStatusBadge({ status }: { status: DataLayerStatus }) {
@@ -240,7 +241,7 @@ export function DataStatusDashboard({
               <div className="flex justify-between text-sm">
                 <span className="text-muted-foreground">Mapping Confidence</span>
                 <span className="text-foreground font-medium">
-                  {status.county_roll.mapping_confidence}%
+                  {status.county_roll.mapping_confidence_pct}%
                 </span>
               </div>
             </div>

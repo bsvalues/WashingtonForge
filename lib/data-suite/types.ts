@@ -1,19 +1,16 @@
 /**
  * DataSuite Types
- * 
+ *
  * Central type definitions for the Intelligent Data Suite.
  * Re-exports from wa-data where appropriate, adds IDS-specific types.
  */
 
+import type { WACountyFips } from "../wa-data/types";
+
 // Re-export core WA types
 export type {
   WACountyFips,
-  WACountyInfo,
   CountyDataStatus,
-  ParcelFabricStatus,
-  CountyRollStatus,
-  SalesStreamStatus,
-  DataCapability,
   OnboardingPath,
   IngestRun,
   LineageEvent,

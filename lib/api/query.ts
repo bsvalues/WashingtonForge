@@ -80,7 +80,7 @@ export type {
   FieldMapping,
   ValidationResult,
   RatioStudy,
-  RatioStudyResult,
+  RatioStudyResults,
   AuditLogEntry,
   Parcel,
   ParcelFilter,

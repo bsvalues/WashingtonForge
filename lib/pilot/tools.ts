@@ -4,7 +4,7 @@
 
 export type PilotMode = "pilot" | "muse" | "both";
 export type ToolRisk = "read_only" | "write_low" | "write_high" | "irreversible";
-export type SuiteOwner = "os" | "forge" | "atlas" | "dais" | "dossier";
+export type SuiteOwner = "os" | "forge" | "atlas" | "dais" | "dossier" | "pilot";
 
 export interface RiskPolicy {
   risk: ToolRisk;
@@ -347,6 +347,10 @@ export function getSuiteLabel(suite: SuiteOwner): string {
       return "TerraDais";
     case "dossier":
       return "TerraDossier";
+    case "pilot":
+      return "TerraFusion Pilot";
+    default:
+      return suite;
   }
 }
 

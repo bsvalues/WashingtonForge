@@ -12,7 +12,6 @@ import { dataSuiteHub, eventBus, type DataSuiteEvent } from "./index";
 import type {
   WACountyFips,
   CountyDataStatus,
-  IngestJob,
   DataProductType,
 } from "./types";
 
@@ -129,7 +128,7 @@ interface DataSuiteContextValue {
   startIngest: (options: {
     countyFips: WACountyFips;
     product: DataProductType;
-    source: string;
+    source: "file" | "connected-feed" | "wa-fabric";
     file?: File;
   }) => Promise<string>;
   
@@ -160,39 +159,39 @@ export function DataSuiteProvider({ children }: { children: ReactNode }) {
 
   // Subscribe to event bus
   useEffect(() => {
-    const unsubscribe = eventBus.subscribe("*", (event) => {
+    const unsubscribe = eventBus.subscribe((event) => {
       dispatch({ type: "ADD_EVENT", event });
-      
+
       // Update job status based on events
-      if (event.type === "INGEST_STARTED") {
+      if (event.type === "ingest.started") {
         dispatch({
           type: "ADD_JOB",
           job: {
-            id: event.payload.ingestRunId,
-            countyFips: event.countyFips,
-            product: event.payload.product,
+            id: event.payload.ingestRunId as string,
+            countyFips: event.payload.countyFips as WACountyFips,
+            product: event.payload.product as DataProductType,
             status: "running",
             progress: 0,
             startedAt: event.timestamp,
           },
         });
-      } else if (event.type === "INGEST_COMPLETE") {
+      } else if (event.type === "ingest.ready") {
         dispatch({
           type: "UPDATE_JOB",
-          jobId: event.payload.ingestRunId,
+          jobId: event.payload.ingestRunId as string,
           updates: {
             status: "complete",
             progress: 100,
             completedAt: event.timestamp,
           },
         });
-      } else if (event.type === "INGEST_FAILED") {
+      } else if (event.type === "ingest.failed") {
         dispatch({
           type: "UPDATE_JOB",
-          jobId: event.payload.ingestRunId,
+          jobId: event.payload.ingestRunId as string,
           updates: {
             status: "failed",
-            error: event.payload.error,
+            error: event.payload.error as string | undefined,
           },
         });
       }
@@ -237,7 +236,7 @@ export function DataSuiteProvider({ children }: { children: ReactNode }) {
   const startIngest = useCallback(async (options: {
     countyFips: WACountyFips;
     product: DataProductType;
-    source: string;
+    source: "file" | "connected-feed" | "wa-fabric";
     file?: File;
   }): Promise<string> => {
     const ingestRun = await dataSuiteHub.ingest(options);

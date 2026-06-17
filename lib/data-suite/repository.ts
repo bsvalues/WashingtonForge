@@ -234,9 +234,9 @@ class DemoRepository implements IDataSuiteRepository {
   // ----------------------------------------
 
   async createLineageEvent(event: LineageEvent): Promise<LineageEvent> {
-    const existing = this.lineageEvents.get(event.county_fips) || [];
+    const existing = this.lineageEvents.get(event.county_fips!) || [];
     existing.unshift(event);
-    this.lineageEvents.set(event.county_fips, existing);
+    this.lineageEvents.set(event.county_fips!, existing);
     this.persist();
     return event;
   }

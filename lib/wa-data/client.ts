@@ -419,7 +419,7 @@ export async function detectExportFingerprint(
   const normalizedColumns = columns.map(c => c.toUpperCase().replace(/[^A-Z0-9]/g, ""));
   
   for (const fp of knownFingerprints) {
-    const fpColumns = fp.signature.columns.map(c => c.toUpperCase().replace(/[^A-Z0-9]/g, ""));
+    const fpColumns = (fp.signature?.columns ?? []).map(c => c.toUpperCase().replace(/[^A-Z0-9]/g, ""));
     const matchCount = fpColumns.filter(c => normalizedColumns.includes(c)).length;
     const matchPct = matchCount / fpColumns.length;
     

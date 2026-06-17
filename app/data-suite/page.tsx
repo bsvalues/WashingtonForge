@@ -132,7 +132,7 @@ export default function DataSuitePage() {
   }));
 
   return (
-    <AppShell user={{ name: "Demo User", role: "Assessor", county: status?.county_name || "Select County" }}>
+    <AppShell user={{ name: "Demo User", role: "Assessor", countyName: status?.county_name || "Select County" }}>
       <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -184,19 +184,19 @@ export default function DataSuitePage() {
                 <div
                   className={cn(
                     "flex h-12 w-12 items-center justify-center rounded-full text-lg font-bold",
-                    status.overall_readiness_pct >= 80
+                    (status.overall_readiness_pct ?? 0) >= 80
                       ? "bg-emerald-400/20 text-emerald-400"
-                      : status.overall_readiness_pct >= 50
+                      : (status.overall_readiness_pct ?? 0) >= 50
                         ? "bg-amber-400/20 text-amber-400"
                         : "bg-red-400/20 text-red-400"
                   )}
                 >
-                  {status.overall_readiness_pct}%
+                  {status.overall_readiness_pct ?? 0}%
                 </div>
                 <div>
                   <p className="text-foreground text-sm font-medium">Data Readiness</p>
                   <p className="text-muted-foreground text-xs">
-                    {status.capabilities_unlocked.length} capabilities unlocked
+                    {(status.capabilities_unlocked ?? []).length} capabilities unlocked
                   </p>
                 </div>
               </div>
@@ -208,17 +208,17 @@ export default function DataSuitePage() {
               <div className="flex flex-wrap gap-2">
                 <ProductStatusPill
                   label="Fabric"
-                  status={status.parcel_fabric.status}
+                  status={status.parcel_fabric.status as "active" | "stale" | "loading" | "not_started" | "error"}
                   count={status.parcel_fabric.parcel_count}
                 />
                 <ProductStatusPill
                   label="Roll"
-                  status={status.county_roll.status}
+                  status={status.county_roll.status as "active" | "stale" | "loading" | "not_started" | "error"}
                   count={status.county_roll.total_records}
                 />
                 <ProductStatusPill
                   label="Sales"
-                  status={status.sales_stream.status}
+                  status={status.sales_stream.status as "active" | "stale" | "loading" | "not_started" | "error"}
                   count={status.sales_stream.total_sales}
                 />
               </div>
@@ -230,7 +230,7 @@ export default function DataSuitePage() {
               <div className="flex items-center gap-2 text-sm">
                 <Clock className="text-muted-foreground h-4 w-4" />
                 <span className="text-muted-foreground">
-                  Last update: {new Date(status.last_updated).toLocaleString()}
+                  Last update: {status.last_updated ? new Date(status.last_updated).toLocaleString() : "—"}
                 </span>
               </div>
             </div>
@@ -364,7 +364,7 @@ function InventoryPanel({
       type: "PARCEL_FABRIC",
       name: "Parcel Fabric",
       icon: Map,
-      status: status.parcel_fabric.status,
+      status: status.parcel_fabric.status as "active" | "stale" | "loading" | "not_started" | "error",
       count: status.parcel_fabric.parcel_count || 0,
       coverage: status.parcel_fabric.coverage_pct || 0,
       lastSync: status.parcel_fabric.last_sync || null,
@@ -374,7 +374,7 @@ function InventoryPanel({
       type: "COUNTY_ROLL",
       name: "County Roll",
       icon: FileText,
-      status: status.county_roll.status,
+      status: status.county_roll.status as "active" | "stale" | "loading" | "not_started" | "error",
       count: status.county_roll.total_records || 0,
       coverage: status.county_roll.join_rate_pct || 0,
       lastSync: status.county_roll.last_sync || null,
@@ -384,7 +384,7 @@ function InventoryPanel({
       type: "SALES_STREAM",
       name: "Sales Stream",
       icon: BarChart3,
-      status: status.sales_stream.status,
+      status: status.sales_stream.status as "active" | "stale" | "loading" | "not_started" | "error",
       count: status.sales_stream.total_sales || 0,
       coverage: status.sales_stream.arms_length_pct || 0,
       lastSync: status.sales_stream.last_sync || null,
@@ -462,7 +462,7 @@ function InventoryPanel({
             { id: "model_calibration", name: "Model Calibration", icon: Zap, href: "/calibration" },
             { id: "appeals_support", name: "Appeals Support", icon: Scale, href: "/audit" },
           ].map((cap) => {
-            const isUnlocked = status.capabilities_unlocked.includes(cap.id);
+            const isUnlocked = (status.capabilities_unlocked ?? []).includes(cap.id);
             const Wrapper = isUnlocked ? "a" : "div";
             return (
               <Wrapper
@@ -718,7 +718,7 @@ function VersionsPanel({ countyFips }: { countyFips: WACountyFips | null }) {
       version_label: string;
       created_at: string;
       row_count: number;
-      approved_by: string;
+      approved_by?: string;
       is_current: boolean;
       change_summary?: {
         rows_added: number;
@@ -923,7 +923,7 @@ function AuditPanel({ countyFips }: { countyFips: WACountyFips | null }) {
       id: string;
       event_type: string;
       version_id?: string;
-      actor: string;
+      actor?: string;
       timestamp: string;
       details?: Record<string, unknown>;
     }>
@@ -944,7 +944,8 @@ function AuditPanel({ countyFips }: { countyFips: WACountyFips | null }) {
   useEffect(() => {
     if (process.env.NODE_ENV === "production") return;
     import("@/lib/api").then((mod) => {
-      setMigrationReport(mod.getMigrationReport());
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      setMigrationReport(mod.getMigrationReport() as any);
     });
   }, []);
 

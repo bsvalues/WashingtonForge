@@ -1,11 +1,13 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import { ChevronUp, ChevronDown, Download, X, Sliders, List, BarChart3 } from "lucide-react";
+import { ChevronUp, ChevronDown, Download, X, Sliders, List, BarChart3, FileText, ClipboardCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SelectionTable } from "./selection-table";
 import { SelectionSummary } from "./selection-summary";
+import { ParcelNotes } from "./parcel-notes";
+import { ParcelReviewStatus } from "./parcel-review-status";
 import { useSelection, downloadSelectionJSON } from "@/lib/selection";
 import type { Parcel, ParcelFilter } from "@/lib/api/types";
 import { cn } from "@/lib/utils";
@@ -110,6 +112,24 @@ export function SelectionDrawer({ allParcels, filters, onZoomToParcel }: Selecti
                   <BarChart3 className="mr-1.5 h-3.5 w-3.5" />
                   Summary
                 </TabsTrigger>
+                {selectedCount === 1 && (
+                  <TabsTrigger
+                    value="notes"
+                    className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary h-6 px-3 text-xs"
+                  >
+                    <FileText className="mr-1.5 h-3.5 w-3.5" />
+                    Notes
+                  </TabsTrigger>
+                )}
+                {selectedCount === 1 && (
+                  <TabsTrigger
+                    value="review"
+                    className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary h-6 px-3 text-xs"
+                  >
+                    <ClipboardCheck className="mr-1.5 h-3.5 w-3.5" />
+                    Review
+                  </TabsTrigger>
+                )}
               </TabsList>
             </Tabs>
 
@@ -152,6 +172,15 @@ export function SelectionDrawer({ allParcels, filters, onZoomToParcel }: Selecti
             )}
             {activeTab === "summary" && (
               <SelectionSummary parcels={selectedParcels} hiddenCount={hiddenCount} />
+            )}
+            {activeTab === "notes" && selectedCount === 1 && selectedParcels[0] && (
+              <ParcelNotes
+                parcelId={selectedParcels[0].id}
+                parcelSitus={selectedParcels[0].situs}
+              />
+            )}
+            {activeTab === "review" && selectedCount === 1 && selectedParcels[0] && (
+              <ParcelReviewStatus parcelId={selectedParcels[0].id} />
             )}
           </div>
         </div>

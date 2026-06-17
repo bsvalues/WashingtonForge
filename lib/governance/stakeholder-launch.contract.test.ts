@@ -408,7 +408,7 @@ describe("PILOT_STATUS_DASHBOARD_GUIDE.md", () => {
     });
 
     it("includes indicator color explanations", () => {
-      expect(doc!.content).toMatch(/Green.*Yellow.*Red/is);
+      expect(doc!.content).toMatch(/Green[\s\S]*Yellow[\s\S]*Red/i);
     });
   });
 

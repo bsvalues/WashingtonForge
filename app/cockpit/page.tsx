@@ -154,7 +154,7 @@ export default function CockpitPage() {
       }
       if (filters.yearRange) {
         const [minYear, maxYear] = filters.yearRange;
-        if (p.yearBuilt < minYear || p.yearBuilt > maxYear) {
+        if (p.yearBuilt !== undefined && (p.yearBuilt < minYear || p.yearBuilt > maxYear)) {
           return false;
         }
       }
@@ -179,7 +179,7 @@ export default function CockpitPage() {
   // LOADING STATE
   if (dataState.status === "loading") {
     return (
-      <AppShell user={{ name: "Jane Doe", role: "Assessor", county: "Benton County" }}>
+      <AppShell user={{ name: "Jane Doe", role: "Assessor", countyName: "Benton County" }}>
         <div className="flex h-[calc(100vh-4rem)] items-center justify-center">
           <div className="text-center">
             <Loader2 className="text-primary mx-auto mb-4 h-12 w-12 animate-spin" />
@@ -194,7 +194,7 @@ export default function CockpitPage() {
   // NO DATA STATE - Link to Data Suite
   if (dataState.status === "no_data") {
     return (
-      <AppShell user={{ name: "Jane Doe", role: "Assessor", county: "Benton County" }}>
+      <AppShell user={{ name: "Jane Doe", role: "Assessor", countyName: "Benton County" }}>
         <div className="flex h-[calc(100vh-4rem)] items-center justify-center p-8">
           <Card className="tf-glass max-w-lg p-8 text-center">
             <Database className="text-muted-foreground mx-auto mb-4 h-16 w-16" />
@@ -239,7 +239,7 @@ export default function CockpitPage() {
   // ERROR STATE
   if (dataState.status === "error") {
     return (
-      <AppShell user={{ name: "Jane Doe", role: "Assessor", county: "Benton County" }}>
+      <AppShell user={{ name: "Jane Doe", role: "Assessor", countyName: "Benton County" }}>
         <div className="flex h-[calc(100vh-4rem)] items-center justify-center p-8">
           <Card className="tf-glass max-w-lg border-red-400/30 bg-red-400/5 p-8 text-center">
             <AlertCircle className="mx-auto mb-4 h-16 w-16 text-red-400" />
@@ -258,7 +258,7 @@ export default function CockpitPage() {
   // READY STATE - Show the map
   return (
     <SelectionProvider>
-      <AppShell user={{ name: "Jane Doe", role: "Assessor", county: "Benton County" }}>
+      <AppShell user={{ name: "Jane Doe", role: "Assessor", countyName: "Benton County" }}>
         <div className="relative flex h-[calc(100vh-4rem)] overflow-hidden">
           {/* Left Panel - Filters */}
           <FilterPanel filters={filters} onFilterChange={handleFilterChange} />
@@ -343,10 +343,10 @@ function generateParcelsForVersion(versionId: string, count: number): Parcel[] {
       landValue: Math.round(baseValue * 0.3),
       impValue: Math.round(baseValue * 0.7),
       totalValue: Math.round(baseValue),
-      salePrice: salePrice ? Math.round(salePrice) : null,
-      saleDate: salePrice ? `2024-${String((i % 12) + 1).padStart(2, "0")}-${String((i % 28) + 1).padStart(2, "0")}` : null,
+      salePrice: salePrice ? Math.round(salePrice) : undefined,
+      saleDate: salePrice ? `2024-${String((i % 12) + 1).padStart(2, "0")}-${String((i % 28) + 1).padStart(2, "0")}` : undefined,
       equityStatus,
-      ratio: ratio ? Math.round(ratio * 100) / 100 : null,
+      ratio: ratio ? Math.round(ratio * 100) / 100 : undefined,
       propertyClass: propertyClasses[Math.floor(random(i + 2000) * propertyClasses.length)],
       neighborhood: neighborhoods[Math.floor(random(i + 3000) * neighborhoods.length)],
       yearBuilt: 1970 + Math.floor(random(i + 4000) * 55),
