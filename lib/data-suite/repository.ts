@@ -20,6 +20,7 @@ import type {
   ActiveDatasetPointer,
 } from "./types";
 import type { ProductVersion } from "./hub";
+import { MOCK_USER } from "@/lib/fixtures";
 
 // ============================================
 // Repository Interface
@@ -419,7 +420,7 @@ class DemoRepository implements IDataSuiteRepository {
       version_label: "2026 Certified v1",
       created_at: new Date(prevDay).toISOString(),
       row_count: 42500,
-      approved_by: "jane.assessor@county.gov",
+      approved_by: MOCK_USER.email,
       is_current: false,
       change_summary: {
         rows_added: 42500,
@@ -433,7 +434,7 @@ class DemoRepository implements IDataSuiteRepository {
       version_label: "2026 Certified v2",
       created_at: new Date(now).toISOString(),
       row_count: 42800,
-      approved_by: "jane.assessor@county.gov",
+      approved_by: MOCK_USER.email,
       is_current: true,
       change_summary: {
         rows_added: 350,
@@ -450,7 +451,7 @@ class DemoRepository implements IDataSuiteRepository {
       product_type: "COUNTY_ROLL",
       event_type: "published",
       version_id: `v-${prevDay}`,
-      actor: "jane.assessor@county.gov",
+      actor: MOCK_USER.email,
       timestamp: new Date(prevDay).toISOString(),
       details: { versionLabel: "2026 Certified v1" },
     });
@@ -461,7 +462,7 @@ class DemoRepository implements IDataSuiteRepository {
       product_type: "COUNTY_ROLL",
       event_type: "published",
       version_id: `v-${now}`,
-      actor: "jane.assessor@county.gov",
+      actor: MOCK_USER.email,
       timestamp: new Date(now).toISOString(),
       details: { versionLabel: "2026 Certified v2" },
     });
@@ -480,7 +481,7 @@ class DemoRepository implements IDataSuiteRepository {
         product_type: "COUNTY_ROLL",
         version_id: currentVersionId,
         delivered_at: new Date().toISOString(),
-        delivered_by: "jane.assessor@county.gov",
+        delivered_by: MOCK_USER.email,
         status: "delivered",
         row_count: 42800,
       });
@@ -491,7 +492,7 @@ class DemoRepository implements IDataSuiteRepository {
         countyFips,
         "COUNTY_ROLL",
         currentVersionId,
-        "jane.assessor@county.gov"
+        MOCK_USER.email
       );
     }
   }

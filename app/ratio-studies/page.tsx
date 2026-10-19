@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { AppShell } from "@/components/app-shell";
+import { DEMO_IDENTITY } from "@/lib/fixtures";
 import { RatioStudyList } from "@/components/ratio-studies/ratio-study-list";
 import { RunStudyModal } from "@/components/ratio-studies/run-study-modal";
 import { StudyResults } from "@/components/ratio-studies/study-results";
@@ -41,7 +42,7 @@ export default function RatioStudiesPage() {
   };
 
   return (
-    <AppShell user={{ name: "Jane Doe", role: "Assessor", countyName: "Benton County" }}>
+    <AppShell user={DEMO_IDENTITY}>
       <div className="mx-auto max-w-7xl p-4 md:p-6">
         {/* Header */}
         <div className="mb-8 flex items-center justify-between">

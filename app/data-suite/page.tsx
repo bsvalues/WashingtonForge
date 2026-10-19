@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import { AppShell } from "@/components/app-shell";
+import { DEMO_IDENTITY } from "@/lib/fixtures";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -134,8 +135,7 @@ function DataSuitePageInner() {
   return (
     <AppShell
       user={{
-        name: "Demo User",
-        role: "Assessor",
+        ...DEMO_IDENTITY,
         countyName: status?.county_name || "Select County",
       }}
     >

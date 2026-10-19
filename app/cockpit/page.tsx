@@ -11,6 +11,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2, Database, ArrowRight, AlertCircle, RefreshCw } from "lucide-react";
 import { DataPlaneStatus } from "@/components/data-suite/data-plane-status";
+import { DEMO_IDENTITY } from "@/lib/fixtures";
 import type { ParcelFilter, Parcel } from "@/lib/api";
 
 // ============================================
@@ -176,7 +177,7 @@ export default function CockpitPage() {
   // LOADING STATE
   if (dataState.status === "loading") {
     return (
-      <AppShell user={{ name: "Jane Doe", role: "Assessor", countyName: "Benton County" }}>
+      <AppShell user={DEMO_IDENTITY}>
         <div className="flex h-[calc(100vh-4rem)] items-center justify-center">
           <div className="text-center">
             <Loader2 className="text-primary mx-auto mb-4 h-12 w-12 animate-spin" />
@@ -191,7 +192,7 @@ export default function CockpitPage() {
   // NO DATA STATE - Link to Data Suite
   if (dataState.status === "no_data") {
     return (
-      <AppShell user={{ name: "Jane Doe", role: "Assessor", countyName: "Benton County" }}>
+      <AppShell user={DEMO_IDENTITY}>
         <div className="flex h-[calc(100vh-4rem)] items-center justify-center p-8">
           <Card className="tf-glass max-w-lg p-8 text-center">
             <Database className="text-muted-foreground mx-auto mb-4 h-16 w-16" />
@@ -235,7 +236,7 @@ export default function CockpitPage() {
   // ERROR STATE
   if (dataState.status === "error") {
     return (
-      <AppShell user={{ name: "Jane Doe", role: "Assessor", countyName: "Benton County" }}>
+      <AppShell user={DEMO_IDENTITY}>
         <div className="flex h-[calc(100vh-4rem)] items-center justify-center p-8">
           <Card className="tf-glass max-w-lg border-red-400/30 bg-red-400/5 p-8 text-center">
             <AlertCircle className="mx-auto mb-4 h-16 w-16 text-red-400" />
@@ -254,7 +255,7 @@ export default function CockpitPage() {
   // READY STATE - Show the map
   return (
     <SelectionProvider>
-      <AppShell user={{ name: "Jane Doe", role: "Assessor", countyName: "Benton County" }}>
+      <AppShell user={DEMO_IDENTITY}>
         <div className="relative flex h-[calc(100vh-4rem)] overflow-hidden">
           {/* Left Panel - Filters */}
           <FilterPanel filters={filters} onFilterChange={handleFilterChange} />

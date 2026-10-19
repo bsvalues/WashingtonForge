@@ -67,6 +67,18 @@ export const MOCK_USER: User = {
 };
 
 // ============================================
+// Demo Identity (single source of truth for UI identity)
+// ============================================
+// Derived from MOCK_USER (the mock-auth session user) so the logged-in
+// identity and the data-plane "Activated By" always agree (F5).
+export const DEMO_IDENTITY = {
+  name: MOCK_USER.name,
+  role: MOCK_USER.role.charAt(0).toUpperCase() + MOCK_USER.role.slice(1),
+  countyName: MOCK_USER.countyName,
+  email: MOCK_USER.email,
+};
+
+// ============================================
 // Parcels (matches PostGIS model)
 // ============================================
 

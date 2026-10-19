@@ -2,6 +2,7 @@
 
 import React, { useEffect, useMemo, useState } from "react";
 import { AppShell } from "@/components/app-shell";
+import { DEMO_IDENTITY } from "@/lib/fixtures";
 import { loadCountyDataFreshness } from "@/lib/api";
 import type { CountyDataFreshness, OverlayStatus, UpdateLane } from "@/lib/api/types";
 import { cn } from "@/lib/utils";
@@ -135,7 +136,7 @@ export default function DataSourcesPage() {
   }, [rows, q, status, lane, sort, dir]);
 
   return (
-    <AppShell user={{ name: "Demo User", role: "Assessor", countyName: "Benton County" }}>
+    <AppShell user={DEMO_IDENTITY}>
       <div className="mx-auto max-w-7xl p-6">
         {/* Header */}
         <div className="mb-6">
