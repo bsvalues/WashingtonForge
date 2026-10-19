@@ -9,6 +9,7 @@ import type {
   AuditLogEntry,
   AuditEventPayload,
 } from "@/lib/api/types";
+import { sha256Hex, canonicalStringify } from "./sha256";
 
 // ============================================
 // Audit Context (Client-side session state)
@@ -62,15 +63,11 @@ export function getAuditEventsByResource(
 
 function computePayloadHash(details: Record<string, unknown> | undefined): string {
   if (!details) return "";
-  const sorted = JSON.stringify(details, Object.keys(details).sort());
-  // Simple hash for demo - in production use crypto.subtle
-  let hash = 0;
-  for (let i = 0; i < sorted.length; i++) {
-    const char = sorted.charCodeAt(i);
-    hash = (hash << 5) - hash + char;
-    hash = hash & hash;
-  }
-  return Math.abs(hash).toString(16).padStart(8, "0");
+  // Real SHA-256 over a key-order-independent (canonical) serialization, so the
+  // same logical payload always yields the same digest regardless of the order
+  // its keys were inserted in. Pure-JS so it works client-side over plain HTTP
+  // where crypto.subtle is unavailable.
+  return sha256Hex(canonicalStringify(details));
 }
 
 // ============================================
