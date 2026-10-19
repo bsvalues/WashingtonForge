@@ -3,7 +3,10 @@
 
 const SSN = /\b\d{3}-\d{2}-\d{4}\b/g;
 const EMAIL = /\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b/gi;
-const PHONE = /\b(?:\+?1[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b/g;
+// (?<!\d) instead of a leading \b: a word boundary fails before "(" or "+",
+// which would leave orphaned characters (e.g. "([REDACTED_PHONE]"). The
+// lookbehind only forbids matching mid-digit-run, so full numbers still match.
+const PHONE = /(?<!\d)(?:\+?1[-.\s]?)?\(?\d{3}\)?[-.\s]?\d{3}[-.\s]?\d{4}\b/g;
 
 export function sanitizeText(input: string): string {
   return input

@@ -311,4 +311,13 @@ describe("sanitizeText", () => {
     // 3-digit numbers alone should not match phone pattern
     expect(sanitizeText("Zone 123 has 456 parcels")).toBe("Zone 123 has 456 parcels");
   });
+
+  it("does not redact long digit runs that are not phones (lookbehind guard)", () => {
+    // A 16-digit order number must not be partially matched as a phone.
+    expect(sanitizeText("Order 1234567890123456 done")).toBe("Order 1234567890123456 done");
+  });
+
+  it("redacts a 10-digit phone with no separators", () => {
+    expect(sanitizeText("Call 5095550142 now")).toBe("Call [REDACTED_PHONE] now");
+  });
 });
