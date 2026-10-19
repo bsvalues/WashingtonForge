@@ -410,10 +410,14 @@ class DemoRepository implements IDataSuiteRepository {
     });
 
     // Add some demo versions
+    // Capture the timestamp once so the version id, lineage event, and route
+    // records all reference the SAME id (avoids cross-millisecond divergence).
+    const now = Date.now();
+    const prevDay = now - 86400000;
     await this.createVersion(countyFips, "COUNTY_ROLL", {
-      id: `v-${Date.now() - 86400000}`,
+      id: `v-${prevDay}`,
       version_label: "2026 Certified v1",
-      created_at: new Date(Date.now() - 86400000).toISOString(),
+      created_at: new Date(prevDay).toISOString(),
       row_count: 42500,
       approved_by: "jane.assessor@county.gov",
       is_current: false,
@@ -425,9 +429,9 @@ class DemoRepository implements IDataSuiteRepository {
     });
 
     await this.createVersion(countyFips, "COUNTY_ROLL", {
-      id: `v-${Date.now()}`,
+      id: `v-${now}`,
       version_label: "2026 Certified v2",
-      created_at: new Date().toISOString(),
+      created_at: new Date(now).toISOString(),
       row_count: 42800,
       approved_by: "jane.assessor@county.gov",
       is_current: true,
@@ -441,36 +445,36 @@ class DemoRepository implements IDataSuiteRepository {
 
     // Add demo lineage events
     await this.createLineageEvent({
-      id: `le-${Date.now() - 86400000}`,
+      id: `le-${prevDay}`,
       county_fips: countyFips,
       product_type: "COUNTY_ROLL",
       event_type: "published",
-      version_id: `v-${Date.now() - 86400000}`,
+      version_id: `v-${prevDay}`,
       actor: "jane.assessor@county.gov",
-      timestamp: new Date(Date.now() - 86400000).toISOString(),
+      timestamp: new Date(prevDay).toISOString(),
       details: { versionLabel: "2026 Certified v1" },
     });
 
     await this.createLineageEvent({
-      id: `le-${Date.now()}`,
+      id: `le-${now}`,
       county_fips: countyFips,
       product_type: "COUNTY_ROLL",
       event_type: "published",
-      version_id: `v-${Date.now()}`,
+      version_id: `v-${now}`,
       actor: "jane.assessor@county.gov",
-      timestamp: new Date().toISOString(),
+      timestamp: new Date(now).toISOString(),
       details: { versionLabel: "2026 Certified v2" },
     });
 
     // CRITICAL: Set up route records and active pointers for subscribers
     // This is what makes Cockpit actually have data to show
-    const currentVersionId = `v-${Date.now()}`;
+    const currentVersionId = `v-${now}`;
     const subscribers = ["cockpit-map", "comps-engine", "ratio-studies", "calibration", "appeals"];
 
     for (const subscriber of subscribers) {
       // Create route record (delivery receipt)
       await this.createRouteRecord({
-        id: `rr-demo-${subscriber}-${Date.now()}`,
+        id: `rr-demo-${subscriber}-${now}`,
         subscriber,
         county_fips: countyFips,
         product_type: "COUNTY_ROLL",
