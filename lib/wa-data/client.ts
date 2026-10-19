@@ -28,7 +28,11 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 // Generate a proper UUID (crypto.randomUUID in modern runtimes)
 function generateId(prefix: string): string {
-  // In production: return `${prefix}-${crypto.randomUUID()}`;
+  const c = globalThis.crypto;
+  if (c && typeof c.randomUUID === "function") {
+    return `${prefix}-${c.randomUUID()}`;
+  }
+  // Fallback for runtimes without Web Crypto (e.g. older jsdom)
   return `${prefix}-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
 }
 
