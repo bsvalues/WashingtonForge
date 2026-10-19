@@ -23,8 +23,8 @@ export function sha256Hex(input: string): string {
  * timestamp, so the hash is reproducible given (payload, timestamp) and can
  * be independently recomputed to verify the package was not altered.
  */
-export function generatePackageHash(
-  data: Record<string, unknown>,
+export function generatePackageHash<T extends object>(
+  data: T,
   timestamp: string,
 ): string {
   const input = JSON.stringify({ ...data, timestamp });
