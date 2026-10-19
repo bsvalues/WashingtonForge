@@ -218,16 +218,14 @@ export default function CockpitPage() {
               Cockpit.
             </p>
 
-            {/* Data Plane Status (Dev Debug) */}
-            {process.env.NODE_ENV !== "production" && (
-              <div className="mt-6">
-                <DataPlaneStatus
-                  countyFips={DEFAULT_COUNTY}
-                  subscriber="cockpit-map"
-                  product="COUNTY_ROLL"
-                />
-              </div>
-            )}
+            {/* Data Plane Status — always visible so simulated-data provenance is unambiguous (F4) */}
+            <div className="mt-6">
+              <DataPlaneStatus
+                countyFips={DEFAULT_COUNTY}
+                subscriber="cockpit-map"
+                product="COUNTY_ROLL"
+              />
+            </div>
           </Card>
         </div>
       </AppShell>
@@ -290,16 +288,14 @@ export default function CockpitPage() {
               onZoomToParcel={handleZoomToParcel}
             />
 
-            {/* Data Plane Status (Dev Debug) */}
-            {process.env.NODE_ENV !== "production" && (
-              <div className="absolute right-4 bottom-4 z-20 w-64">
-                <DataPlaneStatus
-                  countyFips={DEFAULT_COUNTY}
-                  subscriber="cockpit-map"
-                  product="COUNTY_ROLL"
-                />
-              </div>
-            )}
+            {/* Data Plane Status — always visible so simulated-data provenance is unambiguous (F4) */}
+            <div className="absolute right-4 bottom-4 z-20 w-64">
+              <DataPlaneStatus
+                countyFips={DEFAULT_COUNTY}
+                subscriber="cockpit-map"
+                product="COUNTY_ROLL"
+              />
+            </div>
           </div>
         </div>
       </AppShell>
