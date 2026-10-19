@@ -71,6 +71,21 @@ function computePayloadHash(details: Record<string, unknown> | undefined): strin
 }
 
 // ============================================
+// Audit Event ID
+// ============================================
+
+// Generate a proper UUID (crypto.randomUUID in modern runtimes). Mirrors the
+// F6 fix in lib/wa-data/client.ts: a real random UUID, with a fallback for
+// runtimes without Web Crypto (e.g. older jsdom).
+function generateAuditId(): string {
+  const c = globalThis.crypto;
+  if (c && typeof c.randomUUID === "function") {
+    return `audit-${c.randomUUID()}`;
+  }
+  return `audit-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+}
+
+// ============================================
 // Emit Audit Event
 // ============================================
 
@@ -80,7 +95,7 @@ export function emitAuditEvent(payload: AuditEventPayload): AuditLogEntry {
   }
 
   const entry: AuditLogEntry = {
-    id: `audit-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`,
+    id: generateAuditId(),
     userId: auditContext?.userId || "anonymous",
     userName: auditContext?.userName || "Anonymous User",
     action: payload.action,
