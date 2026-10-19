@@ -7,6 +7,8 @@
 
 import { NextRequest, NextResponse } from "next/server";
 
+import { generatePackageHash, generateSignatureHash } from "@/lib/export/hash";
+
 // =============================================================================
 // Types
 // =============================================================================
@@ -41,23 +43,6 @@ interface ExportResponse {
 // =============================================================================
 // Helpers
 // =============================================================================
-
-function generatePackageHash(data: ExportRequest): string {
-  // In production: use crypto.subtle.digest for real SHA-256
-  const input = JSON.stringify({
-    ...data,
-    timestamp: new Date().toISOString(),
-  });
-
-  // Simulated hash for demo
-  let hash = 0;
-  for (let i = 0; i < input.length; i++) {
-    const char = input.charCodeAt(i);
-    hash = (hash << 5) - hash + char;
-    hash = hash & hash;
-  }
-  return `sha256:${Math.abs(hash).toString(16).padStart(16, "0")}${Date.now().toString(16)}`;
-}
 
 function generateExportId(): string {
   return `exp_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
@@ -115,13 +100,14 @@ export async function POST(request: NextRequest) {
 
     // Generate export
     const exportId = generateExportId();
-    const packageHash = generatePackageHash(body);
     const generatedAt = new Date().toISOString();
+    const packageHash = generatePackageHash(body, generatedAt);
     const expiresAt = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(); // 7 days
 
     // In production: Actually generate the PDF/DOCX using a library like pdfkit or docx
     // For now, return the metadata that would accompany the generated file
 
+    const certifiedBy = `${body.county_fips} County Assessor`;
     const response: ExportResponse = {
       export_id: exportId,
       parcel_id: body.parcel_id,
@@ -134,9 +120,9 @@ export async function POST(request: NextRequest) {
       expires_at: expiresAt,
       lineage_events_count: 12, // Simulated
       certification: {
-        certified_by: `${body.county_fips} County Assessor`,
+        certified_by: certifiedBy,
         certified_at: generatedAt,
-        signature_hash: `sig:${packageHash.slice(7, 23)}`,
+        signature_hash: generateSignatureHash(packageHash, certifiedBy, generatedAt),
       },
     };
 
