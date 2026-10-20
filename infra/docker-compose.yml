@@ -1,0 +1,43 @@
+# WashingtonForge — owned data-plane (Phase 1)
+#
+# This is OUR OWN isolated PostGIS instance, cloned from the modernized PACS
+# (pacs-pg / pacs-geo). It is a dev clone — not the source of truth.
+#
+# Secrets live in infra/.env (gitignored). Copy infra/.env.example -> infra/.env
+# and fill in WF_PG_PASSWORD before `docker compose up -d`.
+#
+# Redis: we reuse the hub's existing `redis` container (127.0.0.1:6379).
+# If that is unavailable, start our own with:  docker compose --profile redis up -d
+
+name: washingtonforge
+
+services:
+  wf-postgres:
+    image: postgis/postgis:16-3.4
+    container_name: wf-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${WF_PG_DB:-washingtonforge}
+      POSTGRES_USER: ${WF_PG_USER:-wf}
+      POSTGRES_PASSWORD: ${WF_PG_PASSWORD:?Set WF_PG_PASSWORD in infra/.env}
+    ports:
+      - "127.0.0.1:5434:5432"
+    volumes:
+      - wf_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${WF_PG_USER:-wf} -d ${WF_PG_DB:-washingtonforge}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # Optional: our own Redis, only if the shared hub redis (6379) is not available.
+  wf-redis:
+    image: redis:7
+    container_name: wf-redis
+    restart: unless-stopped
+    profiles: ["redis"]
+    ports:
+      - "127.0.0.1:6380:6379"
+
+volumes:
+  wf_pgdata:
