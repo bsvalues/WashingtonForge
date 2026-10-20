@@ -129,7 +129,9 @@ function mapRow(r: Record<string, unknown>): ParcelRow {
  * - If `bbox` is provided (WGS84 lng/lat), it is transformed to SRID 2927 and
  *   used as a spatial filter (fast, uses the GiST index).
  * - Otherwise the first `limit` parcels (by prop_id) are returned.
- * - Geometry is returned as GeoJSON via ST_AsGeoJSON.
+ * - Geometry is stored in SRID 2927 (WA State Plane South, feet) but is
+ *   transformed to WGS84 (4326, lng/lat) before serialization so the map
+ *   (Web Mercator) can render it directly.
  */
 export async function getParcelsGeoJSON(
   query: ParcelQuery = {}
@@ -171,7 +173,7 @@ export async function getParcelsGeoJSON(
       (COALESCE(land_hstd_val,0) + COALESCE(land_non_hstd_val,0)) AS land_val,
       (COALESCE(imprv_hstd_val,0) + COALESCE(imprv_non_hstd_val,0)) AS imprv_val,
       last_appraisal_dt,
-      ST_AsGeoJSON(geom) AS geom_geojson
+      ST_AsGeoJSON(ST_Transform(geom, 4326)) AS geom_geojson
     FROM parcel_current
     WHERE ${where}
     ORDER BY prop_id
@@ -273,7 +275,7 @@ export async function getParcelById(propId: string): Promise<ParcelRow | null> {
         (COALESCE(land_hstd_val,0) + COALESCE(land_non_hstd_val,0)) AS land_val,
         (COALESCE(imprv_hstd_val,0) + COALESCE(imprv_non_hstd_val,0)) AS imprv_val,
         last_appraisal_dt,
-        ST_AsGeoJSON(geom) AS geom_geojson
+        ST_AsGeoJSON(ST_Transform(geom, 4326)) AS geom_geojson
       FROM parcel_current
       WHERE prop_id = $1
       LIMIT 1
