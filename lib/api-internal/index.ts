@@ -6,16 +6,22 @@
 export * from "./types";
 
 // ============================================
-// Demo Mode (hardcoded for now - no backend connected)
+// Demo Mode (env-driven — F1)
 // ============================================
 
 /**
- * DEMO_MODE: Set to true for UI demo, false when real backend is ready.
+ * DEMO_MODE: true when the app should serve simulated/demo data.
  *
- * When you connect a real backend, change this to false or use:
- * export const DEMO_MODE = process.env.NEXT_PUBLIC_DEMO_MODE !== "false";
+ * Driven by NEXT_PUBLIC_DEMO_MODE:
+ *  - unset / "true"  → demo mode ON (default, safe for zero-infra runs)
+ *  - "false"         → demo mode OFF (real backend expected)
+ *
+ * NOTE: This flag gates the *client-side* demo helpers. The server-side data
+ * layer (lib/db) independently decides live-vs-simulated from actual database
+ * connectivity (see /api/health), so a misconfigured flag can never silently
+ * serve fake data as if it were real.
  */
-export const DEMO_MODE = true;
+export const DEMO_MODE = process.env.NEXT_PUBLIC_DEMO_MODE !== "false";
 
 // ============================================
 // Direct Re-exports from Demo Client

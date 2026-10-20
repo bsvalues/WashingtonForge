@@ -11,6 +11,7 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Loader2, Database, ArrowRight, AlertCircle, RefreshCw } from "lucide-react";
 import { DataPlaneStatus } from "@/components/data-suite/data-plane-status";
+import { ProvenanceBadge } from "@/components/provenance-badge";
 import { DEMO_IDENTITY } from "@/lib/fixtures";
 import type { ParcelFilter, Parcel } from "@/lib/api";
 
@@ -39,6 +40,7 @@ export default function CockpitPage() {
   const [filters, setFilters] = useState<ParcelFilter>({});
   const [focusedParcel, setFocusedParcel] = useState<Parcel | null>(null);
   const [parcels, setParcels] = useState<Parcel[]>([]);
+  const [provenance, setProvenance] = useState<{ mode: string; parcelCount: number } | null>(null);
   const [dataState, setDataState] = useState<CockpitDataState>({
     status: "loading",
     versionId: null,
@@ -91,23 +93,35 @@ export default function CockpitPage() {
         return;
       }
 
-      // Data exists! Load the actual parcel data for this version
-      // In production: fetch from DB based on versionId
-      // For demo: generate mock parcels that represent the delivered data
-      const mockParcels = generateParcelsForVersion(
-        activeDataset.versionId,
-        activeDataset.rowCount
-      );
+      // Data exists! Load the actual parcel data for this version.
+      // LIVE: fetch real parcels (with geometry) from /api/wa-fabric.
+      // SIMULATED: fall back to the deterministic demo generator.
+      const health = await fetchHealth();
+      setProvenance(health);
+
+      let loadedParcels: Parcel[];
+      let rowCount = activeDataset.rowCount;
+      if (health?.mode === "live") {
+        const live = await fetchLiveParcels(DEFAULT_COUNTY);
+        if (live.length > 0) {
+          loadedParcels = live;
+          rowCount = health.parcelCount || live.length;
+        } else {
+          loadedParcels = generateParcelsForVersion(activeDataset.versionId, activeDataset.rowCount);
+        }
+      } else {
+        loadedParcels = generateParcelsForVersion(activeDataset.versionId, activeDataset.rowCount);
+      }
 
       setDataState({
         status: "ready",
         versionId: activeDataset.versionId,
         activatedAt: activeDataset.activatedAt,
         activatedBy: activeDataset.activatedBy,
-        rowCount: activeDataset.rowCount,
+        rowCount,
         error: null,
       });
-      setParcels(mockParcels);
+      setParcels(loadedParcels);
     } catch (error) {
       setDataState({
         status: "error",
@@ -219,6 +233,11 @@ export default function CockpitPage() {
               Cockpit.
             </p>
 
+            {/* Provenance — always visible so simulated-data is unambiguous (F2/F4) */}
+            <div className="mt-6 flex justify-center">
+              <ProvenanceBadge />
+            </div>
+
             {/* Data Plane Status — always visible so simulated-data provenance is unambiguous (F4) */}
             <div className="mt-6">
               <DataPlaneStatus
@@ -262,8 +281,8 @@ export default function CockpitPage() {
 
           {/* Map Area */}
           <div className="relative flex-1">
-            {/* Data Version Badge */}
-            <div className="absolute top-4 left-4 z-20">
+            {/* Data Version Badge + Provenance */}
+            <div className="absolute top-4 left-4 z-20 flex flex-col gap-2">
               <div className="tf-glass flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs">
                 <span className="text-muted-foreground">Version:</span>
                 <span className="text-foreground font-mono">
@@ -274,6 +293,7 @@ export default function CockpitPage() {
                   {dataState.rowCount.toLocaleString()} parcels
                 </span>
               </div>
+              <ProvenanceBadge />
             </div>
 
             <CockpitMap
@@ -302,6 +322,62 @@ export default function CockpitPage() {
       </AppShell>
     </SelectionProvider>
   );
+}
+
+// ============================================
+// LIVE DATA HELPERS
+// ============================================
+
+/** Fetch /api/health to determine provenance (live vs simulated). */
+async function fetchHealth(): Promise<{ mode: string; parcelCount: number } | null> {
+  try {
+    const res = await fetch("/api/health", { cache: "no-store" });
+    if (!res.ok) return null;
+    const data = await res.json();
+    return { mode: data.mode, parcelCount: data.parcelCount ?? 0 };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Fetch real parcels (with geometry) from the live parcel-fabric API.
+ * Uses an even sample so the map shows parcels spread across the county.
+ * Returns [] on any failure so the caller can fall back to demo data.
+ */
+async function fetchLiveParcels(county: string): Promise<Parcel[]> {
+  try {
+    // ~1500 evenly-spread parcels for a smooth map preview.
+    const res = await fetch(
+      `/api/wa-fabric?county=${county}&format=geojson&limit=1500&sampleEvery=50`,
+      { cache: "no-store" }
+    );
+    if (!res.ok) return [];
+    const fc = await res.json();
+    if (!fc?.features?.length) return [];
+
+    return fc.features.map((f: any): Parcel => {
+      const p = f.properties ?? {};
+      const assessed = Number(p.assessedValue ?? 0);
+      const market = Number(p.marketValue ?? 0);
+      const ratio = p.ratio != null ? Number(p.ratio) : market > 0 ? assessed / market : undefined;
+      return {
+        id: String(p.id ?? f.id),
+        parcelId: String(p.parcelId ?? f.id),
+        situs: p.situs ?? "",
+        landValue: Number(p.landValue ?? 0),
+        impValue: Number(p.impValue ?? 0),
+        totalValue: Number(p.totalValue ?? assessed),
+        equityStatus: (p.equityStatus ?? "fair") as Parcel["equityStatus"],
+        ratio: ratio != null ? Math.round(ratio * 1000) / 1000 : undefined,
+        propertyClass: p.propertyClass ?? "Unknown",
+        neighborhood: p.neighborhood ?? "",
+        geometry: f.geometry ?? undefined,
+      };
+    });
+  } catch {
+    return [];
+  }
 }
 
 // ============================================

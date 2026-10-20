@@ -19,7 +19,9 @@ interface CockpitMapProps {
   onZoomToParcel?: (parcel: Parcel) => void;
 }
 
-// Generate GeoJSON features from parcels with pseudo-random positions around Benton County
+// Generate GeoJSON features from parcels.
+// - If a parcel carries real geometry (from the live PostGIS API), use it.
+// - Otherwise fall back to a pseudo-random grid around Benton County (demo).
 function parcelsToGeoJSON(parcels: Parcel[]): GeoJSON.FeatureCollection {
   const [centerLng, centerLat] = BENTON_COUNTY_CENTER;
   const spread = 0.15; // ~10 miles spread
@@ -27,20 +29,39 @@ function parcelsToGeoJSON(parcels: Parcel[]): GeoJSON.FeatureCollection {
   return {
     type: "FeatureCollection",
     features: parcels.map((parcel, index) => {
-      // Create a grid-like distribution with some randomness
+      // Use real geometry when present (live data path).
+      const realGeometry = parcel.geometry as GeoJSON.Geometry | undefined;
+      if (realGeometry && (realGeometry.type === "Polygon" || realGeometry.type === "MultiPolygon")) {
+        return {
+          type: "Feature" as const,
+          id: parcel.id,
+          geometry: realGeometry,
+          properties: {
+            id: parcel.id,
+            parcelNumber: parcel.parcelId,
+            address: parcel.situs,
+            assessedValue: parcel.totalValue,
+            marketValue: parcel.totalValue,
+            ratio: parcel.ratio,
+            equityStatus: parcel.equityStatus,
+            propertyType: parcel.propertyClass,
+            yearBuilt: parcel.yearBuilt,
+            neighborhood: parcel.neighborhood,
+          },
+        };
+      }
+
+      // Demo fallback: grid-like distribution with some randomness.
       const gridSize = Math.ceil(Math.sqrt(parcels.length));
       const row = Math.floor(index / gridSize);
       const col = index % gridSize;
 
-      // Normalize to -0.5 to 0.5 range, then scale by spread
       const baseLng = centerLng + (col / gridSize - 0.5) * spread * 2;
       const baseLat = centerLat + (row / gridSize - 0.5) * spread * 2;
 
-      // Add small random offset
       const lng = baseLng + (Math.random() - 0.5) * 0.01;
       const lat = baseLat + (Math.random() - 0.5) * 0.01;
 
-      // Create a small polygon (parcel shape)
       const size = 0.002 + Math.random() * 0.001;
       const coordinates = [
         [
@@ -303,14 +324,20 @@ export function CockpitMap({ filters, parcels, onZoomToParcel }: CockpitMapProps
     if (source) {
       source.setData(geoJSON);
 
-      // Calculate bounds from parcels and fit map to them
+      // Calculate bounds from parcels and fit map to them.
+      // Handles both Polygon (demo) and MultiPolygon (real PostGIS) geometry.
       if (geoJSON.features.length > 0) {
         const bounds = new maplibregl.LngLatBounds();
         for (const feature of geoJSON.features) {
-          if (feature.geometry.type === "Polygon") {
-            for (const ring of feature.geometry.coordinates) {
-              for (const coord of ring) {
-                bounds.extend(coord as [number, number]);
+          const geom = feature.geometry;
+          if (geom.type === "Polygon") {
+            for (const ring of geom.coordinates) {
+              for (const coord of ring) bounds.extend(coord as [number, number]);
+            }
+          } else if (geom.type === "MultiPolygon") {
+            for (const polygon of geom.coordinates) {
+              for (const ring of polygon) {
+                for (const coord of ring) bounds.extend(coord as [number, number]);
               }
             }
           }

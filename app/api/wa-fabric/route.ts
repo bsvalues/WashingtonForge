@@ -1,5 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { WA_COUNTIES, type WACountyFips } from "@/lib/wa-data/types";
+import {
+  isGeoConfigured,
+  getParcelsGeoJSON,
+  getParcelStats,
+  getParcelCount,
+} from "@/lib/db";
 
 /**
  * WA Parcel Fabric API
@@ -208,8 +214,69 @@ export async function GET(request: NextRequest) {
 
   const bbox = parseBBox(bboxParam);
   const fields = fieldsParam ? fieldsParam.split(",") : undefined;
+  const sampleEveryParam = parseInt(searchParams.get("sampleEvery") || "0", 10);
+  const sampleEvery = sampleEveryParam > 1 ? sampleEveryParam : undefined;
 
-  // Generate demo data with all filters applied
+  // ------------------------------------------------------------------
+  // LIVE PATH: real PostGIS data from benton_geo.parcel_current
+  // ------------------------------------------------------------------
+  if (isGeoConfigured()) {
+    if (format === "geojson") {
+      const fc = await getParcelsGeoJSON({
+        bbox,
+        limit: Math.min(limit, 10000),
+        sampleEvery,
+      });
+      const headers = new Headers();
+      headers.set("Cache-Control", "public, max-age=300, stale-while-revalidate=3600");
+      headers.set("Content-Type", "application/geo+json");
+      return NextResponse.json(
+        {
+          ...fc,
+          metadata: {
+            county_fips: county,
+            county_name: WA_COUNTIES[county].name,
+            total_count: fc.features.length,
+            source: "benton_geo.parcel_current (live PostGIS)",
+            source_version: "PACS 2026 clone",
+            provenance: "live",
+            generated_at: new Date().toISOString(),
+            query: {
+              bbox: bbox ? `${bbox.minLng},${bbox.minLat},${bbox.maxLng},${bbox.maxLat}` : null,
+              limit: Math.min(limit, 10000),
+            },
+          },
+        },
+        { headers }
+      );
+    }
+
+    // stats format (live)
+    const [stats, total] = await Promise.all([getParcelStats(), getParcelCount()]);
+    return NextResponse.json({
+      county_fips: county,
+      county_name: WA_COUNTIES[county].name,
+      parcel_count: total,
+      provenance: "live",
+      source: "benton_geo.parcel_current (live PostGIS)",
+      stats: stats
+        ? {
+            total_parcels: stats.count,
+            total_assessed: stats.totalAssessed,
+            total_market: stats.totalMarket,
+            median_assessed: stats.medianAssessed,
+            with_geometry: stats.withGeometry,
+          }
+        : null,
+      _links: {
+        geojson: `/api/wa-fabric?county=${county}&format=geojson&limit=100`,
+      },
+    });
+  }
+
+  // ------------------------------------------------------------------
+  // DEMO PATH: simulated data (no database configured)
+  // ------------------------------------------------------------------
   const geojson = generateDemoParcelGeoJSON(county, {
     limit: Math.min(limit, 10000),
     bbox,

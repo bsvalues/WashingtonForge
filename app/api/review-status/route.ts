@@ -1,12 +1,45 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getReviewRecord, setReviewStatus, validateReviewPayload } from "@/lib/review-status/store";
+import {
+  validateReviewPayload,
+  getReviewRecord as fileGetReviewRecord,
+  setReviewStatus as fileSetReviewStatus,
+} from "@/lib/review-status/store";
+import { DEFAULT_REVIEW_STATUS } from "@/lib/review-status/constants";
+import {
+  getAppPool,
+  getReviewRecord as dbGetReviewRecord,
+  setReviewStatus as dbSetReviewStatus,
+} from "@/lib/db";
 
+/** Synthetic default record (unreviewed, empty history) — matches the file store. */
+function defaultRecord(parcelId: string) {
+  return {
+    parcelId,
+    status: DEFAULT_REVIEW_STATUS,
+    updatedAt: new Date(0).toISOString(),
+    history: [],
+  };
+}
+
+/**
+ * /api/review-status
+ *
+ * Backed by Postgres (washingtonforge.parcel_review + _history) when the app
+ * database is configured; otherwise falls back to the local file store.
+ */
 export async function GET(req: NextRequest) {
   const parcelId = req.nextUrl.searchParams.get("parcelId");
   if (!parcelId) {
     return NextResponse.json({ error: "parcelId required" }, { status: 400 });
   }
-  const record = await getReviewRecord(parcelId);
+
+  let record;
+  if (getAppPool()) {
+    const dbRecord = await dbGetReviewRecord(parcelId);
+    record = dbRecord ?? defaultRecord(parcelId);
+  } else {
+    record = await fileGetReviewRecord(parcelId);
+  }
   return NextResponse.json({ record });
 }
 
@@ -23,6 +56,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: validation.error }, { status: validation.status });
   }
 
-  const record = await setReviewStatus(validation.parcelId, validation.status, validation.note);
-  return NextResponse.json({ record });
+  try {
+    const record = getAppPool()
+      ? await dbSetReviewStatus(validation.parcelId, validation.status, validation.note)
+      : await fileSetReviewStatus(validation.parcelId, validation.status, validation.note);
+    return NextResponse.json({ record });
+  } catch (err) {
+    console.error("[review-status] set failed:", err);
+    return NextResponse.json({ error: "failed to save review status" }, { status: 500 });
+  }
 }

@@ -34,6 +34,7 @@ import {
   IAAO_RESIDENTIAL_THRESHOLDS,
 } from "@/lib/api/types";
 import { MOCK_USER } from "@/lib/fixtures";
+import { ProvenanceBadge } from "@/components/provenance-badge";
 
 // ============================================
 // Dashboard Data Types
@@ -216,6 +217,7 @@ export function DashboardContent({ datasetVersionId }: DashboardContentProps) {
                 v{datasetVersion.version}
               </span>
               <span className="text-muted-foreground text-xs">({datasetVersion.id})</span>
+              <ProvenanceBadge className="ml-1" />
             </div>
           </div>
           <div className="flex gap-3">
