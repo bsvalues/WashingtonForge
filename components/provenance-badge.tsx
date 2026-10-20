@@ -29,7 +29,10 @@ interface ProvenanceBadgeProps {
  * The badge is the single source of truth for data provenance in the UI.
  */
 export function ProvenanceBadge({ className, showCount = true }: ProvenanceBadgeProps) {
-  const [state, setState] = useState<{ status: "loading" | "ready" | "error"; data: Provenance | null }>({
+  const [state, setState] = useState<{
+    status: "loading" | "ready" | "error";
+    data: Provenance | null;
+  }>({
     status: "loading",
     data: null,
   });
@@ -59,7 +62,7 @@ export function ProvenanceBadge({ className, showCount = true }: ProvenanceBadge
     return (
       <span
         className={cn(
-          "inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] font-medium text-muted-foreground",
+          "text-muted-foreground inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-2.5 py-1 text-[11px] font-medium",
           className
         )}
       >

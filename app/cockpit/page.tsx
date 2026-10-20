@@ -107,7 +107,10 @@ export default function CockpitPage() {
           loadedParcels = live;
           rowCount = health.parcelCount || live.length;
         } else {
-          loadedParcels = generateParcelsForVersion(activeDataset.versionId, activeDataset.rowCount);
+          loadedParcels = generateParcelsForVersion(
+            activeDataset.versionId,
+            activeDataset.rowCount
+          );
         }
       } else {
         loadedParcels = generateParcelsForVersion(activeDataset.versionId, activeDataset.rowCount);

@@ -34,7 +34,9 @@ export async function getProvenance(): Promise<Provenance> {
   if (geo) {
     try {
       const pool = getGeoPool();
-      const res = await pool!.query("SELECT count(*)::int AS n FROM parcel_current WHERE geom IS NOT NULL");
+      const res = await pool!.query(
+        "SELECT count(*)::int AS n FROM parcel_current WHERE geom IS NOT NULL"
+      );
       parcelCount = res.rows[0]?.n ?? 0;
     } catch {
       parcelCount = 0;

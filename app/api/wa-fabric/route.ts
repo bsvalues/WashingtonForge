@@ -1,11 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { WA_COUNTIES, type WACountyFips } from "@/lib/wa-data/types";
-import {
-  isGeoConfigured,
-  getParcelsGeoJSON,
-  getParcelStats,
-  getParcelCount,
-} from "@/lib/db";
+import { isGeoConfigured, getParcelsGeoJSON, getParcelStats, getParcelCount } from "@/lib/db";
 
 /**
  * WA Parcel Fabric API

@@ -27,17 +27,11 @@
  */
 
 import { describe, it, expect, beforeEach, afterEach } from "vitest";
-import {
-  emitAuditEvent,
-  setAuditContext,
-  clearAuditContext,
-  getAuditEvents,
-} from "@/lib/audit";
+import { emitAuditEvent, setAuditContext, clearAuditContext, getAuditEvents } from "@/lib/audit";
 
 // A spec-compliant UUID v4: 8-4-4-4-12 hex, version nibble "4", variant
 // nibble one of 8/9/a/b.
-const UUID_V4 =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
+const UUID_V4 = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/;
 
 describe("audit event id (F6-class: crypto.randomUUID)", () => {
   beforeEach(() => {

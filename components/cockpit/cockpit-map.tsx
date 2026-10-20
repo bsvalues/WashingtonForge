@@ -31,7 +31,10 @@ function parcelsToGeoJSON(parcels: Parcel[]): GeoJSON.FeatureCollection {
     features: parcels.map((parcel, index) => {
       // Use real geometry when present (live data path).
       const realGeometry = parcel.geometry as GeoJSON.Geometry | undefined;
-      if (realGeometry && (realGeometry.type === "Polygon" || realGeometry.type === "MultiPolygon")) {
+      if (
+        realGeometry &&
+        (realGeometry.type === "Polygon" || realGeometry.type === "MultiPolygon")
+      ) {
         return {
           type: "Feature" as const,
           id: parcel.id,

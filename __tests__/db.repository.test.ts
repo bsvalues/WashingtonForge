@@ -30,11 +30,7 @@ vi.mock("@/lib/db/cache", () => ({
 
 import { getGeoPool, getAppPool, pingPool } from "@/lib/db/pool";
 import { cacheGet, cacheSet, isRedisConfigured } from "@/lib/db/cache";
-import {
-  getParcelsGeoJSON,
-  getParcelStats,
-  getParcelCount,
-} from "@/lib/db/repository";
+import { getParcelsGeoJSON, getParcelStats, getParcelCount } from "@/lib/db/repository";
 import { getProvenance } from "@/lib/db/provenance";
 
 const mockGeoPool = { query: vi.fn() } as any;
@@ -74,7 +70,16 @@ describe("getParcelsGeoJSON", () => {
           last_appraisal_dt: "2025-01-15",
           geom_geojson: JSON.stringify({
             type: "MultiPolygon",
-            coordinates: [[[[-119.3, 46.3], [-119.3, 46.31], [-119.29, 46.31], [-119.3, 46.3]]]],
+            coordinates: [
+              [
+                [
+                  [-119.3, 46.3],
+                  [-119.3, 46.31],
+                  [-119.29, 46.31],
+                  [-119.3, 46.3],
+                ],
+              ],
+            ],
           }),
         },
       ],
@@ -96,7 +101,17 @@ describe("getParcelsGeoJSON", () => {
 
   it("derives progressive/regressive equity status from assessed vs market", async () => {
     (getGeoPool as any).mockReturnValue(mockGeoPool);
-    const geo = JSON.stringify({ type: "Polygon", coordinates: [[[0, 0], [1, 0], [1, 1], [0, 0]]] });
+    const geo = JSON.stringify({
+      type: "Polygon",
+      coordinates: [
+        [
+          [0, 0],
+          [1, 0],
+          [1, 1],
+          [0, 0],
+        ],
+      ],
+    });
     mockGeoPool.query.mockResolvedValue({
       rows: [
         {

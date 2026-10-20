@@ -4,11 +4,7 @@ import {
   getNotesForParcel as fileGetNotes,
   upsertNote as fileUpsertNote,
 } from "@/lib/notes/store";
-import {
-  getAppPool,
-  getNotesForParcel as dbGetNotes,
-  upsertNote as dbUpsertNote,
-} from "@/lib/db";
+import { getAppPool, getNotesForParcel as dbGetNotes, upsertNote as dbUpsertNote } from "@/lib/db";
 
 /**
  * /api/notes

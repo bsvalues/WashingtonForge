@@ -13,9 +13,7 @@ function nodeSha256(message: string): string {
 
 describe("sha256Hex", () => {
   it("matches FIPS 180-2 vector for empty string", () => {
-    expect(sha256Hex("")).toBe(
-      "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
-    );
+    expect(sha256Hex("")).toBe("e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855");
   });
 
   it("matches FIPS 180-2 vector for 'abc'", () => {
@@ -25,18 +23,13 @@ describe("sha256Hex", () => {
   });
 
   it("matches FIPS 180-2 vector for the 56-char two-block message", () => {
-    const msg =
-      "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq";
-    expect(sha256Hex(msg)).toBe(
-      "248d6a61d20638b8e5c026930c3e6039a33ce45964ff2167f6ecedd419db06c1"
-    );
+    const msg = "abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq";
+    expect(sha256Hex(msg)).toBe("248d6a61d20638b8e5c026930c3e6039a33ce45964ff2167f6ecedd419db06c1");
   });
 
   it("matches FIPS 180-2 vector for the 1,000,000 x 'a' message", () => {
     const msg = "a".repeat(1_000_000);
-    expect(sha256Hex(msg)).toBe(
-      "cdc76e5c9914fb9281a1c7e284d73e67f1809a48a497200e046d39ccc7112cd0"
-    );
+    expect(sha256Hex(msg)).toBe("cdc76e5c9914fb9281a1c7e284d73e67f1809a48a497200e046d39ccc7112cd0");
   });
 
   it("agrees with node:crypto for arbitrary multi-block inputs", () => {
@@ -72,9 +65,7 @@ describe("sha256Hex", () => {
 
 describe("canonicalStringify", () => {
   it("is independent of top-level key insertion order", () => {
-    expect(canonicalStringify({ a: 1, b: 2, c: 3 })).toBe(
-      canonicalStringify({ c: 3, a: 1, b: 2 })
-    );
+    expect(canonicalStringify({ a: 1, b: 2, c: 3 })).toBe(canonicalStringify({ c: 3, a: 1, b: 2 }));
   });
 
   it("is independent of NESTED key insertion order (the old bug)", () => {
@@ -85,16 +76,12 @@ describe("canonicalStringify", () => {
 
   it("preserves array order (arrays are ordered, not sorted)", () => {
     expect(canonicalStringify({ a: [3, 1, 2] })).toBe('{"a":[3,1,2]}');
-    expect(canonicalStringify({ a: [3, 1, 2] })).not.toBe(
-      canonicalStringify({ a: [1, 2, 3] })
-    );
+    expect(canonicalStringify({ a: [3, 1, 2] })).not.toBe(canonicalStringify({ a: [1, 2, 3] }));
   });
 
   it("handles null, undefined-in-object, booleans, and numbers", () => {
     expect(canonicalStringify(null)).toBe("null");
-    expect(canonicalStringify({ a: null, b: true, c: 1.5 })).toBe(
-      '{"a":null,"b":true,"c":1.5}'
-    );
+    expect(canonicalStringify({ a: null, b: true, c: 1.5 })).toBe('{"a":null,"b":true,"c":1.5}');
   });
 
   it("produces a stable hash regardless of key order (end-to-end)", () => {

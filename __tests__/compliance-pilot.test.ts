@@ -182,7 +182,12 @@ describe("guardToolExecution", () => {
     countyId: "03051",
     userId: "demo@terrafusion.gov",
     userClaims: ["parcel:read", "ratio:run", "calibration:write", "snapshot:publish"],
-    enabledTools: ["route_to_parcel", "run_ratio_study", "create_calibration_patch", "publish_snapshot"],
+    enabledTools: [
+      "route_to_parcel",
+      "run_ratio_study",
+      "create_calibration_patch",
+      "publish_snapshot",
+    ],
     currentMode: "pilot",
     correlationId: "corr-test",
   };
@@ -262,9 +267,14 @@ describe("guardToolExecution", () => {
 
   it("county policy can tighten read_only to require confirmation", () => {
     const tool = getTool("route_to_parcel")!;
-    const d = guardToolExecution(tool, baseCtx, {}, {
-      read_only: { requiresConfirmation: true },
-    });
+    const d = guardToolExecution(
+      tool,
+      baseCtx,
+      {},
+      {
+        read_only: { requiresConfirmation: true },
+      }
+    );
     expect(d.ok).toBe(false);
     if (!d.ok) expect(d.blockedBy).toBe("policy");
   });
@@ -280,9 +290,7 @@ describe("sanitizeText", () => {
   });
 
   it("redacts email addresses", () => {
-    expect(sanitizeText("Contact: jane.doe@county.gov")).toBe(
-      "Contact: [REDACTED_EMAIL]",
-    );
+    expect(sanitizeText("Contact: jane.doe@county.gov")).toBe("Contact: [REDACTED_EMAIL]");
   });
 
   it("redacts phone numbers (various formats)", () => {

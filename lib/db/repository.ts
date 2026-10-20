@@ -219,7 +219,9 @@ export async function getParcelCount(): Promise<number> {
   const pool = getGeoPool();
   if (!pool) return 0;
   try {
-    const res = await pool.query("SELECT count(*)::int AS n FROM parcel_current WHERE geom IS NOT NULL");
+    const res = await pool.query(
+      "SELECT count(*)::int AS n FROM parcel_current WHERE geom IS NOT NULL"
+    );
     return res.rows[0]?.n ?? 0;
   } catch {
     return 0;
@@ -467,9 +469,6 @@ export async function setReviewStatus(
     changeNote: note,
     updatedAt: now,
     updatedBy: by,
-    history: [
-      ...(prev?.history ?? []),
-      { from: prev?.status, to: status, note, at: now, by },
-    ],
+    history: [...(prev?.history ?? []), { from: prev?.status, to: status, note, at: now, by }],
   };
 }
