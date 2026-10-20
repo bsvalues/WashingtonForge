@@ -5,7 +5,8 @@
  * In production, this would connect to PostgreSQL + PostGIS.
  *
  * PRODUCTION NOTES:
- * - Use crypto.randomUUID() for IDs (not Date.now())
+ * - IDs use the shared 3-tier UUID v4 generator (lib/uuid.ts) — a real UUID in
+ *   every runtime, including plain-HTTP Tailscale where randomUUID is undefined
  * - Add per-county locks for concurrent updates
  * - Capabilities are computed, not stored (to prevent drift)
  */
@@ -22,18 +23,18 @@ import {
   type CountyExportFingerprint,
   normalizeParcelId,
 } from "./types";
+import { generateUuidId } from "@/lib/uuid";
 
 // Simulated delay for demo
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-// Generate a proper UUID (crypto.randomUUID in modern runtimes)
+// Generate a proper UUID v4 for entity ids (ingest runs, roll versions,
+// connected feeds). Delegates to the shared 3-tier generator in lib/uuid.ts,
+// which guarantees a real, high-entropy UUID in every runtime — including the
+// live Tailscale-HTTP deployment, where crypto.randomUUID is undefined but
+// crypto.getRandomValues works.
 function generateId(prefix: string): string {
-  const c = globalThis.crypto;
-  if (c && typeof c.randomUUID === "function") {
-    return `${prefix}-${c.randomUUID()}`;
-  }
-  // Fallback for runtimes without Web Crypto (e.g. older jsdom)
-  return `${prefix}-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+  return generateUuidId(prefix);
 }
 
 // ============================================

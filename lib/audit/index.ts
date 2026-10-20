@@ -10,6 +10,7 @@ import type {
   AuditEventPayload,
 } from "@/lib/api/types";
 import { sha256Hex, canonicalStringify } from "./sha256";
+import { generateUuidId } from "@/lib/uuid";
 
 // ============================================
 // Audit Context (Client-side session state)
@@ -76,30 +77,11 @@ function computePayloadHash(details: Record<string, unknown> | undefined): strin
 
 // Generate a proper UUID v4 for the audit entry id.
 //
-// crypto.randomUUID() is secure-context-only (HTTPS / localhost), so it is
-// UNDEFINED in the real Tailscale-HTTP deployment. crypto.getRandomValues(),
-// however, is available in ALL contexts, so we build a spec-compliant UUID v4
-// from 16 random bytes when randomUUID is unavailable. This guarantees a real,
-// high-entropy UUID in every runtime — no Date.now()+Math.random() collisions.
+// Delegates to the shared 3-tier generator in lib/uuid.ts, which guarantees a
+// real, high-entropy UUID in every runtime — including the live Tailscale-HTTP
+// deployment, where crypto.randomUUID is undefined but getRandomValues works.
 function generateAuditId(): string {
-  const c = globalThis.crypto;
-  // 1. Prefer the native UUID v4 (secure contexts: HTTPS / localhost).
-  if (c && typeof c.randomUUID === "function") {
-    return `audit-${c.randomUUID()}`;
-  }
-  // 2. crypto.getRandomValues works over plain HTTP too — build a UUID v4 from
-  //    16 random bytes, setting the version (4) and variant (10xx) bits per
-  //    RFC 4122. This is the path that runs in the live Tailscale-HTTP app.
-  if (c && typeof c.getRandomValues === "function") {
-    const b = new Uint8Array(16);
-    c.getRandomValues(b);
-    b[6] = (b[6] & 0x0f) | 0x40; // version 4
-    b[8] = (b[8] & 0x3f) | 0x80; // variant 10xx
-    const hex = Array.from(b, (x) => x.toString(16).padStart(2, "0")).join("");
-    return `audit-${hex.slice(0, 8)}-${hex.slice(8, 12)}-${hex.slice(12, 16)}-${hex.slice(16, 20)}-${hex.slice(20)}`;
-  }
-  // 3. Last-resort fallback for runtimes with no Web Crypto at all.
-  return `audit-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`;
+  return generateUuidId("audit");
 }
 
 // ============================================
