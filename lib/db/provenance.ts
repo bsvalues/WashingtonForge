@@ -24,7 +24,10 @@ export interface Provenance {
 }
 
 export async function getProvenance(): Promise<Provenance> {
-  const [geo, app] = await Promise.all([pingPool(getGeoPool()), pingPool(getAppPool())]);
+  const [geo, app] = await Promise.all([
+    Boolean(await pingPool(getGeoPool())),
+    Boolean(await pingPool(getAppPool())),
+  ]);
   const redis = redisConfigured();
 
   let parcelCount = 0;

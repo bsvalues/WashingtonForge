@@ -207,6 +207,8 @@ describe("getProvenance", () => {
     (getGeoPool as any).mockReturnValue(null);
     (getAppPool as any).mockReturnValue(null);
     (isRedisConfigured as any).mockReturnValue(false);
+    // Mirror real pingPool: null pool → false
+    (pingPool as any).mockImplementation(async (pool: any) => (pool ? true : false));
 
     const p = await getProvenance();
     expect(p.mode).toBe("simulated");
